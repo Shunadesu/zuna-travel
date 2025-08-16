@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation, EffectFade } from 'swiper/modules';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +14,18 @@ import './HeroSwiper.css';
 const HeroSwiper = () => {
   const { t, i18n } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Check if i18n is ready
+  if (!i18n.isInitialized) {
+    return (
+      <div className="relative h-screen overflow-hidden bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const heroSlides = [
     {
@@ -48,96 +59,11 @@ const HeroSwiper = () => {
         en: 'Experience the breathtaking beauty of thousands of limestone karsts and isles.',
         vi: 'Trải nghiệm vẻ đẹp ngoạn mục của hàng nghìn hòn đảo đá vôi.'
       }
-    },
-    {
-      id: 3,
-      image: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      title: {
-        en: 'Sapa Terraces',
-        vi: 'Ruộng Bậc Thang Sapa'
-      },
-      subtitle: {
-        en: 'Mountain Rice Terraces',
-        vi: 'Ruộng Bậc Thang Trên Núi'
-      },
-      description: {
-        en: 'Discover the stunning rice terraces carved into the mountainsides.',
-        vi: 'Khám phá những ruộng bậc thang tuyệt đẹp được khắc vào sườn núi.'
-      }
-    },
-    {
-      id: 4,
-      image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-      title: {
-        en: 'Hoi An Ancient Town',
-        vi: 'Phố Cổ Hội An'
-      },
-      subtitle: {
-        en: 'UNESCO World Heritage Site',
-        vi: 'Di Sản Thế Giới UNESCO'
-      },
-      description: {
-        en: 'Step back in time in this beautifully preserved ancient trading port.',
-        vi: 'Quay ngược thời gian tại cảng thương mại cổ được bảo tồn đẹp mắt.'
-      }
     }
   ];
 
-  const slideVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut"
-      }
-    },
-    exit: { 
-      opacity: 0, 
-      y: -50,
-      transition: {
-        duration: 0.5,
-        ease: "easeIn"
-      }
-    }
-  };
-
-  const textVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.6,
-        delay: 0.2,
-        ease: "easeOut"
-      }
-    }
-  };
-
-  const buttonVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { 
-      opacity: 1, 
-      scale: 1,
-      transition: {
-        duration: 0.5,
-        delay: 0.4,
-        ease: "easeOut"
-      }
-    },
-    hover: {
-      scale: 1.05,
-      transition: {
-        duration: 0.2,
-        ease: "easeInOut"
-      }
-    },
-    tap: {
-      scale: 0.95
-    }
-  };
+  // Get current language with fallback
+  const currentLang = i18n.language || 'en';
 
   return (
     <div className="relative h-screen overflow-hidden">
@@ -151,9 +77,6 @@ const HeroSwiper = () => {
         }}
         pagination={{
           clickable: true,
-          renderBullet: function (index, className) {
-            return `<span class="${className} w-3 h-3 bg-white/50 hover:bg-white transition-colors duration-300"></span>`;
-          },
         }}
         navigation={{
           nextEl: '.swiper-button-next',
@@ -176,55 +99,61 @@ const HeroSwiper = () => {
             {/* Content Overlay */}
             <div className="relative z-10 flex items-center justify-center h-full">
               <div className="text-center text-white px-4 max-w-4xl mx-auto">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={`${slide.id}-${i18n.language}`}
-                    variants={slideVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    className="space-y-6"
+                <div className="space-y-6">
+                  {/* Title */}
+                  <h1 
+                    className="text-5xl md:text-7xl font-bold leading-tight"
+                    style={{ 
+                      color: 'white',
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+                      zIndex: 20,
+                      position: 'relative'
+                    }}
                   >
-                    {/* Title */}
-                    <motion.h1 
-                      variants={textVariants}
-                      className="text-5xl md:text-7xl font-bold leading-tight"
+                    {slide.title[currentLang] || slide.title.en || 'Discover Vietnam'}
+                  </h1>
+                  
+                  {/* Subtitle */}
+                  <h2 
+                    className="text-xl md:text-2xl font-medium"
+                    style={{ 
+                      color: 'white',
+                      textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                      zIndex: 20,
+                      position: 'relative'
+                    }}
+                  >
+                    {slide.subtitle[currentLang] || slide.subtitle.en || 'Your Gateway to Unforgettable Adventures'}
+                  </h2>
+                  
+                  {/* Description */}
+                  <p 
+                    className="text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
+                    style={{ 
+                      color: 'white',
+                      textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                      zIndex: 20,
+                      position: 'relative'
+                    }}
+                  >
+                    {slide.description[currentLang] || slide.description.en || 'Explore the beauty of Vietnam with our carefully curated tours and reliable transfer services.'}
+                  </p>
+                  
+                  {/* CTA Button */}
+                  <div className="pt-4" style={{ zIndex: 20, position: 'relative' }}>
+                    <button
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                      style={{ 
+                        color: 'white',
+                        backgroundColor: '#2563eb',
+                        border: 'none',
+                        cursor: 'pointer'
+                      }}
                     >
-                      {slide.title[i18n.language]}
-                    </motion.h1>
-                    
-                    {/* Subtitle */}
-                    <motion.h2 
-                      variants={textVariants}
-                      className="text-xl md:text-2xl font-medium text-gray-200"
-                    >
-                      {slide.subtitle[i18n.language]}
-                    </motion.h2>
-                    
-                    {/* Description */}
-                    <motion.p 
-                      variants={textVariants}
-                      className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed"
-                    >
-                      {slide.description[i18n.language]}
-                    </motion.p>
-                    
-                    {/* CTA Button */}
-                    <motion.div
-                      variants={buttonVariants}
-                      className="pt-4"
-                    >
-                      <motion.button
-                        whileHover="hover"
-                        whileTap="tap"
-                        variants={buttonVariants}
-                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                      >
-                        {t('home.hero.cta')}
-                      </motion.button>
-                    </motion.div>
-                  </motion.div>
-                </AnimatePresence>
+                      {t('home.hero.cta') || 'Browse Tours'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </SwiperSlide>

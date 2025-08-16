@@ -20,6 +20,22 @@
   object-fit: cover;
 }
 
+/* Ensure text is visible */
+.swiper-slide h1,
+.swiper-slide h2,
+.swiper-slide p {
+  color: white !important;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
+  z-index: 10 !important;
+  position: relative !important;
+}
+
+.swiper-slide button {
+  color: white !important;
+  z-index: 10 !important;
+  position: relative !important;
+}
+
 /* Custom Pagination */
 .swiper-pagination-bullet {
   width: 12px !important;
@@ -70,6 +86,26 @@
 .swiper-slide-prev,
 .swiper-slide-next {
   opacity: 0 !important;
+}
+
+/* Ensure content overlay is visible */
+.swiper-slide .relative {
+  z-index: 10 !important;
+}
+
+.swiper-slide .text-center {
+  z-index: 10 !important;
+  position: relative !important;
+}
+
+/* Force text visibility */
+.swiper-slide .text-center h1,
+.swiper-slide .text-center h2,
+.swiper-slide .text-center p {
+  color: white !important;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
+  z-index: 20 !important;
+  position: relative !important;
 }
 
 /* Responsive */

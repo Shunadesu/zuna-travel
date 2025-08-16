@@ -174,46 +174,108 @@ const SettingsPage = () => {
             <div className="space-y-6">
               <h3 className="text-lg font-medium text-gray-900">Branding</h3>
               
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Primary Color
-                  </label>
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="color"
-                      value={formData.primaryColor || '#3B82F6'}
-                      onChange={(e) => handleInputChange('primaryColor', e.target.value)}
-                      className="h-10 w-20 rounded border border-gray-300"
-                    />
+              {/* Company Information */}
+              <div className="border-b border-gray-200 pb-6">
+                <h4 className="text-md font-medium text-gray-800 mb-4">Company Information</h4>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Company Name (English)
+                    </label>
                     <input
                       type="text"
-                      value={formData.primaryColor || '#3B82F6'}
-                      onChange={(e) => handleInputChange('primaryColor', e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
-                      placeholder="#3B82F6"
+                      value={formData.companyName?.en || ''}
+                      onChange={(e) => handleInputChange('companyName', { ...formData.companyName, en: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      placeholder="Zuna Travel"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Company Name (Vietnamese)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.companyName?.vi || ''}
+                      onChange={(e) => handleInputChange('companyName', { ...formData.companyName, vi: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      placeholder="Zuna Travel"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Company Description (English)
+                    </label>
+                    <textarea
+                      value={formData.companyDescription?.en || ''}
+                      onChange={(e) => handleInputChange('companyDescription', { ...formData.companyDescription, en: e.target.value })}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      placeholder="Your trusted travel partner in Vietnam"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Company Description (Vietnamese)
+                    </label>
+                    <textarea
+                      value={formData.companyDescription?.vi || ''}
+                      onChange={(e) => handleInputChange('companyDescription', { ...formData.companyDescription, vi: e.target.value })}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      placeholder="Đối tác du lịch đáng tin cậy của bạn tại Việt Nam"
                     />
                   </div>
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Secondary Color
-                  </label>
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="color"
-                      value={formData.secondaryColor || '#10B981'}
-                      onChange={(e) => handleInputChange('secondaryColor', e.target.value)}
-                      className="h-10 w-20 rounded border border-gray-300"
-                    />
-                    <input
-                      type="text"
-                      value={formData.secondaryColor || '#10B981'}
-                      onChange={(e) => handleInputChange('secondaryColor', e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
-                      placeholder="#10B981"
-                    />
+              {/* Brand Colors */}
+              <div className="space-y-4">
+                <h4 className="text-md font-medium text-gray-800 mb-4">Brand Colors</h4>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Primary Color
+                    </label>
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="color"
+                        value={formData.primaryColor || '#3B82F6'}
+                        onChange={(e) => handleInputChange('primaryColor', e.target.value)}
+                        className="h-10 w-20 rounded border border-gray-300"
+                      />
+                      <input
+                        type="text"
+                        value={formData.primaryColor || '#3B82F6'}
+                        onChange={(e) => handleInputChange('primaryColor', e.target.value)}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                        placeholder="#3B82F6"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Secondary Color
+                    </label>
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="color"
+                        value={formData.secondaryColor || '#10B981'}
+                        onChange={(e) => handleInputChange('secondaryColor', e.target.value)}
+                        className="h-10 w-20 rounded border border-gray-300"
+                      />
+                      <input
+                        type="text"
+                        value={formData.secondaryColor || '#10B981'}
+                        onChange={(e) => handleInputChange('secondaryColor', e.target.value)}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md"
+                        placeholder="#10B981"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
