@@ -32,7 +32,7 @@ if (process.env.NODE_ENV === 'production') {
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'https://zuna-travel.vercel.app'],
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'https://zuna-travel.vercel.app', 'https://zuna-travel-ab1g.vercel.app'],
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
