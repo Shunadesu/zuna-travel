@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import axios from 'axios';
+import { useApi } from '../contexts/ApiContext';
 
 const useBlogStore = create((set, get) => ({
   // State

@@ -8,6 +8,7 @@ import { ReactQueryDevtools } from 'react-query/devtools';
 
 import './index.css';
 import './i18n';
+import './utils/apiConfig'; // Import axios configuration
 
 import App from './App';
 

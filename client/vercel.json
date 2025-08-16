@@ -9,6 +9,6 @@
     }
   ],
   "env": {
-    "REACT_APP_API_URL": "https://zuna-travel.onrender.com"
+    "REACT_APP_API_URL": "https://zuna-travel.onrender.com/api"
   }
 }
