@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // API base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://zuna-travel.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://zuna-travel.onrender.com/api';
 
 // Retry configuration
 const RETRY_DELAYS = [1000, 2000, 4000]; // Delays in milliseconds
