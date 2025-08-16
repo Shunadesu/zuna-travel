@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, PhotoIcon, MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import apiClient from '../../utils/apiConfig';
 import toast from 'react-hot-toast';
 
 const ProductsPage = () => {
@@ -27,7 +27,7 @@ const ProductsPage = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/products?populate=category');
+      const response = await apiClient.get('/products?populate=category');
       setProducts(response.data.data || []);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -39,7 +39,7 @@ const ProductsPage = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('/api/categories');
+      const response = await apiClient.get('/categories');
       setCategories(response.data.data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -53,7 +53,7 @@ const ProductsPage = () => {
 
     try {
       setDeleteLoading(id);
-      await axios.delete(`/api/products/${id}`);
+      await apiClient.delete(`/products/${id}`);
       toast.success('Product deleted successfully');
       fetchProducts();
     } catch (error) {

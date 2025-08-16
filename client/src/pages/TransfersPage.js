@@ -55,7 +55,7 @@ const TransfersPage = () => {
   }, [fetchProducts, fetchCategories]);
 
   // Filter and search products (only Transfer Services)
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = products?.filter(product => {
     // Only show Transfer Services products
     const isTransferService = product.category?.type === 'transfer-services';
     
@@ -157,8 +157,8 @@ const TransfersPage = () => {
               <h4 className="text-sm font-medium text-gray-900 mb-3">Transfer Type</h4>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {Array.from(new Set(categories
-                  .filter(cat => cat.type === 'transfer-services' && cat.vehicleType)
-                  .map(cat => cat.vehicleType)))
+                  ?.filter(cat => cat.type === 'transfer-services' && cat.vehicleType)
+                  .map(cat => cat.vehicleType) || []))
                   .map(vehicleType => (
                     <label key={vehicleType} className="flex items-center">
                       <input
@@ -178,8 +178,8 @@ const TransfersPage = () => {
               <h4 className="text-sm font-medium text-gray-900 mb-3">Seats</h4>
               <div className="space-y-2 max-h-48 overflow-y-auto">
                 {Array.from(new Set(categories
-                  .filter(cat => cat.type === 'transfer-services' && cat.seats)
-                  .map(cat => cat.seats)))
+                  ?.filter(cat => cat.type === 'transfer-services' && cat.seats)
+                  .map(cat => cat.seats) || []))
                   .sort((a, b) => a - b)
                   .map(seats => (
                     <label key={seats} className="flex items-center">

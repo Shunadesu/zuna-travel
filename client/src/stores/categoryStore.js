@@ -41,7 +41,7 @@ const useCategoryStore = create((set, get) => ({
         if (options.level !== undefined) params.append('level', options.level);
         if (options.parent) params.append('parent', options.parent);
 
-        const response = await apiClient.get(`/api/categories?${params.toString()}`);
+        const response = await apiClient.get(`/categories?${params.toString()}`);
         const fetchedCategories = response.data.data;
         
         set({ 
@@ -69,7 +69,7 @@ const useCategoryStore = create((set, get) => ({
   // Fetch categories hierarchy
   fetchCategoriesHierarchy: async (type = 'vietnam-tours') => {
     try {
-      const response = await apiClient.get(`/api/categories/hierarchy/${type}`);
+      const response = await apiClient.get(`/categories/hierarchy/${type}`);
       return response.data.data;
     } catch (error) {
       console.error('Failed to fetch categories hierarchy:', error);
@@ -80,46 +80,46 @@ const useCategoryStore = create((set, get) => ({
   // Get category by slug
   getCategoryBySlug: (slug) => {
     const { categories } = get();
-    return categories.find(category => category.slug === slug);
+    return categories?.find(category => category.slug === slug);
   },
 
   // Get active categories
   getActiveCategories: () => {
     const { categories } = get();
-    return categories.filter(category => category.isActive);
+    return categories?.filter(category => category.isActive) || [];
   },
 
   // Get main categories (level 0)
   getMainCategories: () => {
     const { categories } = get();
-    return categories.filter(category => category.isActive && category.level === 0);
+    return categories?.filter(category => category.isActive && category.level === 0) || [];
   },
 
   // Get subcategories of a parent
   getSubcategories: (parentId) => {
     const { categories } = get();
-    return categories.filter(category => 
+    return categories?.filter(category => 
       category.isActive && 
       category.parent === parentId
-    );
+    ) || [];
   },
 
   // Get categories by level
   getCategoriesByLevel: (level) => {
     const { categories } = get();
-    return categories.filter(category => 
+    return categories?.filter(category => 
       category.isActive && 
       category.level === level
-    );
+    ) || [];
   },
 
   // Get categories by region
   getCategoriesByRegion: (region) => {
     const { categories } = get();
-    return categories.filter(category => 
+    return categories?.filter(category => 
       category.isActive && 
       (category.region === region || category.region === 'all')
-    );
+    ) || [];
   },
 
   // Clear cache

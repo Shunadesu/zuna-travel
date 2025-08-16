@@ -1,15 +1,19 @@
 import axios from 'axios';
 
 // API base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://zuna-travel.onrender.com';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://zuna-travel.onrender.com/api';
 
-// Configure axios defaults
-axios.defaults.baseURL = API_BASE_URL;
-axios.defaults.timeout = 30000;
-axios.defaults.headers.common['Content-Type'] = 'application/json';
+// Create axios instance with base URL
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 30000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 // Request interceptor
-axios.interceptors.request.use(
+apiClient.interceptors.request.use(
   (config) => {
     // Add auth token if available
     const token = localStorage.getItem('adminToken');
@@ -24,7 +28,7 @@ axios.interceptors.request.use(
 );
 
 // Response interceptor
-axios.interceptors.response.use(
+apiClient.interceptors.response.use(
   (response) => {
     return response;
   },
@@ -83,4 +87,4 @@ axios.interceptors.response.use(
   }
 );
 
-export default axios;
+export default apiClient;

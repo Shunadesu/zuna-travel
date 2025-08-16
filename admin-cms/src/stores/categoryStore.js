@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import axios from 'axios';
+import apiClient from '../utils/apiConfig';
 
 const useCategoryStore = create((set, get) => ({
   // State
@@ -28,7 +28,7 @@ const useCategoryStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await axios.get('/api/categories');
+      const response = await apiClient.get('/categories');
       const fetchedCategories = response.data.data;
       
       set({ 
@@ -52,7 +52,7 @@ const useCategoryStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await axios.get(`/api/categories/${id}`);
+      const response = await apiClient.get(`/categories/${id}`);
       const category = response.data.data;
       
       set({ category, loading: false });
@@ -71,7 +71,7 @@ const useCategoryStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await axios.post('/api/categories', categoryData);
+      const response = await apiClient.post('/categories', categoryData);
       const newCategory = response.data.data;
       
       // Add to local state
@@ -95,7 +95,7 @@ const useCategoryStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await axios.put(`/api/categories/${id}`, updateData);
+      const response = await apiClient.put(`/categories/${id}`, updateData);
       const updatedCategory = response.data.data;
       
       // Update in local state
@@ -122,7 +122,7 @@ const useCategoryStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      await axios.delete(`/api/categories/${id}`);
+      await apiClient.delete(`/categories/${id}`);
       
       // Remove from local state
       set(state => ({

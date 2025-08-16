@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import apiClient from '../../utils/apiConfig';
 import toast from 'react-hot-toast';
 
 const RegisterPage = () => {
@@ -67,7 +67,7 @@ const RegisterPage = () => {
     try {
       setLoading(true);
 
-      const response = await axios.post('/api/auth/register', {
+      const response = await apiClient.post('/auth/register', {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import apiClient from '../../utils/apiConfig';
 import toast from 'react-hot-toast';
 
 const BlogsPage = () => {
@@ -18,7 +18,7 @@ const BlogsPage = () => {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/blogs');
+      const response = await apiClient.get('/blogs');
       setBlogs(response.data.data || []);
     } catch (error) {
       console.error('Error fetching blogs:', error);
@@ -35,7 +35,7 @@ const BlogsPage = () => {
 
     try {
       setDeleteLoading(id);
-      await axios.delete(`/api/blogs/${id}`);
+      await apiClient.delete(`/blogs/${id}`);
       toast.success(t('blogs.deleteSuccess'));
       fetchBlogs();
     } catch (error) {
@@ -48,7 +48,7 @@ const BlogsPage = () => {
 
   const handleTogglePublished = async (id, currentPublished) => {
     try {
-      await axios.put(`/api/blogs/${id}`, {
+      await apiClient.put(`/blogs/${id}`, {
         isPublished: !currentPublished
       });
       toast.success(currentPublished ? 'Blog unpublished' : 'Blog published');
@@ -61,7 +61,7 @@ const BlogsPage = () => {
 
   const handleToggleFeatured = async (id, currentFeatured) => {
     try {
-      await axios.put(`/api/blogs/${id}`, {
+      await apiClient.put(`/blogs/${id}`, {
         isFeatured: !currentFeatured
       });
       toast.success(currentFeatured ? 'Blog unfeatured' : 'Blog featured');

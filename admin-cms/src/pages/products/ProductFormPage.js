@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import apiClient from '../../utils/apiConfig';
 import toast from 'react-hot-toast';
 import ImageUpload from '../../components/common/ImageUpload';
 
@@ -73,7 +73,7 @@ const ProductFormPage = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('/api/categories');
+      const response = await apiClient.get('/categories');
       const allCategories = response.data.data || [];
       
       // If type is specified, filter categories by type
@@ -100,7 +100,7 @@ const ProductFormPage = () => {
   const fetchProduct = async () => {
     try {
       setInitialLoading(true);
-      const response = await axios.get(`/api/products/${id}`);
+      const response = await apiClient.get(`/products/${id}`);
       const product = response.data.data;
       
       setFormData({
@@ -270,10 +270,10 @@ const ProductFormPage = () => {
       };
 
       if (isEditing) {
-        await axios.put(`/api/products/${id}`, submitData);
+        await apiClient.put(`/products/${id}`, submitData);
         toast.success(t('products.updateSuccess'));
       } else {
-        await axios.post('/api/products', submitData);
+        await apiClient.post('/products', submitData);
         toast.success(t('products.createSuccess'));
       }
       

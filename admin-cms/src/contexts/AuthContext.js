@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '../utils/apiConfig';
 
 const AuthContext = createContext();
 
@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('adminToken');
     if (token) {
       // Set default auth header
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       // You can verify token here if needed
       setUser({ token });
     }
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
+      const response = await apiClient.post('/auth/login', { email, password });
       const userData = response.data;
       
       // Store token and user based on role
@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(userData));
       }
       
-      axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
       setUser(userData);
       
       return { success: true, user: userData };
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('adminUser');
     localStorage.removeItem('userToken');
     localStorage.removeItem('user');
-    delete axios.defaults.headers.common['Authorization'];
+    delete apiClient.defaults.headers.common['Authorization'];
     setUser(null);
     navigate('/auth/login');
   };

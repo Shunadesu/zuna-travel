@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 // import { useTranslation } from 'react-i18next';
 import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import apiClient from '../../utils/apiConfig';
 import toast from 'react-hot-toast';
 
 const ImageUpload = ({ 
@@ -32,7 +32,7 @@ const ImageUpload = ({
       });
       formData.append('folder', folder);
 
-      const response = await axios.post('/api/upload/images', formData, {
+      const response = await apiClient.post('/upload/images', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -83,7 +83,7 @@ const ImageUpload = ({
     
     try {
       // Delete from Cloudinary
-      await axios.delete(`/api/upload/image/${encodeURIComponent(imageToRemove.publicId)}`);
+              await apiClient.delete(`/upload/image/${encodeURIComponent(imageToRemove.publicId)}`);
       
       // Remove from local state
       const newImages = images.filter((_, i) => i !== index);

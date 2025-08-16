@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon, PencilIcon, PhotoIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import apiClient from '../../utils/apiConfig';
 import toast from 'react-hot-toast';
 
 const ProductDetailPage = () => {
@@ -18,7 +18,7 @@ const ProductDetailPage = () => {
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/products/${id}`);
+      const response = await apiClient.get(`/products/${id}`);
       setProduct(response.data.data);
     } catch (error) {
       console.error('Error fetching product:', error);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeftIcon, PencilIcon, PhotoIcon, MapPinIcon, TagIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import apiClient from '../../utils/apiConfig';
 import toast from 'react-hot-toast';
 
 const CategoryDetailPage = () => {
@@ -21,7 +21,7 @@ const CategoryDetailPage = () => {
   const fetchCategory = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/categories/${id}`);
+      const response = await apiClient.get(`/categories/${id}`);
       setCategory(response.data.data);
     } catch (error) {
       console.error('Error fetching category:', error);
@@ -34,7 +34,7 @@ const CategoryDetailPage = () => {
   const fetchProducts = async () => {
     try {
       setProductsLoading(true);
-      const response = await axios.get(`/api/products?category=${id}&populate=category`);
+      const response = await apiClient.get(`/products?category=${id}&populate=category`);
       setProducts(response.data.data || []);
     } catch (error) {
       console.error('Error fetching products:', error);

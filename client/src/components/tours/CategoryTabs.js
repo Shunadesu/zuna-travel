@@ -8,7 +8,7 @@ const CategoryTabs = ({ categories, selectedCategory, onCategorySelect }) => {
   const [activeTab, setActiveTab] = useState(0);
 
   // Filter main categories (level 0)
-  const mainCategories = categories.filter(cat => cat.level === 0);
+  const mainCategories = categories?.filter(cat => cat.level === 0) || [];
 
   if (mainCategories.length === 0) {
     return null;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, PhotoIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import apiClient from '../../utils/apiConfig';
 import toast from 'react-hot-toast';
 
 const CategoriesPage = () => {
@@ -19,7 +19,7 @@ const CategoriesPage = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/categories');
+      const response = await apiClient.get('/categories');
       setCategories(response.data.data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -36,7 +36,7 @@ const CategoriesPage = () => {
 
     try {
       setDeleteLoading(id);
-      await axios.delete(`/api/categories/${id}`);
+      await apiClient.delete(`/categories/${id}`);
       toast.success(t('categories.deleteSuccess'));
       fetchCategories();
     } catch (error) {
@@ -49,7 +49,7 @@ const CategoriesPage = () => {
 
   const handleToggleStatus = async (id, currentStatus) => {
     try {
-      await axios.put(`/api/categories/${id}`, {
+      await apiClient.put(`/categories/${id}`, {
         isActive: !currentStatus
       });
       toast.success(currentStatus ? 'Category deactivated' : 'Category activated');

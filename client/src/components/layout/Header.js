@@ -59,7 +59,7 @@ const Header = () => {
     { name: t('nav.contact'), href: '/contact' },
   ];
 
-  const activeCategories = categories.filter(cat => cat.isActive);
+  const activeCategories = categories?.filter(cat => cat.isActive) || [];
 
   return (
     <>

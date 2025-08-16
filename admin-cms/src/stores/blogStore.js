@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { useApi } from '../contexts/ApiContext';
+import apiClient from '../utils/apiConfig';
 
 const useBlogStore = create((set, get) => ({
   // State
@@ -28,7 +28,7 @@ const useBlogStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await axios.get('/api/blogs');
+      const response = await apiClient.get('/blogs');
       const fetchedBlogs = response.data.data;
       
       set({ 
@@ -52,7 +52,7 @@ const useBlogStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await axios.get(`/api/blogs/${id}`);
+      const response = await apiClient.get(`/blogs/${id}`);
       const blog = response.data.data;
       
       set({ blog, loading: false });
@@ -71,7 +71,7 @@ const useBlogStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await axios.post('/api/blogs', blogData);
+      const response = await apiClient.post('/blogs', blogData);
       const newBlog = response.data.data;
       
       // Add to local state
@@ -95,7 +95,7 @@ const useBlogStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await axios.put(`/api/blogs/${id}`, updateData);
+      const response = await apiClient.put(`/blogs/${id}`, updateData);
       const updatedBlog = response.data.data;
       
       // Update in local state
@@ -122,7 +122,7 @@ const useBlogStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      await axios.delete(`/api/blogs/${id}`);
+      await apiClient.delete(`/blogs/${id}`);
       
       // Remove from local state
       set(state => ({
@@ -144,7 +144,7 @@ const useBlogStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await axios.get(`/api/blogs/featured/list?limit=${limit}`);
+      const response = await apiClient.get(`/blogs/featured/list?limit=${limit}`);
       const featuredBlogs = response.data.data;
       
       set({ loading: false });

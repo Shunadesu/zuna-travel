@@ -40,7 +40,7 @@ const ToursPage = () => {
   }, [slug]);
 
   // Filter and search products (only Vietnam Tours)
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = products?.filter(product => {
     // Only show Vietnam Tours products
     const isVietnamTour = product.category?.type === 'vietnam-tours';
     
@@ -93,7 +93,7 @@ const ToursPage = () => {
     setSearchParams({});
   };
 
-  const activeCategories = categories.filter(cat => cat.isActive && cat.type === 'vietnam-tours');
+  const activeCategories = categories?.filter(cat => cat.isActive && cat.type === 'vietnam-tours') || [];
 
   return (
     <div className="py-16">

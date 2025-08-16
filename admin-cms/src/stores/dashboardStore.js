@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import axios from 'axios';
+import apiClient from '../utils/apiConfig';
 
 const useDashboardStore = create((set, get) => ({
   // State
@@ -37,12 +37,12 @@ const useDashboardStore = create((set, get) => ({
     try {
       // Fetch all data in parallel
       const [categoriesRes, productsRes, blogsRes, usersRes, featuredProductsRes, featuredBlogsRes] = await Promise.all([
-        axios.get('/api/categories'),
-        axios.get('/api/products'),
-        axios.get('/api/blogs'),
-        axios.get('/api/users'),
-        axios.get('/api/products/featured/list?limit=5'),
-        axios.get('/api/blogs/featured/list?limit=5')
+              apiClient.get('/categories'),
+      apiClient.get('/products'),
+      apiClient.get('/blogs'),
+      apiClient.get('/users'),
+      apiClient.get('/products/featured/list?limit=5'),
+      apiClient.get('/blogs/featured/list?limit=5')
       ]);
 
       const stats = {

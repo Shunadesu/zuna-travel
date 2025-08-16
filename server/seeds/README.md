@@ -1,132 +1,106 @@
-# Seed Data Guide
+# Seed Scripts
 
-## Tổng quan
-Thư mục này chứa các file seed để tạo dữ liệu mẫu cho database.
+Các script để tạo dữ liệu mẫu cho Zuna Travel Tour.
 
-## Files có sẵn
+## Các Scripts Có Sẵn
 
-### 1. `completeSeed.js` - Seed đầy đủ
-- **Mô tả**: Tạo dữ liệu mẫu đầy đủ với nhiều categories, products, blogs
-- **Dữ liệu bao gồm**:
-  - 4 categories (Hanoi, Ha Long Bay, Sapa, Airport Transfers)
-  - 3 products (Hanoi Tour, Ha Long Cruise, Airport Transfer)
-  - 2 blog posts
-  - 1 admin user
-  - Settings configuration
+### 1. Tạo Admin User
 
-### 2. `quickSeed.js` - Seed nhanh
-- **Mô tả**: Tạo dữ liệu cơ bản nhanh chóng
-- **Dữ liệu bao gồm**:
-  - 2 categories (Vietnam Tours, Transfer Services)
-  - 2 products (Hanoi Tour, Airport Transfer)
-  - 1 blog post
-  - 1 admin user
-  - Settings configuration
-
-### 3. Các file seed cũ (có thể xóa)
-- `seedData.js` - File seed cũ
-- `simpleCategories.js` - Categories đơn giản
-- `simpleProducts.js` - Products đơn giản
-- `simpleBlogs.js` - Blogs đơn giản
-- `categoriesWithSubcategories.js` - Categories với subcategories
-
-## Cách sử dụng
-
-### 1. Chạy seed đầy đủ
 ```bash
-cd server
-npm run seed
+# Tạo admin đơn giản
+npm run seed:admin
+
+# Tạo admin với thông tin chi tiết
+npm run seed:admin:detailed
 ```
 
-### 2. Chạy seed nhanh
+**Thông tin đăng nhập Admin:**
+
+- Email: `admin@gmail.com`
+- Password: `admin123`
+- Role: `admin`
+
+### 2. Tạo Dữ Liệu Hoàn Chỉnh
+
 ```bash
-cd server
+# Tạo tất cả dữ liệu mẫu (categories, products, blogs, settings)
+npm run seed:complete
+
+# Tạo dữ liệu nhanh (ít dữ liệu hơn)
 npm run seed:quick
 ```
 
-### 3. Chạy trực tiếp
-```bash
-cd server
-node seeds/completeSeed.js
-# hoặc
-node seeds/quickSeed.js
-```
+## Chi Tiết Các Scripts
 
-## Thông tin đăng nhập
+### `createAdmin.js`
 
-Sau khi chạy seed, bạn có thể đăng nhập với:
+- Tạo admin user cơ bản
+- Email: admin@gmail.com
+- Password: admin123
+- Role: admin
 
-**Admin Account:**
-- Email: `admin@zunatravel.com`
-- Password: `admin123`
+### `createAdminDetailed.js`
 
-## Cấu trúc dữ liệu
+- Tạo admin user với thông tin chi tiết
+- Bao gồm avatar, preferences, addresses
+- Thông tin đầy đủ cho admin panel
 
-### Categories
-- **Vietnam Tours**: Các tour du lịch Việt Nam
-- **Transfer Services**: Dịch vụ đưa đón
+### `completeSeed.js`
 
-### Products
-- **Tour Products**: Các tour du lịch với pricing theo người lớn/trẻ em
-- **Transfer Products**: Dịch vụ đưa đón với pricing theo chuyến
+- Tạo categories với subcategories
+- Tạo products (tours và transfers)
+- Tạo blogs
+- Tạo settings
+- Dữ liệu đầy đủ cho website
 
-### Blogs
-- Bài viết về du lịch Việt Nam
-- Hỗ trợ đa ngôn ngữ (EN/VI)
+### `quickSeed.js`
 
-### Settings
-- Thông tin website
-- Thông tin liên hệ
-- Cấu hình booking
+- Tạo dữ liệu cơ bản
+- Ít products và blogs hơn
+- Phù hợp cho testing
 
-## Lưu ý
+## Cách Sử Dụng
 
-1. **Xóa dữ liệu cũ**: Tất cả seed files sẽ xóa dữ liệu cũ trước khi tạo mới
-2. **Environment Variables**: Đảm bảo `MONGODB_URI` đã được cấu hình
-3. **Password**: Admin password được hash với bcrypt
-4. **Multilingual**: Tất cả dữ liệu hỗ trợ tiếng Anh và tiếng Việt
+1. **Đảm bảo MongoDB đã được kết nối**
+
+   - Kiểm tra file `.env` có `MONGODB_URI` đúng
+
+2. **Chạy script tạo admin trước**
+
+   ```bash
+   npm run seed:admin
+   ```
+
+3. **Chạy script tạo dữ liệu**
+
+   ```bash
+   npm run seed:complete
+   ```
+
+4. **Kiểm tra kết quả**
+   - Admin có thể đăng nhập vào admin panel
+   - Website có dữ liệu để hiển thị
+
+## Lưu Ý
+
+- Các scripts sẽ kiểm tra dữ liệu đã tồn tại trước khi tạo
+- Nếu admin đã tồn tại, script sẽ hiển thị thông tin admin hiện tại
+- Dữ liệu được tạo với `isActive: true` để hiển thị trên website
+- Các images sử dụng Unsplash URLs cho demo
 
 ## Troubleshooting
 
-### Lỗi kết nối database
-```bash
-# Kiểm tra MONGODB_URI
-echo $MONGODB_URI
+### Lỗi kết nối MongoDB
 
-# Hoặc tạo file .env
-cp env.example .env
-# Chỉnh sửa .env với MONGODB_URI thực tế
-```
+- Kiểm tra `MONGODB_URI` trong file `.env`
+- Đảm bảo MongoDB đang chạy
 
-### Lỗi permission
-```bash
-# Đảm bảo có quyền write vào database
-# Kiểm tra connection string có username/password đúng
-```
+### Lỗi duplicate key
+
+- Script sẽ hiển thị thông báo nếu dữ liệu đã tồn tại
+- Không cần lo lắng, đây là hành vi bình thường
 
 ### Lỗi validation
-```bash
-# Kiểm tra models có đúng schema
-# Đảm bảo required fields được điền đầy đủ
-```
 
-## Tùy chỉnh dữ liệu
-
-Để thêm/sửa dữ liệu mẫu:
-
-1. **Thêm categories**: Chỉnh sửa `categoriesData` array
-2. **Thêm products**: Chỉnh sửa `productsData` array
-3. **Thêm blogs**: Chỉnh sửa `blogsData` array
-4. **Sửa settings**: Chỉnh sửa `settingsData` object
-
-## Backup dữ liệu
-
-Trước khi chạy seed, nên backup dữ liệu hiện tại:
-
-```bash
-# Export data
-mongodump --uri="your-mongodb-uri" --out=./backup
-
-# Restore nếu cần
-mongorestore --uri="your-mongodb-uri" ./backup
-```
+- Kiểm tra các trường required trong models
+- Đảm bảo dữ liệu đúng format

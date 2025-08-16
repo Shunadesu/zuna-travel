@@ -1,15 +1,37 @@
 import axios from 'axios';
 
+// API base URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://zuna-travel.onrender.com';
+
 // Retry configuration
 const RETRY_DELAYS = [1000, 2000, 4000]; // Delays in milliseconds
 const MAX_RETRIES = 3;
 
 // Create axios instance with interceptors
 const apiClient = axios.create({
-  timeout: 10000,
+  baseURL: API_BASE_URL,
+  timeout: 30000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-// Request interceptor to add retry logic
+// Request interceptor
+apiClient.interceptors.request.use(
+  (config) => {
+    // Add auth token if available
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor to add retry logic
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {

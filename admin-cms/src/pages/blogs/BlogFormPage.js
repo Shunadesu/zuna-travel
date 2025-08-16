@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import apiClient from '../../utils/apiConfig';
 import toast from 'react-hot-toast';
 
 const BlogFormPage = () => {
@@ -52,7 +52,7 @@ const BlogFormPage = () => {
   const fetchBlog = async () => {
     try {
       setInitialLoading(true);
-      const response = await axios.get(`/api/blogs/${id}`);
+      const response = await apiClient.get(`/blogs/${id}`);
       const blog = response.data.data;
       
       setFormData({
@@ -154,10 +154,10 @@ const BlogFormPage = () => {
       };
 
       if (isEditing) {
-        await axios.put(`/api/blogs/${id}`, submitData);
+        await apiClient.put(`/blogs/${id}`, submitData);
         toast.success(t('blogs.updateSuccess'));
       } else {
-        await axios.post('/api/blogs', submitData);
+        await apiClient.post('/blogs', submitData);
         toast.success(t('blogs.createSuccess'));
       }
       

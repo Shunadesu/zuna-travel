@@ -29,17 +29,17 @@ const HomePage = () => {
     fetchProducts();
   }, [fetchCategories, fetchProducts]);
 
-  const activeCategories = categories.filter(cat => cat.isActive);
+  const activeCategories = categories?.filter(cat => cat.isActive) || [];
   const tourCategories = activeCategories.filter(cat => cat.type === 'vietnam-tours');
   const transferCategories = activeCategories.filter(cat => cat.type === 'transfer-services');
   
-  const featuredTours = products.filter(product => 
+  const featuredTours = products?.filter(product => 
     product.category?.type === 'vietnam-tours' && product.isFeatured
-  ).slice(0, 6);
+  ).slice(0, 6) || [];
   
-  const featuredTransfers = products.filter(product => 
+  const featuredTransfers = products?.filter(product => 
     product.category?.type === 'transfer-services' && product.isFeatured
-  ).slice(0, 3);
+  ).slice(0, 3) || [];
 
   // Set default active tab to first category if available
   useEffect(() => {
@@ -50,10 +50,10 @@ const HomePage = () => {
 
   // Get products for the active category tab
   const getProductsByCategory = (categorySlug) => {
-    return products.filter(product => 
+    return products?.filter(product => 
       product.category?.type === 'vietnam-tours' && 
       product.category?.slug === categorySlug
-    ).slice(0, 4); // Show max 4 products per category
+    ).slice(0, 4) || []; // Show max 4 products per category
   };
 
   const stats = [

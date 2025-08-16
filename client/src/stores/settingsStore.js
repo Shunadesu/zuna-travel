@@ -34,7 +34,7 @@ const useSettingsStore = create((set, get) => ({
 
     const fetchSettingsPromise = (async () => {
       try {
-        const response = await apiClient.get('/api/settings');
+        const response = await apiClient.get('/settings');
         const fetchedSettings = response.data.data;
         
         set({ 
@@ -64,7 +64,7 @@ const useSettingsStore = create((set, get) => ({
     set({ loading: true, error: null });
 
           try {
-        const response = await apiClient.get(`/api/settings/group/${group}`);
+        const response = await apiClient.get(`/settings/group/${group}`);
         const groupData = response.data.data;
       
       set({ loading: false });

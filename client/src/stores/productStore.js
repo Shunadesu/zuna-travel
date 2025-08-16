@@ -36,7 +36,7 @@ const useProductStore = create((set, get) => ({
 
     const fetchProductsPromise = (async () => {
       try {
-        const response = await apiClient.get('/api/products');
+        const response = await apiClient.get('/products');
         const fetchedProducts = response.data.data;
         
         set({ 
@@ -80,7 +80,7 @@ const useProductStore = create((set, get) => ({
 
     const fetchFeaturedProductsPromise = (async () => {
       try {
-        const response = await apiClient.get('/api/products?featured=true');
+        const response = await apiClient.get('/products?featured=true');
         const fetchedProducts = response.data.data;
         
         set({ 
@@ -114,13 +114,13 @@ const useProductStore = create((set, get) => ({
   // Get products by category
   getProductsByCategory: (categorySlug) => {
     const { products } = get();
-    return products.filter(product => product.category?.slug === categorySlug);
+    return products?.filter(product => product.category?.slug === categorySlug) || [];
   },
 
   // Get active products
   getActiveProducts: () => {
     const { products } = get();
-    return products.filter(product => product.isActive);
+    return products?.filter(product => product.isActive) || [];
   },
 
   // Clear cache

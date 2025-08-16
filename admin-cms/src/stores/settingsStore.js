@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import axios from 'axios';
+import apiClient from '../utils/apiConfig';
 
 const useSettingsStore = create((set, get) => ({
   // State
@@ -28,7 +28,7 @@ const useSettingsStore = create((set, get) => ({
 
     try {
       // Use public route for initial fetch
-      const response = await axios.get('/api/settings');
+      const response = await apiClient.get('/settings');
       const fetchedSettings = response.data.data;
       
       set({ 
@@ -52,7 +52,7 @@ const useSettingsStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await axios.put('/api/settings', updateData);
+      const response = await apiClient.put('/settings', updateData);
       const updatedSettings = response.data.data;
       
       set({ 
@@ -75,7 +75,7 @@ const useSettingsStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await axios.post('/api/settings/reset');
+      const response = await apiClient.post('/settings/reset');
       const resetSettings = response.data.data;
       
       set({ 
@@ -98,7 +98,7 @@ const useSettingsStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await axios.get(`/api/settings/group/${group}`);
+      const response = await apiClient.get(`/settings/group/${group}`);
       const groupData = response.data.data;
       
       set({ loading: false });
@@ -117,7 +117,7 @@ const useSettingsStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      const response = await axios.get('/api/settings/admin');
+      const response = await apiClient.get('/settings/admin');
       const fetchedSettings = response.data.data;
       
       set({ 
