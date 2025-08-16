@@ -64,6 +64,9 @@ const ProductFormPage = () => {
   const [includedInput, setIncludedInput] = useState({ en: '', vi: '' });
   const [excludedInput, setExcludedInput] = useState({ en: '', vi: '' });
 
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState({});
+
   useEffect(() => {
     fetchCategories();
     if (isEditing) {
@@ -170,6 +173,19 @@ const ProductFormPage = () => {
         [field]: value
       };
     });
+
+    // Clear validation error when user starts typing
+    if (lang) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [`${field}_${lang}`]: null
+      }));
+    } else {
+      setValidationErrors(prev => ({
+        ...prev,
+        [field]: null
+      }));
+    }
   };
 
   const handleNestedInputChange = (parent, field, value) => {
@@ -236,19 +252,119 @@ const ProductFormPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validation
-    if (!formData.title.en.trim() || !formData.title.vi.trim()) {
-      toast.error('Title is required in both languages');
-      return;
+    // Clear previous validation errors
+    setValidationErrors({});
+    
+    // Client-side validation
+    const errors = [];
+
+    // Title validation
+    if (!formData.title.en.trim()) {
+      errors.push('English title is required');
+      setValidationErrors(prev => ({ ...prev, title_en: 'English title is required' }));
+    }
+    if (!formData.title.vi.trim()) {
+      errors.push('Vietnamese title is required');
+      setValidationErrors(prev => ({ ...prev, title_vi: 'Vietnamese title is required' }));
     }
 
-    if (!formData.description.en.trim() || !formData.description.vi.trim()) {
-      toast.error('Description is required in both languages');
-      return;
+    // Description validation
+    if (!formData.description.en.trim()) {
+      errors.push('English description is required');
+      setValidationErrors(prev => ({ ...prev, description_en: 'English description is required' }));
+    }
+    if (!formData.description.vi.trim()) {
+      errors.push('Vietnamese description is required');
+      setValidationErrors(prev => ({ ...prev, description_vi: 'Vietnamese description is required' }));
     }
 
+    // Short description validation
+    if (!formData.shortDescription.en.trim()) {
+      errors.push('English short description is required');
+      setValidationErrors(prev => ({ ...prev, shortDescription_en: 'English short description is required' }));
+    }
+    if (!formData.shortDescription.vi.trim()) {
+      errors.push('Vietnamese short description is required');
+      setValidationErrors(prev => ({ ...prev, shortDescription_vi: 'Vietnamese short description is required' }));
+    }
+
+    // Category validation
     if (!formData.category) {
-      toast.error('Category is required');
+      errors.push('Category is required');
+      setValidationErrors(prev => ({ ...prev, category: 'Category is required' }));
+    }
+
+    // Pricing validation
+    if (!formData.pricing.adult || parseFloat(formData.pricing.adult) <= 0) {
+      errors.push('Adult price must be greater than 0');
+      setValidationErrors(prev => ({ ...prev, pricing: 'Adult price must be greater than 0' }));
+    }
+
+    // Duration validation
+    if (!formData.duration.days || parseInt(formData.duration.days) <= 0) {
+      errors.push('Duration days must be greater than 0');
+      setValidationErrors(prev => ({ ...prev, duration: 'Duration days must be greater than 0' }));
+    }
+
+    // Location validation
+    if (!formData.location.en.trim()) {
+      errors.push('English location is required');
+      setValidationErrors(prev => ({ ...prev, location_en: 'English location is required' }));
+    }
+    if (!formData.location.vi.trim()) {
+      errors.push('Vietnamese location is required');
+      setValidationErrors(prev => ({ ...prev, location_vi: 'Vietnamese location is required' }));
+    }
+
+    // Images validation
+    if (!formData.images || formData.images.length === 0) {
+      errors.push('At least one image is required');
+      setValidationErrors(prev => ({ ...prev, images: 'At least one image is required' }));
+    }
+
+    // Requirements validation
+    if (!formData.requirements.en.trim()) {
+      errors.push('English requirements are required');
+      setValidationErrors(prev => ({ ...prev, requirements_en: 'English requirements are required' }));
+    }
+    if (!formData.requirements.vi.trim()) {
+      errors.push('Vietnamese requirements are required');
+      setValidationErrors(prev => ({ ...prev, requirements_vi: 'Vietnamese requirements are required' }));
+    }
+
+    // Cancellation policy validation
+    if (!formData.cancellationPolicy.en.trim()) {
+      errors.push('English cancellation policy is required');
+      setValidationErrors(prev => ({ ...prev, cancellationPolicy_en: 'English cancellation policy is required' }));
+    }
+    if (!formData.cancellationPolicy.vi.trim()) {
+      errors.push('Vietnamese cancellation policy is required');
+      setValidationErrors(prev => ({ ...prev, cancellationPolicy_vi: 'Vietnamese cancellation policy is required' }));
+    }
+
+    // Highlights validation
+    if (!formData.highlights || formData.highlights.length === 0) {
+      errors.push('At least one highlight is required');
+      setValidationErrors(prev => ({ ...prev, highlights: 'At least one highlight is required' }));
+    }
+
+    // Included validation
+    if (!formData.included || formData.included.length === 0) {
+      errors.push('At least one included item is required');
+      setValidationErrors(prev => ({ ...prev, included: 'At least one included item is required' }));
+    }
+
+    // Excluded validation
+    if (!formData.excluded || formData.excluded.length === 0) {
+      errors.push('At least one excluded item is required');
+      setValidationErrors(prev => ({ ...prev, excluded: 'At least one excluded item is required' }));
+    }
+
+    // Show all validation errors
+    if (errors.length > 0) {
+      errors.forEach(error => {
+        toast.error(error);
+      });
       return;
     }
 
@@ -280,10 +396,66 @@ const ProductFormPage = () => {
       navigate('/admin/products');
     } catch (error) {
       console.error('Error saving product:', error);
-      toast.error(error.response?.data?.message || 'Failed to save product');
+      
+      // Handle server validation errors
+      if (error.response?.data?.errors) {
+        // Handle array of validation errors
+        const serverErrors = error.response.data.errors;
+        if (Array.isArray(serverErrors)) {
+          serverErrors.forEach(err => {
+            toast.error(err.msg || err.message || 'Validation error');
+          });
+        } else {
+          // Handle object of validation errors
+          Object.values(serverErrors).forEach(err => {
+            toast.error(err);
+          });
+        }
+      } else if (error.response?.data?.message) {
+        // Handle single error message
+        toast.error(error.response.data.message);
+      } else {
+        // Handle network or other errors
+        toast.error('Failed to save product. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const validateField = (field, value, lang = null) => {
+    const fieldKey = lang ? `${field}_${lang}` : field;
+    
+    if (lang) {
+      if (!value.trim()) {
+        setValidationErrors(prev => ({
+          ...prev,
+          [fieldKey]: `${field} is required`
+        }));
+        return false;
+      }
+    } else {
+      if (field === 'category' && !value) {
+        setValidationErrors(prev => ({
+          ...prev,
+          [fieldKey]: 'Category is required'
+        }));
+        return false;
+      }
+      if (field === 'pricing' && (!value.adult || parseFloat(value.adult) <= 0)) {
+        setValidationErrors(prev => ({
+          ...prev,
+          [fieldKey]: 'Adult price must be greater than 0'
+        }));
+        return false;
+      }
+    }
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      [fieldKey]: null
+    }));
+    return true;
   };
 
   if (initialLoading) {

@@ -464,8 +464,8 @@ const SettingsPage = () => {
                   </label>
                   <input
                     type="email"
-                    value={formData.contactEmail || ''}
-                    onChange={(e) => handleInputChange('contactEmail', e.target.value)}
+                    value={formData.email || ''}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     placeholder="info@zunatravel.com"
                   />
@@ -477,8 +477,8 @@ const SettingsPage = () => {
                   </label>
                   <input
                     type="tel"
-                    value={formData.contactPhone || ''}
-                    onChange={(e) => handleInputChange('contactPhone', e.target.value)}
+                    value={formData.phone || ''}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     placeholder="+84 123 456 789"
                   />
@@ -486,11 +486,24 @@ const SettingsPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Address
+                    WhatsApp
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.whatsapp || ''}
+                    onChange={(e) => handleInputChange('whatsapp', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder="+84 123 456 789"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Address (English)
                   </label>
                   <textarea
-                    value={formData.contactAddress || ''}
-                    onChange={(e) => handleInputChange('contactAddress', e.target.value)}
+                    value={formData.address?.en || ''}
+                    onChange={(e) => handleInputChange('address', { ...formData.address, en: e.target.value })}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     placeholder="123 Travel Street, Hanoi, Vietnam"
@@ -499,14 +512,40 @@ const SettingsPage = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Business Hours
+                    Address (Vietnamese)
+                  </label>
+                  <textarea
+                    value={formData.address?.vi || ''}
+                    onChange={(e) => handleInputChange('address', { ...formData.address, vi: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder="123 Đường Du Lịch, Hà Nội, Việt Nam"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Business Hours (English)
                   </label>
                   <input
                     type="text"
-                    value={formData.businessHours || ''}
-                    onChange={(e) => handleInputChange('businessHours', e.target.value)}
+                    value={formData.businessHours?.en || ''}
+                    onChange={(e) => handleInputChange('businessHours', { ...formData.businessHours, en: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     placeholder="Monday - Friday: 9:00 AM - 6:00 PM"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Business Hours (Vietnamese)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.businessHours?.vi || ''}
+                    onChange={(e) => handleInputChange('businessHours', { ...formData.businessHours, vi: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder="Thứ 2 - Thứ 6: 9:00 - 18:00"
                   />
                 </div>
               </div>
@@ -524,8 +563,8 @@ const SettingsPage = () => {
                   </label>
                   <input
                     type="url"
-                    value={formData.socialMedia?.facebook || ''}
-                    onChange={(e) => handleInputChange('socialMedia', { ...formData.socialMedia, facebook: e.target.value })}
+                    value={formData.facebook || ''}
+                    onChange={(e) => handleInputChange('facebook', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     placeholder="https://facebook.com/zunatravel"
                   />
@@ -537,23 +576,10 @@ const SettingsPage = () => {
                   </label>
                   <input
                     type="url"
-                    value={formData.socialMedia?.instagram || ''}
-                    onChange={(e) => handleInputChange('socialMedia', { ...formData.socialMedia, instagram: e.target.value })}
+                    value={formData.instagram || ''}
+                    onChange={(e) => handleInputChange('instagram', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     placeholder="https://instagram.com/zunatravel"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Twitter URL
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.socialMedia?.twitter || ''}
-                    onChange={(e) => handleInputChange('socialMedia', { ...formData.socialMedia, twitter: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="https://twitter.com/zunatravel"
                   />
                 </div>
 
@@ -563,10 +589,23 @@ const SettingsPage = () => {
                   </label>
                   <input
                     type="url"
-                    value={formData.socialMedia?.youtube || ''}
-                    onChange={(e) => handleInputChange('socialMedia', { ...formData.socialMedia, youtube: e.target.value })}
+                    value={formData.youtube || ''}
+                    onChange={(e) => handleInputChange('youtube', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     placeholder="https://youtube.com/zunatravel"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    TikTok URL
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.tiktok || ''}
+                    onChange={(e) => handleInputChange('tiktok', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder="https://tiktok.com/@zunatravel"
                   />
                 </div>
               </div>
