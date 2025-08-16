@@ -130,6 +130,12 @@ const CategoryFormPage = () => {
         slug: formData.slug || generateSlug(formData.name.en)
       };
 
+      // Only include vehicleType if type is transfer-services
+      if (formData.type !== 'transfer-services') {
+        delete submitData.vehicleType;
+        delete submitData.seats;
+      }
+
       if (isEditing) {
         await updateCategory(id, submitData);
         toast.success(t('categories.updateSuccess'));

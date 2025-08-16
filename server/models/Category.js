@@ -93,7 +93,9 @@ const categorySchema = new mongoose.Schema({
   vehicleType: {
     type: String,
     enum: ['Luxury LIMO', 'Sharing Bus', 'Private', 'Shuttle Bus', 'Private car/Private LIMO', 'LIMO', 'Sleeping Bus', 'Private car'],
-    required: false
+    required: function() {
+      return this.type === 'transfer-services';
+    }
   },
   seo: {
     title: {
