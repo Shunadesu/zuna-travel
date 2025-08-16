@@ -1,0 +1,19 @@
+{
+  "name": "zuna-travel-tour",
+  "version": "1.0.0",
+  "description": "MERN Stack Travel Tour Management System",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\" \"npm run admin\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "admin": "cd admin-cms && npm start",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install && cd ../admin-cms && npm install"
+  },
+  "keywords": ["mern", "travel", "tour", "cms"],
+  "author": "Zuna Travel",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
