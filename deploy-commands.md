@@ -100,7 +100,7 @@ CORS_ORIGIN=https://your-client-domain.vercel.app
 ### Client (Vercel)
 
 ```env
-REACT_APP_API_URL=https://your-api-domain.onrender.com/api
+REACT_APP_API_URL=https://zuna-travel.onrender.com/api
 REACT_APP_NAME=Zuna Travel
 REACT_APP_VERSION=1.0.0
 ```
@@ -108,7 +108,7 @@ REACT_APP_VERSION=1.0.0
 ### Admin CMS (Vercel)
 
 ```env
-REACT_APP_API_URL=https://your-api-domain.onrender.com/api
+REACT_APP_API_URL=https://zuna-travel.onrender.com/api
 REACT_APP_NAME=Zuna Travel Admin
 REACT_APP_VERSION=1.0.0
 ```

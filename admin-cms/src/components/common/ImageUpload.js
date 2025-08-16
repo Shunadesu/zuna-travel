@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import { PhotoIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -12,7 +12,7 @@ const ImageUpload = ({
   label = 'Images',
   required = false 
 }) => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
 
   const handleFileSelect = async (files) => {
@@ -96,12 +96,12 @@ const ImageUpload = ({
     }
   };
 
-  const reorderImages = (fromIndex, toIndex) => {
-    const newImages = [...images];
-    const [movedImage] = newImages.splice(fromIndex, 1);
-    newImages.splice(toIndex, 0, movedImage);
-    onImagesChange(newImages);
-  };
+  // const reorderImages = (fromIndex, toIndex) => {
+  //   const newImages = [...images];
+  //   const [movedImage] = newImages.splice(fromIndex, 1);
+  //   newImages.splice(toIndex, 0, movedImage);
+  //   onImagesChange(newImages);
+  // };
 
   return (
     <div className="space-y-4">

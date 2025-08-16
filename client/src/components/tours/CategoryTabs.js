@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+// import { Link } from 'react-router-dom';
+// import { useTranslation } from 'react-i18next';
 
 const CategoryTabs = ({ categories, selectedCategory, onCategorySelect }) => {
-  const { t, i18n } = useTranslation();
+  // const { t, i18n } = useTranslation();
+  const i18n = { language: 'en' }; // Fallback for now
   const [activeTab, setActiveTab] = useState(0);
 
   // Filter main categories (level 0)

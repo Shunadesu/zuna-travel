@@ -22,7 +22,7 @@
 Thêm biến môi trường:
 
 ```env
-REACT_APP_API_URL=https://your-api-domain.onrender.com/api
+REACT_APP_API_URL=https://zuna-travel.onrender.com/api
 REACT_APP_NAME=Zuna Travel
 REACT_APP_VERSION=1.0.0
 ```
@@ -38,6 +38,19 @@ REACT_APP_VERSION=1.0.0
    - **Root Directory**: `client`
    - **Build Command**: `npm run build`
    - **Output Directory**: `build`
+
+## Troubleshooting
+
+### Lỗi thường gặp:
+
+1. **Build Error**: Kiểm tra dependencies trong `package.json`
+2. **API Error**: Kiểm tra `REACT_APP_API_URL` đúng
+3. **CORS Error**: Đảm bảo backend đã cấu hình CORS
+4. **ESLint Warnings**: Các warnings không ảnh hưởng đến build
+
+### Logs
+
+- Vào Vercel Dashboard > Project > Functions > Logs
 
 ## Kiểm tra Deployment
 
