@@ -24,6 +24,7 @@ Dự án này được deploy trên:
 4. Cấu hình như sau:
    - **Name**: `zuna-travel-api`
    - **Environment**: `Node`
+   - **Root Directory**: `server` (hoặc để trống nếu deploy từ thư mục server)
    - **Build Command**: `npm install`
    - **Start Command**: `npm start`
    - **Plan**: Free
