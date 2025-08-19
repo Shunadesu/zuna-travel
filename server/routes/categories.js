@@ -59,9 +59,17 @@ router.get('/', [
 
     const categories = await categoriesQuery
       .limit(parseInt(limit))
-      .skip(skip);
+      .skip(skip)
+      .lean();
 
     const total = await Category.countDocuments(query);
+
+    // Set cache headers for better performance
+    res.set({
+      'Cache-Control': 'public, max-age=900', // Cache for 15 minutes
+      'ETag': `"categories-${total}-${Date.now()}"`,
+      'Vary': 'Accept-Encoding'
+    });
 
     res.json({
       message: 'Categories retrieved successfully',

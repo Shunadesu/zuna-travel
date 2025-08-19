@@ -170,17 +170,7 @@ const Header = () => {
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={toggleLanguage}
-                    className="flex items-center transition-colors"
-                    style={{
-                      color: settings.topBar?.textColor || '#FFFFFF',
-                      '--tw-text-opacity': '1'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.color = settings.topBar?.hoverColor || '#93C5FD';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.color = settings.topBar?.textColor || '#FFFFFF';
-                    }}
+                    className="flex items-center transition-colors text-white hover:text-blue-300"
                   >
                     <GlobeAltIcon className="h-4 w-4 mr-1" />
                     {i18n.language === 'en' ? 'VI' : 'EN'}
@@ -193,14 +183,14 @@ const Header = () => {
 
         {/* Main navigation */}
         <nav className={`transition-all duration-300 ${
-          isScrolled ? 'bg-white' : 'bg-white/90 backdrop-blur-sm'
+          isScrolled ? 'bg-white' : 'bg-white backdrop-blur-sm'
         }`}>
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center py-4">
               {/* Logo */}
               <Link to="/" className="flex items-center">
                 <div className="text-2xl font-bold" style={{ color: settings?.primaryColor || '#3B82F6' }}>
-                  {settings?.companyName?.[i18n.language] || 'Zuna Travel'}
+                  {settings?.companyName?.[i18n.language] || 'VN BEST Travel'}
                 </div>
               </Link>
 
@@ -220,7 +210,7 @@ const Header = () => {
                   </Link>
                 ))}
                 
-                {/* Categories Dropdown */}
+                {/* Categories Dropdown
                 {activeCategories.length > 0 && (
                   <div className="relative group">
                     <button className="font-medium text-gray-700 hover:text-blue-600 transition-colors">
@@ -238,7 +228,7 @@ const Header = () => {
                       ))}
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
 
               {/* Search and CTA Buttons */}
@@ -360,7 +350,7 @@ const Header = () => {
                   {t('nav.search')}
                 </button>
                 
-                {/* Mobile Categories */}
+                {/* Mobile Categories
                 {activeCategories.length > 0 && (
                   <div className="border-t border-gray-200 pt-2">
                     <div className="px-3 py-2 text-sm font-medium text-gray-500">
@@ -377,7 +367,7 @@ const Header = () => {
                       </Link>
                     ))}
                   </div>
-                )}
+                )} */}
                 
                 {/* Mobile User Menu */}
                 <div className="border-t border-gray-200 pt-2">
@@ -438,21 +428,6 @@ const Header = () => {
                       </Link>
                     </div>
                   )}
-                </div>
-                
-                {/* Mobile CTA */}
-                <div className="border-t border-gray-200 pt-2">
-                  <Link
-                    to="/contact"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md font-medium transition-all duration-200"
-                    style={{
-                      backgroundColor: settings?.primaryColor || '#3B82F6',
-                      color: 'white'
-                    }}
-                  >
-                    {t('nav.bookNow')}
-                  </Link>
                 </div>
               </div>
             </div>

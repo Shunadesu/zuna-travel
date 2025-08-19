@@ -15,19 +15,31 @@ import {
 } from '@heroicons/react/24/outline';
 import { useSettingsStore, useCategoryStore, useProductStore } from '../stores';
 import HeroSwiper from '../components/home/HeroSwiper';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const HomePage = () => {
   const { t, i18n } = useTranslation();
-  const { settings, fetchSettings } = useSettingsStore();
-  const { categories, fetchCategories } = useCategoryStore();
-  const { products, fetchProducts } = useProductStore();
+  const { settings, fetchSettings, loading: settingsLoading } = useSettingsStore();
+  const { categories, fetchCategories, loading: categoriesLoading } = useCategoryStore();
+  const { products, fetchProducts, loading: productsLoading } = useProductStore();
   const [activeCategoryTab, setActiveCategoryTab] = useState('');
 
+  // Check if any data is still loading
+  const isLoading = settingsLoading || categoriesLoading || productsLoading;
+  
+  // Check if we have any data to show
+  const hasData = settings || categories?.length > 0 || products?.length > 0;
+
   useEffect(() => {
-    fetchSettings();
-    fetchCategories();
-    fetchProducts();
-  }, [fetchCategories, fetchProducts]);
+    // Fetch all data in parallel for better performance
+    Promise.all([
+      fetchSettings(),
+      fetchCategories(),
+      fetchProducts()
+    ]).catch(error => {
+      console.error('Error fetching data:', error);
+    });
+  }, [fetchSettings, fetchCategories, fetchProducts]);
 
   const activeCategories = categories?.filter(cat => cat.isActive) || [];
   const tourCategories = activeCategories.filter(cat => cat.type === 'vietnam-tours');
@@ -112,7 +124,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen">
-              {/* Hero Section */}
+        {/* Hero Section */}
         <HeroSwiper />
 
         {/* Browse by Location Section */}
@@ -129,7 +141,20 @@ const HomePage = () => {
 
             {/* Location Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-16">
-              {tourCategories.slice(0, 4).map((category, index) => (
+              {isLoading ? (
+                // Loading skeleton for location cards
+                Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="relative overflow-hidden rounded-3xl shadow-xl">
+                    <div className="w-full h-80 bg-gray-200 animate-pulse"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                    <div className="absolute bottom-6 left-6 right-6">
+                      <div className="h-8 bg-white/20 rounded mb-2 animate-pulse"></div>
+                      <div className="h-4 bg-white/20 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                tourCategories.slice(0, 4).map((category, index) => (
                 <Link 
                   key={category._id} 
                   to={`/tours?category=${category.slug}`} 
@@ -165,7 +190,8 @@ const HomePage = () => {
                     </div>
                   </div>
                 </Link>
-              ))}
+              ))
+              )}
             </div>
 
             {/* CTA Button */}
@@ -182,7 +208,7 @@ const HomePage = () => {
         </section>
 
         {/* Tour Categories Tabs Section */}
-      {tourCategories.length > 0 && (
+      {(isLoading || tourCategories.length > 0) && (
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -196,7 +222,13 @@ const HomePage = () => {
             
             {/* Category Tabs */}
             <div className="flex flex-wrap justify-center gap-2 mb-12">
-              {tourCategories.map((category) => (
+              {isLoading ? (
+                // Loading skeleton for category tabs
+                Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="h-12 w-32 bg-gray-200 rounded-full animate-pulse"></div>
+                ))
+              ) : (
+                tourCategories.map((category) => (
                 <button
                   key={category._id}
                   onClick={() => setActiveCategoryTab(category.slug)}
@@ -208,11 +240,33 @@ const HomePage = () => {
                 >
                   {category.name?.[i18n.language] || category.name?.en || 'Category'}
                 </button>
-              ))}
+              ))
+              )}
             </div>
             
             {/* Products Grid for Active Category */}
-            {activeCategoryTab && (
+            {isLoading ? (
+              // Loading skeleton for products grid
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div className="h-48 bg-gray-200 animate-pulse"></div>
+                    <div className="p-4">
+                      <div className="h-3 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                      <div className="h-5 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                      <div className="flex justify-between mb-3">
+                        <div className="h-3 bg-gray-200 rounded w-20 animate-pulse"></div>
+                        <div className="h-3 bg-gray-200 rounded w-8 animate-pulse"></div>
+                      </div>
+                      <div className="flex justify-between">
+                        <div className="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+                        <div className="h-3 bg-gray-200 rounded w-20 animate-pulse"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : activeCategoryTab && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {getProductsByCategory(activeCategoryTab).map((product) => (
                   <Link
@@ -289,7 +343,7 @@ const HomePage = () => {
       )}
 
       {/* Featured Tours Section */}
-      {featuredTours.length > 0 && (
+      {(isLoading || featuredTours.length > 0) && (
         <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
@@ -302,7 +356,27 @@ const HomePage = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredTours.map((product) => (
+              {isLoading ? (
+                // Loading skeleton for featured tours
+                Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div className="h-48 bg-gray-200 animate-pulse"></div>
+                    <div className="p-4">
+                      <div className="h-3 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                      <div className="h-5 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                      <div className="flex justify-between mb-3">
+                        <div className="h-3 bg-gray-200 rounded w-20 animate-pulse"></div>
+                        <div className="h-3 bg-gray-200 rounded w-8 animate-pulse"></div>
+                      </div>
+                      <div className="flex justify-between">
+                        <div className="h-5 bg-gray-200 rounded w-16 animate-pulse"></div>
+                        <div className="h-3 bg-gray-200 rounded w-20 animate-pulse"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                featuredTours.map((product) => (
                 <Link
                   key={product._id}
                   to={`/tour/${product.slug}`}
@@ -361,7 +435,8 @@ const HomePage = () => {
                     </div>
                   </div>
                 </Link>
-              ))}
+              ))
+              )}
             </div>
             
             <div className="text-center mt-12">
@@ -378,7 +453,7 @@ const HomePage = () => {
       )}
 
       {/* Transfer Services Section */}
-      {featuredTransfers.length > 0 && (
+      {(isLoading || featuredTransfers.length > 0) && (
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
@@ -391,7 +466,23 @@ const HomePage = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {featuredTransfers.map((product) => (
+              {isLoading ? (
+                // Loading skeleton for transfer services
+                Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="group bg-white rounded-2xl shadow-lg overflow-hidden">
+                    <div className="h-48 bg-gray-200 animate-pulse"></div>
+                    <div className="p-6">
+                      <div className="h-5 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-4 animate-pulse"></div>
+                      <div className="flex justify-between">
+                        <div className="h-6 bg-gray-200 rounded w-20 animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                featuredTransfers.map((product) => (
                 <Link
                   key={product._id}
                   to={`/transfer/${product.slug}`}
@@ -429,7 +520,8 @@ const HomePage = () => {
                     </div>
                   </div>
                 </Link>
-              ))}
+              ))
+              )}
             </div>
             
             <div className="text-center mt-12">

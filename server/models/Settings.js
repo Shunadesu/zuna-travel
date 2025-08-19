@@ -211,10 +211,11 @@ const settingsSchema = new mongoose.Schema({
 
 // Ensure only one settings document exists
 settingsSchema.statics.getSettings = async function() {
-  let settings = await this.findOne();
+  let settings = await this.findOne().lean();
   if (!settings) {
     settings = new this();
     await settings.save();
+    return settings.toObject();
   }
   return settings;
 };

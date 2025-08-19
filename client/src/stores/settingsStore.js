@@ -30,7 +30,10 @@ const useSettingsStore = create((set, get) => ({
       return fetchPromise;
     }
 
-    set({ loading: true, error: null });
+    // Only set loading if we don't have any data yet
+    if (!settings) {
+      set({ loading: true, error: null });
+    }
 
     const fetchSettingsPromise = (async () => {
       try {

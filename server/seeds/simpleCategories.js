@@ -334,6 +334,32 @@ const transferServicesCategories = [
     ],
     sortOrder: 6,
     isActive: true
+  },
+  {
+    name: {
+      en: 'Airport Transfer',
+      vi: 'Đưa đón sân bay'
+    },
+    slug: 'airport-transfer',
+    description: {
+      en: 'Professional airport transfer service with meet and greet',
+      vi: 'Dịch vụ đưa đón sân bay chuyên nghiệp với đón tiếp'
+    },
+    type: 'transfer-services',
+    location: {
+      en: 'All Airports, Vietnam',
+      vi: 'Tất cả sân bay, Việt Nam'
+    },
+    vehicleType: 'Airport Transfer',
+    seats: 7,
+    images: [
+      {
+        url: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800',
+        alt: { en: 'Airport Transfer', vi: 'Đưa đón sân bay' }
+      }
+    ],
+    sortOrder: 7,
+    isActive: true
   }
 ];
 

@@ -23,7 +23,7 @@ const ToursPage = () => {
   
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(slug || '');
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, 10000]);
   const [duration, setDuration] = useState('');
   const [sortBy, setSortBy] = useState('name');
 
@@ -42,13 +42,17 @@ const ToursPage = () => {
   // Filter and search products (only Vietnam Tours)
   const filteredProducts = products?.filter(product => {
     // Only show Vietnam Tours products
-    const isVietnamTour = product.category?.type === 'vietnam-tours';
+    // Check if category is populated object or just slug string
+    const isVietnamTour = product.category?.type === 'vietnam-tours' || 
+                         (typeof product.category === 'string' && categories?.find(cat => cat.slug === product.category)?.type === 'vietnam-tours');
     
     const matchesSearch = product.title?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.shortDescription?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesCategory = !selectedCategory || product.category?.slug === selectedCategory;
+    const matchesCategory = !selectedCategory || 
+                           product.category?.slug === selectedCategory || 
+                           (typeof product.category === 'string' && product.category === selectedCategory);
     
     const matchesPrice = product.pricing?.adult >= priceRange[0] && product.pricing?.adult <= priceRange[1];
     
@@ -87,7 +91,7 @@ const ToursPage = () => {
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedCategory('');
-    setPriceRange([0, 1000]);
+    setPriceRange([0, 10000]);
     setDuration('');
     setSortBy('name');
     setSearchParams({});

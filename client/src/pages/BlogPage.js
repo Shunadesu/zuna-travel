@@ -18,9 +18,7 @@ const BlogPage = () => {
   useEffect(() => {
     const loadBlogs = async () => {
       try {
-        console.log('Loading blogs...');
         await fetchBlogs();
-        console.log('Blogs loaded successfully');
       } catch (err) {
         console.error('Error loading blogs:', err);
       }
@@ -61,13 +59,7 @@ const BlogPage = () => {
     return text.substring(0, maxLength) + '...';
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  // Don't show full page loading, just show content with loading states
 
   if (error) {
     return (
@@ -132,60 +124,112 @@ const BlogPage = () => {
       </div>
 
       {/* Featured Blog */}
-      {filteredBlogs.length > 0 && (
+      {(loading || filteredBlogs.length > 0) && (
         <div className="mb-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Featured Post</h2>
-          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-            <div className="grid grid-cols-1 lg:grid-cols-2">
-              <div className="aspect-video lg:aspect-auto">
-                                 <img
-                   src={filteredBlogs[0].featuredImage?.url || filteredBlogs[0].images?.[0]?.url || 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&h=600&fit=crop'}
-                   alt={filteredBlogs[0].title?.en || filteredBlogs[0].title}
-                   className="w-full h-full object-cover"
-                 />
-              </div>
-              <div className="p-8 flex flex-col justify-center">
-                <div className="flex items-center space-x-4 mb-4">
-                                     <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                     {filteredBlogs[0].categories?.[0] || 'Travel'}
-                   </span>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <CalendarIcon className="w-4 h-4 mr-1" />
-                    {formatDate(filteredBlogs[0].createdAt)}
+          {loading ? (
+            // Loading skeleton for featured blog
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+              <div className="grid grid-cols-1 lg:grid-cols-2">
+                <div className="aspect-video lg:aspect-auto bg-gray-200 animate-pulse"></div>
+                <div className="p-8 flex flex-col justify-center">
+                  <div className="flex items-center space-x-4 mb-4">
+                    <div className="h-6 bg-gray-200 rounded w-20 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
                   </div>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  {filteredBlogs[0].title?.en || filteredBlogs[0].title}
-                </h3>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  {truncateText(filteredBlogs[0].content?.en || filteredBlogs[0].content, 200)}
-                </p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <UserIcon className="w-4 h-4 mr-1" />
-                      {filteredBlogs[0].author?.name || 'Admin'}
-                    </div>
-                    <div className="flex items-center">
-                      <EyeIcon className="w-4 h-4 mr-1" />
-                      {filteredBlogs[0].views || 0} views
-                    </div>
+                  <div className="h-8 bg-gray-200 rounded mb-4 animate-pulse"></div>
+                  <div className="space-y-2 mb-6">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
                   </div>
-                  <Link
-                    to={`/blog/${filteredBlogs[0].slug}`}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Read More
-                  </Link>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                    </div>
+                    <div className="h-8 bg-gray-200 rounded w-24 animate-pulse"></div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="grid grid-cols-1 lg:grid-cols-2">
+                <div className="aspect-video lg:aspect-auto">
+                  <img
+                    src={filteredBlogs[0].featuredImage?.url || filteredBlogs[0].images?.[0]?.url || 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&h=600&fit=crop'}
+                    alt={filteredBlogs[0].title?.en || filteredBlogs[0].title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-8 flex flex-col justify-center">
+                  <div className="flex items-center space-x-4 mb-4">
+                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                      {filteredBlogs[0].categories?.[0] || 'Travel'}
+                    </span>
+                    <div className="flex items-center text-sm text-gray-500">
+                      <CalendarIcon className="w-4 h-4 mr-1" />
+                      {formatDate(filteredBlogs[0].createdAt)}
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                    {filteredBlogs[0].title?.en || filteredBlogs[0].title}
+                  </h3>
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    {truncateText(filteredBlogs[0].content?.en || filteredBlogs[0].content, 200)}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4 text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <UserIcon className="w-4 h-4 mr-1" />
+                        {filteredBlogs[0].author?.name || 'Admin'}
+                      </div>
+                      <div className="flex items-center">
+                        <EyeIcon className="w-4 h-4 mr-1" />
+                        {filteredBlogs[0].views || 0} views
+                      </div>
+                    </div>
+                    <Link
+                      to={`/blog/${filteredBlogs[0].slug}`}
+                      className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Read More
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* Blog Grid */}
-      {filteredBlogs.length === 0 ? (
+      {loading ? (
+        // Loading skeleton for blog grid
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+              <div className="aspect-video bg-gray-200 animate-pulse"></div>
+              <div className="p-6">
+                <div className="flex items-center space-x-4 mb-3">
+                  <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                </div>
+                <div className="h-6 bg-gray-200 rounded mb-3 animate-pulse"></div>
+                <div className="space-y-2 mb-4">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                  <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filteredBlogs.length === 0 ? (
         <div className="text-center py-12">
           <FunnelIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No blogs found</h3>

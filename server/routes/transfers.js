@@ -7,31 +7,8 @@ const { protect: authenticateToken, admin: requireAdmin, optionalAuth } = requir
 const router = express.Router();
 
 // Get all transfer services (public with optional auth)
-router.get('/', optionalAuth, [
-  query('type').optional().isIn([
-    'luxury-limo', 'sharing-bus', 'private-car', 'shuttle-bus', 
-    'private-limo', 'sleeping-bus', 'airport-transfer', 'city-transfer', 'intercity-transfer'
-  ]),
-  query('seats').optional().isInt({ min: 1, max: 45 }),
-  query('departure').optional().trim(),
-  query('destination').optional().trim(),
-  query('minPrice').optional().isFloat({ min: 0 }),
-  query('maxPrice').optional().isFloat({ min: 0 }),
-  query('active').optional().isBoolean(),
-  query('featured').optional().isBoolean(),
-  query('sortBy').optional().isIn(['createdAt', 'title', 'price', 'seats', 'rating']),
-  query('sortOrder').optional().isIn(['asc', 'desc']),
-  query('limit').optional().isInt({ min: 1, max: 100 }),
-  query('page').optional().isInt({ min: 1 })
-], async (req, res) => {
+router.get('/', optionalAuth, async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        message: 'Validation failed',
-        errors: errors.array()
-      });
-    }
 
     const {
       type,
@@ -48,16 +25,9 @@ router.get('/', optionalAuth, [
       page = 1
     } = req.query;
 
-    // Build query - only get transfer services category
-    const transferCategory = await Category.findOne({ type: 'transfer-services' });
-    if (!transferCategory) {
-      return res.status(404).json({
-        message: 'Transfer services category not found'
-      });
-    }
-
+    // Build query - get products with transfer-services category type
     const query = {
-      category: transferCategory._id
+      'category.type': 'transfer-services'
     };
 
     // For public access, only show active transfers unless user is admin
@@ -69,39 +39,15 @@ router.get('/', optionalAuth, [
 
     if (featured !== undefined) query.isFeatured = featured === 'true';
 
-    // Transfer service specific filters
-    if (type) query['transferService.type'] = type;
-    if (seats) query['transferService.seats'] = { $gte: parseInt(seats) };
-
-    // Route filters
-    if (departure) {
-      query.$or = [
-        { 'transferService.route.departure.en': new RegExp(departure, 'i') },
-        { 'transferService.route.departure.vi': new RegExp(departure, 'i') }
-      ];
-    }
-
-    if (destination) {
-      const destinationQuery = {
-        $or: [
-          { 'transferService.route.destination.en': new RegExp(destination, 'i') },
-          { 'transferService.route.destination.vi': new RegExp(destination, 'i') }
-        ]
-      };
-      
-      if (query.$or) {
-        query.$and = [{ $or: query.$or }, destinationQuery];
-        delete query.$or;
-      } else {
-        query.$or = destinationQuery.$or;
-      }
-    }
+    // Simple filters - only use what exists in current data structure
+    if (type) query['category.slug'] = type;
+    if (seats) query['category.seats'] = { $gte: parseInt(seats) };
 
     // Price filter
     if (minPrice || maxPrice) {
-      query['pricing.perTrip'] = {};
-      if (minPrice) query['pricing.perTrip'].$gte = parseFloat(minPrice);
-      if (maxPrice) query['pricing.perTrip'].$lte = parseFloat(maxPrice);
+      query['pricing.adult'] = {};
+      if (minPrice) query['pricing.adult'].$gte = parseFloat(minPrice);
+      if (maxPrice) query['pricing.adult'].$lte = parseFloat(maxPrice);
     }
 
     const skip = (page - 1) * limit;
@@ -109,9 +55,9 @@ router.get('/', optionalAuth, [
     // Build sort object
     const sort = {};
     if (sortBy === 'price') {
-      sort['pricing.perTrip'] = sortOrder === 'asc' ? 1 : -1;
+      sort['pricing.adult'] = sortOrder === 'asc' ? 1 : -1;
     } else if (sortBy === 'seats') {
-      sort['transferService.seats'] = sortOrder === 'asc' ? 1 : -1;
+      sort['category.seats'] = sortOrder === 'asc' ? 1 : -1;
     } else if (sortBy === 'rating') {
       sort['rating.average'] = sortOrder === 'asc' ? 1 : -1;
     } else if (sortBy === 'title') {
@@ -127,6 +73,13 @@ router.get('/', optionalAuth, [
       .skip(skip);
 
     const total = await Product.countDocuments(query);
+
+    // Set cache headers for better performance
+    res.set({
+      'Cache-Control': 'public, max-age=600', // Cache for 10 minutes
+      'ETag': `"transfers-${total}-${Date.now()}"`,
+      'Vary': 'Accept-Encoding'
+    });
 
     res.json({
       message: 'Transfer services retrieved successfully',

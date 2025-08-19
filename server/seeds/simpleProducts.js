@@ -594,7 +594,7 @@ const transferServicesProducts = [
       en: 'Professional city transfer service in Hanoi for business and leisure travelers',
       vi: 'Dịch vụ đưa đón trong thành phố Hà Nội chuyên nghiệp cho khách du lịch công vụ và giải trí'
     },
-    category: 'city-transfers',
+    category: 'private-car',
     pricing: {
       adult: 15,
       child: 10,
@@ -638,7 +638,7 @@ const transferServicesProducts = [
       en: 'Reliable city transfer service in Ho Chi Minh City for all your transportation needs',
       vi: 'Dịch vụ đưa đón trong thành phố Hồ Chí Minh đáng tin cậy cho mọi nhu cầu di chuyển'
     },
-    category: 'city-transfers',
+    category: 'private-car',
     pricing: {
       adult: 12,
       child: 8,
@@ -682,7 +682,7 @@ const transferServicesProducts = [
       en: 'Comfortable transfer service from Hanoi to Ha Long Bay for your cruise adventure',
       vi: 'Dịch vụ đưa đón thoải mái từ Hà Nội đến Hạ Long cho chuyến du thuyền của bạn'
     },
-    category: 'inter-city-transfers',
+    category: 'shuttle-bus',
     pricing: {
       adult: 35,
       child: 25,
@@ -726,7 +726,7 @@ const transferServicesProducts = [
       en: 'Convenient transfer service from Ho Chi Minh City to Mekong Delta destinations',
       vi: 'Dịch vụ đưa đón thuận tiện từ TP. Hồ Chí Minh đến các điểm đến ĐBSCL'
     },
-    category: 'inter-city-transfers',
+    category: 'shuttle-bus',
     pricing: {
       adult: 30,
       child: 20,

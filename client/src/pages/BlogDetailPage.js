@@ -51,15 +51,9 @@ const BlogDetailPage = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  // Don't show full page loading, just show content with loading states
 
-  if (error || !blog) {
+  if (error && !loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -112,7 +106,11 @@ const BlogDetailPage = () => {
           <li aria-current="page">
             <div className="flex items-center">
               <span className="mx-2 text-gray-400">/</span>
-              <span className="text-gray-500">{blog.title?.en || blog.title}</span>
+              {loading ? (
+                <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+              ) : (
+                <span className="text-gray-500">{blog?.title?.en || blog?.title}</span>
+              )}
             </div>
           </li>
         </ol>
@@ -122,29 +120,41 @@ const BlogDetailPage = () => {
       <article className="mb-12">
         {/* Featured Image */}
         <div className="mb-8">
-                     <img
-             src={blog.featuredImage?.url || blog.images?.[0]?.url || 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&h=600&fit=crop'}
-             alt={blog.title?.en || blog.title}
-             className="w-full h-96 object-cover rounded-lg"
-           />
+          {loading ? (
+            <div className="w-full h-96 bg-gray-200 rounded-lg animate-pulse"></div>
+          ) : (
+            <img
+              src={blog?.featuredImage?.url || blog?.images?.[0]?.url || 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&h=600&fit=crop'}
+              alt={blog?.title?.en || blog?.title}
+              className="w-full h-96 object-cover rounded-lg"
+            />
+          )}
         </div>
 
         {/* Article Meta */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-6">
-            <div className="flex items-center text-sm text-gray-500">
-              <CalendarIcon className="w-4 h-4 mr-1" />
-              {formatDate(blog.createdAt)}
+          {loading ? (
+            <div className="flex items-center space-x-6">
+              <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
             </div>
-                         <div className="flex items-center text-sm text-gray-500">
-               <UserIcon className="w-4 h-4 mr-1" />
-               {blog.author?.name || 'Admin'}
-             </div>
-            <div className="flex items-center text-sm text-gray-500">
-              <EyeIcon className="w-4 h-4 mr-1" />
-              {blog.views || 0} views
+          ) : (
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center text-sm text-gray-500">
+                <CalendarIcon className="w-4 h-4 mr-1" />
+                {formatDate(blog?.createdAt)}
+              </div>
+              <div className="flex items-center text-sm text-gray-500">
+                <UserIcon className="w-4 h-4 mr-1" />
+                {blog?.author?.name || 'Admin'}
+              </div>
+              <div className="flex items-center text-sm text-gray-500">
+                <EyeIcon className="w-4 h-4 mr-1" />
+                {blog?.views || 0} views
+              </div>
             </div>
-          </div>
+          )}
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setIsFavorite(!isFavorite)}
@@ -162,14 +172,22 @@ const BlogDetailPage = () => {
 
         {/* Category */}
         <div className="mb-6">
-                   <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-           {blog.categories?.[0] || 'Travel'}
-         </span>
+          {loading ? (
+            <div className="h-6 bg-gray-200 rounded w-20 animate-pulse"></div>
+          ) : (
+            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+              {blog?.categories?.[0] || 'Travel'}
+            </span>
+          )}
         </div>
 
         {/* Title */}
         <h1 className="text-4xl font-bold text-gray-900 mb-6">
-          {blog.title?.en || blog.title}
+          {loading ? (
+            <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
+          ) : (
+            blog?.title?.en || blog?.title
+          )}
         </h1>
 
         {/* Excerpt */}

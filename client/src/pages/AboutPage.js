@@ -102,7 +102,7 @@ const AboutPage = () => {
           </div>
           <div className="relative">
             <img
-              src="/about/company-story.jpg"
+              src="https://statics.vinpearl.com/pho-co-ha-noi-10_1687918089.jpg"
               alt="Zuna Travel Team"
               className="rounded-lg shadow-lg"
             />

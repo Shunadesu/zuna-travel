@@ -59,6 +59,13 @@ npm run seed:quick
 - Ít products và blogs hơn
 - Phù hợp cho testing
 
+### `transferServices.js`
+
+- Tạo 8 dịch vụ transfer chính dựa trên hình ảnh
+- Bao gồm: Halong Bay, Hanoi Sapa Train, Ha Giang, Airport Transfer, Sapa, Ninh Binh, Cat Ba, All-in-One Package
+- Dữ liệu song ngữ (English/Vietnamese)
+- Pricing và duration phù hợp
+
 ## Cách Sử Dụng
 
 1. **Đảm bảo MongoDB đã được kết nối**
@@ -75,6 +82,16 @@ npm run seed:quick
 
    ```bash
    npm run seed:complete
+   ```
+
+4. **Chạy script tạo transfer services (tùy chọn)**
+
+   ```bash
+   # Chạy trực tiếp
+   node seeds/transferServices.js
+   
+   # Hoặc sử dụng script helper
+   node seeds/runTransferSeed.js
    ```
 
 4. **Kiểm tra kết quả**

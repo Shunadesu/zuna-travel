@@ -70,9 +70,17 @@ router.get('/', optionalAuth, [
       .populate('author', 'name email avatar')
       .sort(sort)
       .limit(parseInt(limit))
-      .skip(skip);
+      .skip(skip)
+      .lean();
 
     const total = await Blog.countDocuments(query);
+
+    // Set cache headers for better performance
+    res.set({
+      'Cache-Control': 'public, max-age=600', // Cache for 10 minutes
+      'ETag': `"blogs-${total}-${Date.now()}"`,
+      'Vary': 'Accept-Encoding'
+    });
 
     res.json({
       message: 'Blogs retrieved successfully',

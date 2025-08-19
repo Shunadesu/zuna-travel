@@ -88,9 +88,17 @@ router.get('/', optionalAuth, [
       .populate('category', 'name slug type')
       .sort(sort)
       .limit(parseInt(limit))
-      .skip(skip);
+      .skip(skip)
+      .lean();
 
     const total = await Product.countDocuments(query);
+
+    // Set cache headers for better performance
+    res.set({
+      'Cache-Control': 'public, max-age=600', // Cache for 10 minutes
+      'ETag': `"products-${total}-${Date.now()}"`,
+      'Vary': 'Accept-Encoding'
+    });
 
     res.json({
       message: 'Products retrieved successfully',

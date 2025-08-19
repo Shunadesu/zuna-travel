@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const compression = require('compression');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -19,6 +20,9 @@ const app = express();
 
 // Security middleware
 app.use(helmet());
+
+// Compression middleware for better performance
+app.use(compression());
 
 // Rate limiting - only in production
 if (process.env.NODE_ENV === 'production') {

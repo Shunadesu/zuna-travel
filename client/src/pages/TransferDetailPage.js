@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useProductStore, useBookingStore } from '../stores';
+import { useTransferStore, useBookingStore } from '../stores';
 import { 
-  CalendarIcon, 
   MapPinIcon, 
   ClockIcon, 
   CurrencyDollarIcon,
   StarIcon,
   ArrowLeftIcon,
-  ShareIcon,
-  HeartIcon,
   PhoneIcon,
   EnvelopeIcon,
   XMarkIcon
@@ -21,13 +18,11 @@ import toast from 'react-hot-toast';
 const TransferDetailPage = () => {
   const { t, i18n } = useTranslation();
   const { slug } = useParams();
-  const { products, fetchProducts, loading, error } = useProductStore();
+  const { getTransferBySlug, loading, error } = useTransferStore();
   const { createBooking } = useBookingStore();
   const [transfer, setTransfer] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [passengers, setPassengers] = useState(1);
+  const [selectedImage] = useState(0);
+  const [passengers] = useState(1);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [bookingData, setBookingData] = useState({
     travelers: 1,
@@ -44,18 +39,15 @@ const TransferDetailPage = () => {
   useEffect(() => {
     const fetchTransfer = async () => {
       try {
-        // First, ensure products are loaded
-        await fetchProducts();
-        
-        // Then find the transfer by slug
-        const transferData = products.find(product => product.slug === slug);
+        // Get transfer by slug directly
+        const transferData = await getTransferBySlug(slug);
         setTransfer(transferData);
       } catch (error) {
         console.error('Error fetching transfer:', error);
       }
     };
     fetchTransfer();
-  }, [slug, fetchProducts, products]);
+  }, [slug, getTransferBySlug]);
 
   // Initialize booking data when transfer loads
   useEffect(() => {
@@ -111,7 +103,7 @@ const TransferDetailPage = () => {
   };
 
   const getTransferPrice = () => {
-    return transfer.pricing?.adult || transfer.pricing?.perTrip || 0;
+    return transfer.pricing?.adult || 0;
   };
 
   const calculateTotalPrice = () => {
@@ -137,10 +129,10 @@ const TransferDetailPage = () => {
         customerInfo: bookingData.customerInfo,
         transferDetails: {
           name: transfer.title?.en || transfer.title,
-          from: transfer.from?.en || transfer.from,
-          to: transfer.to?.en || transfer.to,
-          duration: transfer.duration,
-          vehicle: transfer.vehicle
+          category: transfer.category?.name?.en || transfer.category?.name,
+          seats: transfer.category?.seats,
+          duration: transfer.duration?.days || 1,
+          price: transfer.pricing?.adult
         },
         specialRequests: bookingData.specialRequests
       };
@@ -282,7 +274,7 @@ const TransferDetailPage = () => {
               <div className="flex items-center">
                 <CurrencyDollarIcon className="h-5 w-5 text-blue-600 mr-2" />
                 <span className="text-gray-700">
-                  {transfer.pricing?.currency || 'USD'} {transfer.pricing?.adult || '0'} {t('transfers.perTrip') || 'per trip'}
+                  {transfer.pricing?.currency || 'USD'} {transfer.pricing?.perTrip || '0'} {t('transfers.perTrip') || 'per trip'}
                 </span>
               </div>
             </div>
@@ -377,16 +369,16 @@ const TransferDetailPage = () => {
                       <p className="font-medium">{transfer.title?.en || transfer.title}</p>
                     </div>
                     <div>
-                      <span className="text-gray-600">Route:</span>
-                      <p className="font-medium">{transfer.from?.en || transfer.from} → {transfer.to?.en || transfer.to}</p>
+                      <span className="text-gray-600">Category:</span>
+                      <p className="font-medium">{transfer.category?.name?.en || transfer.category?.name || 'Transfer Service'}</p>
                     </div>
                     <div>
-                      <span className="text-gray-600">Vehicle:</span>
-                      <p className="font-medium">{transfer.vehicle || 'Standard'}</p>
+                      <span className="text-gray-600">Seats:</span>
+                      <p className="font-medium">{transfer.category?.seats || 'Flexible'} seats</p>
                     </div>
                     <div>
                       <span className="text-gray-600">Duration:</span>
-                      <p className="font-medium">{formatDuration(transfer.duration)}</p>
+                      <p className="font-medium">{transfer.duration?.days || 1} day</p>
                     </div>
                   </div>
                 </div>

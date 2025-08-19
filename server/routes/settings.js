@@ -10,6 +10,13 @@ router.get('/', async (req, res) => {
   try {
     const settings = await Settings.getSettings();
     
+    // Set cache headers for better performance
+    res.set({
+      'Cache-Control': 'public, max-age=600', // Cache for 10 minutes
+      'ETag': `"${settings._id}-${settings.updatedAt.getTime()}"`,
+      'Vary': 'Accept-Encoding'
+    });
+    
     res.json({
       message: 'Settings retrieved successfully',
       data: settings

@@ -7,7 +7,7 @@ const useCategoryStore = create((set, get) => ({
   loading: false,
   error: null,
   lastFetched: null,
-  cacheExpiry: 15 * 60 * 1000, // 15 minutes
+  cacheExpiry: 30 * 60 * 1000, // 30 minutes
   fetchPromise: null, // To prevent multiple simultaneous requests
 
   // Actions
@@ -30,7 +30,10 @@ const useCategoryStore = create((set, get) => ({
       return fetchPromise;
     }
 
-    set({ loading: true, error: null });
+    // Only set loading if we don't have any data yet
+    if (categories.length === 0) {
+      set({ loading: true, error: null });
+    }
 
     const fetchCategoriesPromise = (async () => {
       try {

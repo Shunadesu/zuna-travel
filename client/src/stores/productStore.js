@@ -8,7 +8,7 @@ const useProductStore = create((set, get) => ({
   loading: false,
   error: null,
   lastFetched: null,
-  cacheExpiry: 10 * 60 * 1000, // 10 minutes
+  cacheExpiry: 20 * 60 * 1000, // 20 minutes
   fetchPromise: null, // To prevent multiple simultaneous requests
   fetchFeaturedPromise: null, // To prevent multiple simultaneous requests
 
@@ -32,7 +32,10 @@ const useProductStore = create((set, get) => ({
       return fetchPromise;
     }
 
-    set({ loading: true, error: null });
+    // Only set loading if we don't have any data yet
+    if (products.length === 0) {
+      set({ loading: true, error: null });
+    }
 
     const fetchProductsPromise = (async () => {
       try {
@@ -76,7 +79,10 @@ const useProductStore = create((set, get) => ({
       return fetchFeaturedPromise;
     }
 
-    set({ loading: true, error: null });
+    // Only set loading if we don't have any data yet
+    if (featuredProducts.length === 0) {
+      set({ loading: true, error: null });
+    }
 
     const fetchFeaturedProductsPromise = (async () => {
       try {

@@ -46,7 +46,7 @@ const HeroSwiper = () => {
     },
     {
       id: 2,
-      image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+      image: 'https://statics.vinpearl.com/ha-long-bay-in-vietnam-4_1689180998.jpg',
       title: {
         en: 'Ha Long Bay',
         vi: 'Vịnh Hạ Long'
@@ -59,6 +59,102 @@ const HeroSwiper = () => {
         en: 'Experience the breathtaking beauty of thousands of limestone karsts and isles.',
         vi: 'Trải nghiệm vẻ đẹp ngoạn mục của hàng nghìn hòn đảo đá vôi.'
       }
+    },
+    {
+      id: 3,
+      image: 'https://vcdn1-dulich.vnecdn.net/2022/04/18/dulichSaPa-1650268886-1480-1650277620.png?w=0&h=0&q=100&dpr=2&fit=crop&s=JTUw8njZ_Glkqf1itzjObg',
+      title: {
+        en: 'Sapa Mountains',
+        vi: 'Núi Sapa'
+      },
+      subtitle: {
+        en: 'Misty Mountain Peaks',
+        vi: 'Những Đỉnh Núi Sương Mù'
+      },
+      description: {
+        en: 'Trek through terraced rice fields and meet ethnic minority communities in the misty mountains.',
+        vi: 'Đi bộ qua những ruộng bậc thang và gặp gỡ các cộng đồng dân tộc thiểu số trên núi sương mù.'
+      }
+    },
+    {
+      id: 4,
+      image: 'https://statics.vinpearl.com/hoi-an-ancient-town_1648356190.jpg',
+      title: {
+        en: 'Hoi An Ancient Town',
+        vi: 'Phố Cổ Hội An'
+      },
+      subtitle: {
+        en: 'Timeless Beauty & Culture',
+        vi: 'Vẻ Đẹp Và Văn Hóa Vượt Thời Gian'
+      },
+      description: {
+        en: 'Walk through lantern-lit streets and discover the charm of this UNESCO World Heritage site.',
+        vi: 'Đi bộ qua những con phố rực rỡ đèn lồng và khám phá sự quyến rũ của di sản UNESCO này.'
+      }
+    },
+    {
+      id: 5,
+      image: 'https://bcp.cdnchinhphu.vn/334894974524682240/2022/3/6/img6993-16465660681331104827006-0-0-400-640-crop-1646566105065638540982.jpg',
+      title: {
+        en: 'Mekong Delta',
+        vi: 'Đồng Bằng Sông Cửu Long'
+      },
+      subtitle: {
+        en: 'Floating Markets & Life',
+        vi: 'Chợ Nổi Và Cuộc Sống'
+      },
+      description: {
+        en: 'Experience the vibrant floating markets and lush green landscapes of the Mekong Delta.',
+        vi: 'Trải nghiệm những chợ nổi sôi động và cảnh quan xanh tươi của đồng bằng sông Cửu Long.'
+      }
+    },
+    {
+      id: 6,
+      image: 'https://statics.vinpearl.com/pho-co-ha-noi-10_1687918089.jpg',
+      title: {
+        en: 'Hanoi Old Quarter',
+        vi: 'Phố Cổ Hà Nội'
+      },
+      subtitle: {
+        en: 'Historic Heart of Vietnam',
+        vi: 'Trái Tim Lịch Sử Của Việt Nam'
+      },
+      description: {
+        en: 'Explore the bustling streets, ancient temples, and rich history of Vietnam\'s capital.',
+        vi: 'Khám phá những con phố nhộn nhịp, đền chùa cổ kính và lịch sử phong phú của thủ đô Việt Nam.'
+      }
+    },
+    {
+      id: 7,
+      image: 'https://khaihoanphuquoc.com.vn/wp-content/uploads/2023/11/du-lich-phu-quoc-thang-10-1.jpg',
+      title: {
+        en: 'Phu Quoc Island',
+        vi: 'Đảo Phú Quốc'
+      },
+      subtitle: {
+        en: 'Tropical Paradise',
+        vi: 'Thiên Đường Nhiệt Đới'
+      },
+      description: {
+        en: 'Relax on pristine beaches and enjoy crystal clear waters in Vietnam\'s largest island.',
+        vi: 'Thư giãn trên những bãi biển hoang sơ và tận hưởng làn nước trong vắt tại hòn đảo lớn nhất Việt Nam.'
+      }
+    },
+    {
+      id: 8,
+      image: 'https://vtcpay.vn/blog/wp-content/uploads/2022/07/bai-bien-Nha-Trang-1-1.jpg',
+      title: {
+        en: 'Nha Trang Beaches',
+        vi: 'Bãi Biển Nha Trang'
+      },
+      subtitle: {
+        en: 'Coastal Beauty',
+        vi: 'Vẻ Đẹp Ven Biển'
+      },
+      description: {
+        en: 'Discover pristine beaches, coral reefs, and vibrant coastal culture.',
+        vi: 'Khám phá những bãi biển hoang sơ, rạn san hô và văn hóa ven biển sôi động.'
+      }
     }
   ];
 
@@ -68,7 +164,7 @@ const HeroSwiper = () => {
   return (
     <div className="relative h-screen overflow-hidden">
       <Swiper
-        modules={[Autoplay, Pagination, Navigation, EffectFade]}
+        modules={[Autoplay, Pagination, EffectFade]}
         effect="fade"
         speed={1000}
         autoplay={{
@@ -159,13 +255,7 @@ const HeroSwiper = () => {
           </SwiperSlide>
         ))}
         
-        {/* Custom Navigation Buttons */}
-        <div className="swiper-button-prev !text-white !w-12 !h-12 !bg-black/20 hover:!bg-black/40 rounded-full transition-all duration-300">
-          <ChevronLeftIcon className="w-6 h-6" />
-        </div>
-        <div className="swiper-button-next !text-white !w-12 !h-12 !bg-black/20 hover:!bg-black/40 rounded-full transition-all duration-300">
-          <ChevronRightIcon className="w-6 h-6" />
-        </div>
+  
       </Swiper>
       
       {/* Slide Counter */}
