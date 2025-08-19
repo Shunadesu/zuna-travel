@@ -32,7 +32,16 @@ if (process.env.NODE_ENV === 'production') {
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'https://zuna-travel.vercel.app', 'https://zuna-travel-ab1g.vercel.app'],
+  origin: [
+    'http://localhost:3000',
+     'http://localhost:3001',
+     'https://zuna-travel.vercel.app',
+     'https://zuna-travel-ab1g.vercel.app',
+     'https://zuna-travel-git-main-zunatravel-dev.vercel.app',
+     'https://zunatravel-dev.vercel.app',
+     'https://zunatravel-dev.vercel.app',
+     'https://www.vnbesttravel.com',
+     ],
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));

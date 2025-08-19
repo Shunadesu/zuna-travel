@@ -67,7 +67,7 @@ const Header = () => {
         isScrolled ? 'bg-white shadow-lg' : 'bg-transparent'
       }`}>
         {/* Top bar with contact info */}
-        {settings && (
+        {settings ? (
           <div 
             className="py-2"
             style={{
@@ -116,6 +116,56 @@ const Header = () => {
                       {settings.email}
                     </a>
                   )}
+                </div>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={toggleLanguage}
+                    className="flex items-center transition-colors"
+                    style={{
+                      color: settings.topBar?.textColor || '#FFFFFF',
+                      '--tw-text-opacity': '1'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.color = settings.topBar?.hoverColor || '#93C5FD';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.color = settings.topBar?.textColor || '#FFFFFF';
+                    }}
+                  >
+                    <GlobeAltIcon className="h-4 w-4 mr-1" />
+                    {i18n.language === 'en' ? 'VI' : 'EN'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div 
+            className="py-2 bg-[#1F2937] text-white"
+          >
+            <div className="container mx-auto px-4">
+              <div className="flex justify-between items-center text-sm">
+                <div className="flex items-center space-x-4">
+                  
+                    <a 
+                      href={`tel:${'0909090909'}`}  
+                      className="flex items-center transition-colors"
+                      style={{
+                        color: '#FFFFFF',
+                        '--tw-text-opacity': '1'
+                      }}
+                    >
+                      <PhoneIcon className="h-4 w-4 mr-1" />
+                      <span className='text-white'>0909090909</span>
+                    </a>
+              
+                    <a 
+                      href={`mailto:${'info@vnbesttravel.com'}`}
+                      className="flex items-center transition-colors"
+                    >
+                      <EnvelopeIcon className="h-4 w-4 mr-1" />
+                      <span className='text-white'>info@vnbesttravel.com</span>
+                    </a>
                 </div>
                 <div className="flex items-center space-x-4">
                   <button
