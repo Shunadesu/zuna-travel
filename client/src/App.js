@@ -7,6 +7,10 @@ import { useAuthStore } from './stores';
 import Layout from './components/layout/Layout';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ScrollToTop from './components/common/ScrollToTop';
+import ServerWarmupLoader from './components/common/ServerWarmupLoader';
+
+// Hooks
+import useServerWarmup from './hooks/useServerWarmup';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -30,6 +34,7 @@ import { ApiProvider } from './contexts/ApiContext';
 function App() {
   const { i18n } = useTranslation();
   const { initializeAuth } = useAuthStore();
+  const { isWarmingUp, isServerReady, warmupError, warmupServer } = useServerWarmup();
 
   // Initialize auth state
   useEffect(() => {
@@ -45,6 +50,15 @@ function App() {
     <div className="App">
       <ApiProvider>
         <ScrollToTop />
+        
+        {/* Server Warmup Loader - Only shows when needed */}
+        <ServerWarmupLoader 
+          isWarmingUp={isWarmingUp}
+          isServerReady={isServerReady}
+          warmupError={warmupError}
+          onRetry={warmupServer}
+        />
+        
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path="/" element={<Layout />}>

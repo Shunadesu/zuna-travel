@@ -39,12 +39,34 @@ const ToursPage = () => {
     }
   }, [slug]);
 
+  // Re-filter when categories are loaded
+  useEffect(() => {
+    // This will trigger re-render when categories are loaded
+    // and the filteredProducts will be recalculated
+  }, [categories]);
+
   // Filter and search products (only Vietnam Tours)
   const filteredProducts = products?.filter(product => {
     // Only show Vietnam Tours products
-    // Check if category is populated object or just slug string
-    const isVietnamTour = product.category?.type === 'vietnam-tours' || 
-                         (typeof product.category === 'string' && categories?.find(cat => cat.slug === product.category)?.type === 'vietnam-tours');
+    let isVietnamTour = false;
+    
+    // Check if category is populated object with type
+    if (product.category?.type === 'vietnam-tours') {
+      isVietnamTour = true;
+    } 
+    // Check if category is just a string (ID or slug) and we have categories loaded
+    else if (typeof product.category === 'string' && categories?.length > 0) {
+      const category = categories.find(cat => 
+        cat.slug === product.category || 
+        cat._id === product.category
+      );
+      isVietnamTour = category?.type === 'vietnam-tours';
+    }
+    // If categories haven't loaded yet, show all products temporarily
+    // This prevents the "no tours" state on initial load
+    else if (categories?.length === 0) {
+      isVietnamTour = true;
+    }
     
     const matchesSearch = product.title?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.shortDescription?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||

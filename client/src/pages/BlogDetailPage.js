@@ -51,7 +51,24 @@ const BlogDetailPage = () => {
     }
   };
 
-  // Don't show full page loading, just show content with loading states
+  // Show loading state if no blog data and still loading
+  if (loading && !blog) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-1/4 mb-8"></div>
+          <div className="w-full h-96 bg-gray-200 rounded-lg mb-8"></div>
+          <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+          <div className="space-y-4">
+            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+            <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (error && !loading) {
     return (
@@ -117,19 +134,20 @@ const BlogDetailPage = () => {
       </nav>
 
       {/* Article Header */}
-      <article className="mb-12">
-        {/* Featured Image */}
-        <div className="mb-8">
-          {loading ? (
-            <div className="w-full h-96 bg-gray-200 rounded-lg animate-pulse"></div>
-          ) : (
-            <img
-              src={blog?.featuredImage?.url || blog?.images?.[0]?.url || 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&h=600&fit=crop'}
-              alt={blog?.title?.en || blog?.title}
-              className="w-full h-96 object-cover rounded-lg"
-            />
-          )}
-        </div>
+      {blog && (
+        <article className="mb-12">
+          {/* Featured Image */}
+          <div className="mb-8">
+            {loading ? (
+              <div className="w-full h-96 bg-gray-200 rounded-lg animate-pulse"></div>
+            ) : (
+              <img
+                src={blog?.featuredImage?.url || blog?.images?.[0]?.url || 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&h=600&fit=crop'}
+                alt={blog?.title?.en || blog?.title}
+                className="w-full h-96 object-cover rounded-lg"
+              />
+            )}
+          </div>
 
         {/* Article Meta */}
         <div className="flex items-center justify-between mb-6">
@@ -191,60 +209,63 @@ const BlogDetailPage = () => {
         </h1>
 
         {/* Excerpt */}
-                 {blog.excerpt && (
-           <div className="mb-8">
-             <p className="text-xl text-gray-600 leading-relaxed italic">
-               {blog.excerpt?.en || blog.excerpt}
-             </p>
-           </div>
-         )}
+        {blog?.excerpt && (
+          <div className="mb-8">
+            <p className="text-xl text-gray-600 leading-relaxed italic">
+              {blog.excerpt?.en || blog.excerpt}
+            </p>
+          </div>
+        )}
 
         {/* Content */}
         <div className="prose prose-lg max-w-none">
           <div 
             className="text-gray-700 leading-relaxed"
             dangerouslySetInnerHTML={{ 
-              __html: blog.content?.en || blog.content || 'No content available.' 
+              __html: blog?.content?.en || blog?.content || 'No content available.' 
             }}
           />
         </div>
 
         {/* Tags */}
-        {blog.tags && blog.tags.length > 0 && (
+        {blog?.tags && blog.tags.length > 0 && (
           <div className="mt-8 pt-8 border-t border-gray-200">
             <div className="flex items-center space-x-2">
               <TagIcon className="w-5 h-5 text-gray-400" />
               <span className="text-sm font-medium text-gray-700">Tags:</span>
-                             {blog.tags.map((tag, index) => (
-                 <span
-                   key={index}
-                   className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm"
-                 >
-                   {tag?.en || tag}
-                 </span>
-               ))}
+              {blog.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm"
+                >
+                  {tag?.en || tag}
+                </span>
+              ))}
             </div>
           </div>
         )}
-      </article>
+        </article>
+      )}
 
       {/* Author Bio */}
-      <div className="mb-12 bg-gray-50 rounded-lg p-6">
-        <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-                         <span className="text-white font-bold text-xl">
-               {(blog.author?.name || 'A').charAt(0).toUpperCase()}
-             </span>
-          </div>
-          <div>
-                         <h3 className="font-semibold text-gray-900">{blog.author?.name || 'Admin'}</h3>
-            <p className="text-gray-600">
-              Travel enthusiast and writer with years of experience exploring the world. 
-              Passionate about sharing travel tips and inspiring others to discover new destinations.
-            </p>
+      {blog && (
+        <div className="mb-12 bg-gray-50 rounded-lg p-6">
+          <div className="flex items-center space-x-4">
+            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-xl">
+                {(blog.author?.name || 'A').charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">{blog.author?.name || 'Admin'}</h3>
+              <p className="text-gray-600">
+                Travel enthusiast and writer with years of experience exploring the world. 
+                Passionate about sharing travel tips and inspiring others to discover new destinations.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Related Posts */}
       {relatedBlogs.length > 0 && (

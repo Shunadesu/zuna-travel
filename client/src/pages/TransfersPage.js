@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useTransferStore } from '../stores';
+import { useTransferStore, useCategoryStore } from '../stores';
 import { 
   ClockIcon, 
   CurrencyDollarIcon,
@@ -13,6 +13,7 @@ import {
 const TransfersPage = () => {
   const { t, i18n } = useTranslation();
   const { transfers, fetchTransfers, loading, error } = useTransferStore();
+  const { categories, fetchCategories } = useCategoryStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVehicleType, setSelectedVehicleType] = useState('');
   const [selectedSeats, setSelectedSeats] = useState('');
@@ -35,10 +36,38 @@ const TransfersPage = () => {
 
   useEffect(() => {
     fetchTransfers();
-  }, [fetchTransfers]);
+    fetchCategories();
+  }, [fetchTransfers, fetchCategories]);
 
-  // Filter and search transfers
+  // Re-filter when categories are loaded
+  useEffect(() => {
+    // This will trigger re-render when categories are loaded
+    // and the filteredTransfers will be recalculated
+  }, [categories]);
+
+  // Filter and search transfers (only Transfer Services)
   const filteredTransfers = transfers?.filter(transfer => {
+    // Only show Transfer Services products
+    let isTransferService = false;
+    
+    // Check if category is populated object with type
+    if (transfer.category?.type === 'transfer-services') {
+      isTransferService = true;
+    } 
+    // Check if category is just a string (ID or slug) and we have categories loaded
+    else if (typeof transfer.category === 'string' && categories?.length > 0) {
+      const category = categories.find(cat => 
+        cat.slug === transfer.category || 
+        cat._id === transfer.category
+      );
+      isTransferService = category?.type === 'transfer-services';
+    }
+    // If categories haven't loaded yet, show all transfers temporarily
+    // This prevents the "no transfers" state on initial load
+    else if (categories?.length === 0) {
+      isTransferService = true;
+    }
+    
     const matchesSearch = transfer.title?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          transfer.shortDescription?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          transfer.description?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -52,7 +81,7 @@ const TransfersPage = () => {
     // Use pricing.adult instead of pricing.perTrip
     const matchesPrice = (transfer.pricing?.adult || 0) >= priceRange[0] && (transfer.pricing?.adult || 0) <= priceRange[1];
     
-    return matchesSearch && matchesVehicleType && matchesSeats && matchesPrice;
+    return isTransferService && matchesSearch && matchesVehicleType && matchesSeats && matchesPrice;
   });
 
   // Sort transfers

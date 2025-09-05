@@ -79,6 +79,18 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Warmup endpoint to wake up server from sleep (Render.com)
+app.get('/api/warmup', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Server is awake and ready',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    environment: process.env.NODE_ENV
+  });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
