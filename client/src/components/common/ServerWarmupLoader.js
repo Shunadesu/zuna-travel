@@ -34,7 +34,7 @@ const ServerWarmupLoader = ({ isWarmingUp, isServerReady, warmupError, onRetry }
       }, 200);
 
       return () => clearInterval(interval);
-    } else if (isServerReady && !warmupError) {
+    } else if (isServerReady && !warmupError && !isWarmingUp) {
       setProgress(100);
       setShowSuccess(true);
     }
@@ -51,8 +51,19 @@ const ServerWarmupLoader = ({ isWarmingUp, isServerReady, warmupError, onRetry }
     }
   }, [isWarmingUp]);
 
+  // Auto-hide success animation after delay
+  useEffect(() => {
+    if (showSuccess) {
+      const timer = setTimeout(() => {
+        setShowSuccess(false);
+      }, 1500); // Show success for 1.5 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccess]);
+
+  // Don't show anything when everything is done
   if (!isWarmingUp && isServerReady && !warmupError && !showSuccess) {
-    return null; // Don't show anything when server is ready
+    return null;
   }
 
   return (

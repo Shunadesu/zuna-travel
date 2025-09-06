@@ -416,5 +416,51 @@ Hệ thống có tính bảo mật cao với JWT authentication, role-based auth
 #### Thời Gian Hiển Thị:
 
 - Loading: Cho đến khi server ready
-- Success: 2.5 giây để user thấy animation thành công
+- Success: 1.5 giây để user thấy animation thành công
 - Error: Hiển thị cho đến khi user retry
+
+### 12.6 Sửa Lỗi Loading Screen Không Tự Động Ẩn
+
+#### Vấn Đề:
+
+- Loading screen hiển thị xong nhưng không tự động ẩn
+- User bị "kẹt" ở loading screen không vào được trang web
+
+#### Nguyên Nhân:
+
+- Logic hiển thị success animation phức tạp
+- `showSuccess` state không được quản lý đúng cách
+- Timing giữa các state không đồng bộ
+
+#### Giải Pháp:
+
+- Đơn giản hóa logic hiển thị
+- Đảm bảo `showSuccess` được set đúng cách
+- Đồng bộ timing giữa các state
+- Auto-hide sau 1.5 giây
+
+#### Thay Đổi:
+
+```javascript
+// Hook: Đảm bảo state được set đúng
+if (sessionWarmedUp === "true") {
+  setIsServerReady(true);
+  setIsWarmingUp(false);
+  return;
+}
+
+// Component: Đơn giản hóa logic hiển thị
+if (!isWarmingUp && isServerReady && !warmupError && !showSuccess) {
+  return null;
+}
+
+// Auto-hide success animation
+useEffect(() => {
+  if (showSuccess) {
+    const timer = setTimeout(() => {
+      setShowSuccess(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }
+}, [showSuccess]);
+```

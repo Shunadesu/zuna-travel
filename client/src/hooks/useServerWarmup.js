@@ -11,6 +11,7 @@ const useServerWarmup = () => {
     const sessionWarmedUp = sessionStorage.getItem('server-warmed-up');
     if (sessionWarmedUp === 'true') {
       setIsServerReady(true);
+      setIsWarmingUp(false);
       return;
     }
 
@@ -28,10 +29,10 @@ const useServerWarmup = () => {
       sessionStorage.setItem('server-warmed-up', 'true');
       setIsServerReady(true);
       
-      // Auto-hide loader after showing success animation
+      // Show success animation briefly then hide
       setTimeout(() => {
         setIsWarmingUp(false);
-      }, 2500); // Show success animation for 2.5 seconds
+      }, 1000); // Show success animation for 1 second
     } catch (error) {
       console.error('❌ Server warmup failed:', error);
       setWarmupError(error.response?.data?.message || 'Failed to warm up server');
@@ -47,7 +48,9 @@ const useServerWarmup = () => {
     if (sessionWarmedUp !== 'true') {
       warmupServer();
     } else {
+      // Already warmed up, set ready immediately
       setIsServerReady(true);
+      setIsWarmingUp(false);
     }
   }, [warmupServer]);
 
