@@ -724,7 +724,7 @@ const { transfers, fetchTransfers, loading, error } = useTransferStore();
 
 ### Dịch Vụ Được Tạo:
 
-#### **6 Dịch Vụ Transfer Chính**:
+#### **12 Dịch Vụ Transfer Chính**:
 
 - ✅ **Hanoi Airport Sapa Bus** - $12, 4.5★ (1,250 reviews)
 - ✅ **Hanoi Sapa Sleeping Bus** - $12, 4.3★ (890 reviews)
@@ -732,6 +732,12 @@ const { transfers, fetchTransfers, loading, error } = useTransferStore();
 - ✅ **Hanoi to Sapa Private Car, Limousine Van** - $136, 4.8★ (420 reviews)
 - ✅ **Hanoi Cat Ba Island Bus** - $16, 4.4★ (380 reviews)
 - ✅ **Hanoi Halong Bay Luxury Limousine** - $16, 4.8★ (280 reviews)
+- ✅ **Hanoi Sapa Limousine Van** - $20, 4.7★ (320 reviews)
+- ✅ **Hanoi Cat Ba Limousine Van** - $19, 4.6★ (280 reviews)
+- ✅ **Hanoi Sapa Express Sleeping Bus** - $12, 4.4★ (450 reviews)
+- ✅ **Hanoi Ninh Binh Private Car** - $25, 4.5★ (180 reviews)
+- ✅ **Hanoi Ha Giang Motorbike Tour Transfer** - $35, 4.6★ (120 reviews)
+- ✅ **All-in-One Transfers Package** - $150, 4.7★ (95 reviews)
 
 ### Thông Tin Đơn Giản:
 
@@ -767,9 +773,63 @@ node seeds/simpleTransferServices.js
 
 ### Kết Quả:
 
-✅ **6 dịch vụ transfer** đơn giản được tạo  
+✅ **12 dịch vụ transfer** đơn giản được tạo  
 ✅ **Không có lỗi validation**  
 ✅ **Dữ liệu đúng cấu trúc** Product model  
 ✅ **SEO tối ưu** với metadata cơ bản  
 ✅ **Sẵn sàng hiển thị** trên frontend  
-✅ **Dễ dàng maintain** và mở rộng
+✅ **Dễ dàng maintain** và mở rộng  
+✅ **Đa dạng types** - Bus, Limousine, Private Car, Motorbike Tour, Package
+
+## 18. Sửa Lỗi API Transfers Không Hiển Thị Đủ Dữ Liệu
+
+### Vấn Đề:
+
+- Mặc dù script tạo thành công 12 dịch vụ transfer, trang chỉ hiển thị 2 transfers
+- API `/api/transfers` chỉ trả về dữ liệu từ 1 category thay vì tất cả categories có `type: 'transfer-services'`
+
+### Nguyên Nhân:
+
+- API sử dụng `Category.findOne({ type: 'transfer-services' })` chỉ lấy 1 category đầu tiên
+- Có 8 categories với `type: 'transfer-services'` nhưng API chỉ query 1 category
+- Dẫn đến chỉ hiển thị products từ category `halong-bay-transfer`
+
+### Giải Pháp:
+
+- Sửa API để lấy tất cả categories có `type: 'transfer-services'`
+- Sử dụng `$in` operator để query products từ tất cả transfer categories
+
+### Thay Đổi API:
+
+#### **Trước (Chỉ lấy 1 category):**
+
+```javascript
+const transferCategory = await Category.findOne({ type: "transfer-services" });
+const query = {
+  category: transferCategory._id,
+};
+```
+
+#### **Sau (Lấy tất cả categories):**
+
+```javascript
+const transferCategories = await Category.find({ type: "transfer-services" });
+const query = {
+  category: { $in: transferCategories.map((cat) => cat._id) },
+};
+```
+
+### Các Endpoints Được Sửa:
+
+1. **GET `/api/transfers`** - Lấy tất cả transfer services
+2. **GET `/api/transfers/search`** - Tìm kiếm transfer services
+3. **GET `/api/transfers/routes/popular`** - Lấy popular routes
+4. **POST `/api/transfers`** - Tạo transfer service mới
+
+### Kết Quả:
+
+✅ **API trả về đầy đủ** 12 dịch vụ transfer  
+✅ **Hiển thị tất cả categories** transfer-services  
+✅ **Filter hoạt động** đúng cách  
+✅ **Search hoạt động** với tất cả transfers  
+✅ **Frontend hiển thị** đầy đủ dữ liệu

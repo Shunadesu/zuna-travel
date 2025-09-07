@@ -95,8 +95,8 @@ node seeds/simpleTransferServices.js
 
 ### `simpleTransferServices.js`
 
-- Tạo 6 dịch vụ transfer đơn giản dựa trên hình ảnh thực tế
-- Bao gồm: Hanoi Airport Sapa Bus, Hanoi Sapa Sleeping Bus, Airport Transfer, Private Car, Cat Ba Bus, Halong Bay Limousine
+- Tạo 12 dịch vụ transfer đơn giản dựa trên hình ảnh thực tế
+- Bao gồm: Hanoi Airport Sapa Bus, Hanoi Sapa Sleeping Bus, Airport Transfer, Private Car, Cat Ba Bus, Halong Bay Limousine, Sapa Limousine Van, Cat Ba Limousine Van, Express Sleeping Bus, Ninh Binh Private Car, Ha Giang Motorbike Tour, All-in-One Package
 - Dữ liệu đơn giản: pricing, duration, includes, excludes, highlights
 - Thông tin thực tế: ratings, reviews
 - SEO metadata cơ bản

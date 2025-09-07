@@ -26,16 +26,16 @@ router.get('/', optionalAuth, async (req, res) => {
     } = req.query;
 
     // Build query - get products with transfer-services category type
-    // First, get the transfer services category
-    const transferCategory = await Category.findOne({ type: 'transfer-services' });
-    if (!transferCategory) {
+    // First, get all transfer services categories
+    const transferCategories = await Category.find({ type: 'transfer-services' });
+    if (!transferCategories || transferCategories.length === 0) {
       return res.status(404).json({
-        message: 'Transfer services category not found'
+        message: 'Transfer services categories not found'
       });
     }
     
     const query = {
-      category: transferCategory._id
+      category: { $in: transferCategories.map(cat => cat._id) }
     };
 
     // For public access, only show active transfers unless user is admin
@@ -197,17 +197,17 @@ router.get('/search', [
 
     const { from, to, date, passengers, type } = req.query;
 
-    // Get transfer services category
-    const transferCategory = await Category.findOne({ type: 'transfer-services' });
-    if (!transferCategory) {
+    // Get transfer services categories
+    const transferCategories = await Category.find({ type: 'transfer-services' });
+    if (!transferCategories || transferCategories.length === 0) {
       return res.status(404).json({
-        message: 'Transfer services category not found'
+        message: 'Transfer services categories not found'
       });
     }
 
     // Build search query
     const query = {
-      category: transferCategory._id,
+      category: { $in: transferCategories.map(cat => cat._id) },
       isActive: true,
       $and: [
         {
@@ -287,11 +287,11 @@ router.get('/routes/popular', async (req, res) => {
   try {
     const { limit = 10 } = req.query;
 
-    // Get transfer services category
-    const transferCategory = await Category.findOne({ type: 'transfer-services' });
-    if (!transferCategory) {
+    // Get transfer services categories
+    const transferCategories = await Category.find({ type: 'transfer-services' });
+    if (!transferCategories || transferCategories.length === 0) {
       return res.status(404).json({
-        message: 'Transfer services category not found'
+        message: 'Transfer services categories not found'
       });
     }
 
@@ -299,7 +299,7 @@ router.get('/routes/popular', async (req, res) => {
     const popularRoutes = await Product.aggregate([
       {
         $match: {
-          category: transferCategory._id,
+          category: { $in: transferCategories.map(cat => cat._id) },
           isActive: true,
           'transferService.route.departure.en': { $exists: true },
           'transferService.route.destination.en': { $exists: true }
@@ -369,17 +369,18 @@ router.post('/', authenticateToken, requireAdmin, [
       });
     }
 
-    // Get transfer services category
-    const transferCategory = await Category.findOne({ type: 'transfer-services' });
-    if (!transferCategory) {
+    // Get transfer services categories
+    const transferCategories = await Category.find({ type: 'transfer-services' });
+    if (!transferCategories || transferCategories.length === 0) {
       return res.status(400).json({
-        message: 'Transfer services category not found'
+        message: 'Transfer services categories not found'
       });
     }
 
+    // For creation, we'll use the first transfer category or let user specify
     const transferData = {
       ...req.body,
-      category: transferCategory._id
+      category: req.body.category || transferCategories[0]._id
     };
 
     // Generate slug from English title
