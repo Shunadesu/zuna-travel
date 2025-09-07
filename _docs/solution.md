@@ -1241,3 +1241,73 @@ const fetchProduct = async () => {
 ✅ **Architecture nhất quán** giữa client và admin-cms  
 ✅ **Không còn references** đến `/products` endpoint cũ  
 ✅ **Performance tối ưu** với caching và stores
+
+## 23. Dọn Dẹp Scripts Không Cần Thiết
+
+### Vấn Đề:
+
+- Có nhiều script seeding không còn được sử dụng
+- Một số script bị duplicate hoặc đã được thay thế
+- Package.json vẫn reference đến script đã xóa
+
+### Giải Pháp:
+
+- Xóa các script không cần thiết
+- Cập nhật package.json và README.md
+- Giữ lại chỉ những script cần thiết
+
+### Các Scripts Đã Xóa:
+
+#### **1. `categoriesWithSubcategories.js`**
+
+- **Lý do**: Không được sử dụng, logic đã được tích hợp vào `completeSeed.js`
+- **Thay thế**: `completeSeed.js` đã có chức năng tạo categories
+
+#### **2. `transferServices.js`**
+
+- **Lý do**: Đã được thay thế bởi `simpleTransferServices.js`
+- **Vấn đề**: Có lỗi validation, dữ liệu không đúng format
+- **Thay thế**: `simpleTransferServices.js` có dữ liệu đúng và không lỗi
+
+#### **3. `runTransferSeed.js`**
+
+- **Lý do**: Script helper không cần thiết
+- **Vấn đề**: Chỉ là wrapper cho 2 script khác
+- **Thay thế**: Chạy trực tiếp `createTransferCategories.js` và `simpleTransferServices.js`
+
+### Các Thay Đổi:
+
+#### **Package.json:**
+
+```javascript
+// Trước
+"seed:transfers": "node seeds/transferServices.js"
+
+// Sau
+"seed:transfers": "node seeds/simpleTransferServices.js"
+```
+
+#### **README.md:**
+
+- Loại bỏ references đến script đã xóa
+- Cập nhật hướng dẫn sử dụng
+- Giữ lại chỉ những script cần thiết
+
+### Scripts Còn Lại (7 files):
+
+✅ **`completeSeed.js`** - Tạo dữ liệu hoàn chỉnh  
+✅ **`quickSeed.js`** - Tạo dữ liệu nhanh  
+✅ **`createAdmin.js`** - Tạo admin cơ bản  
+✅ **`createAdminDetailed.js`** - Tạo admin chi tiết  
+✅ **`createTransferCategories.js`** - Tạo categories cho transfers  
+✅ **`simpleTransferServices.js`** - Tạo transfer services  
+✅ **`README.md`** - Hướng dẫn sử dụng
+
+### Kết Quả:
+
+✅ **Giảm 3 scripts** không cần thiết  
+✅ **Package.json** được cập nhật  
+✅ **README.md** được cập nhật  
+✅ **Không còn duplicate** scripts  
+✅ **Dễ maintain** hơn  
+✅ **Scripts còn lại** đều hoạt động tốt

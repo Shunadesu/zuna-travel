@@ -10,7 +10,7 @@
     "seed:admin:detailed": "node seeds/createAdminDetailed.js",
     "seed:complete": "node seeds/completeSeed.js",
     "seed:quick": "node seeds/quickSeed.js",
-    "seed:transfers": "node seeds/transferServices.js"
+    "seed:transfers": "node seeds/simpleTransferServices.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

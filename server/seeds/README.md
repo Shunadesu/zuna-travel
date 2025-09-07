@@ -33,15 +33,14 @@ npm run seed:quick
 ### 3. Tạo Transfer Services
 
 ```bash
-# Tạo danh mục và dịch vụ transfer (tự động)
-node seeds/runTransferSeed.js
-
-# Hoặc tạo riêng lẻ
+# Tạo danh mục transfer services
 node seeds/createTransferCategories.js
-node seeds/transferServices.js
 
 # Tạo các dịch vụ transfer đơn giản (dựa trên hình ảnh thực tế)
 node seeds/simpleTransferServices.js
+
+# Hoặc sử dụng npm script
+npm run seed:transfers
 ```
 
 ## Chi Tiết Các Scripts
@@ -80,19 +79,6 @@ node seeds/simpleTransferServices.js
 - Cấu hình vehicle type, seats, region cho từng danh mục
 - SEO metadata đầy đủ
 
-### `transferServices.js`
-
-- Tạo 8 dịch vụ transfer chính dựa trên hình ảnh
-- Bao gồm: Halong Bay, Hanoi Sapa Train, Ha Giang, Airport Transfer, Sapa, Ninh Binh, Cat Ba, All-in-One Package
-- Dữ liệu song ngữ (English/Vietnamese)
-- Pricing và duration phù hợp
-
-### `runTransferSeed.js`
-
-- Script helper chạy cả categories và services
-- Tự động tạo categories trước, sau đó tạo services
-- Báo cáo chi tiết quá trình seeding
-
 ### `simpleTransferServices.js`
 
 - Tạo 12 dịch vụ transfer đơn giản dựa trên hình ảnh thực tế
@@ -120,24 +106,20 @@ node seeds/simpleTransferServices.js
    npm run seed:complete
    ```
 
-4. **Chạy script tạo transfer categories (tùy chọn)**
+4. **Chạy script tạo transfer services (tùy chọn)**
 
    ```bash
    # Tạo danh mục cho transfer services
    node seeds/createTransferCategories.js
+
+   # Tạo các dịch vụ transfer
+   node seeds/simpleTransferServices.js
+
+   # Hoặc sử dụng npm script
+   npm run seed:transfers
    ```
 
-5. **Chạy script tạo transfer services (tùy chọn)**
-
-   ```bash
-   # Chạy trực tiếp (cần categories trước)
-   node seeds/transferServices.js
-
-   # Hoặc sử dụng script helper (tự động tạo categories trước)
-   node seeds/runTransferSeed.js
-   ```
-
-6. **Kiểm tra kết quả**
+5. **Kiểm tra kết quả**
    - Admin có thể đăng nhập vào admin panel
    - Website có dữ liệu để hiển thị
 
