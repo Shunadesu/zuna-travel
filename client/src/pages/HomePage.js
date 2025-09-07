@@ -13,7 +13,7 @@ import {
   TruckIcon,
   PhoneIcon
 } from '@heroicons/react/24/outline';
-import { useSettingsStore, useCategoryStore, useProductStore } from '../stores';
+import { useSettingsStore, useCategoryStore, useTourStore, useTransferStore } from '../stores';
 import HeroSwiper from '../components/home/HeroSwiper';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
@@ -21,37 +21,34 @@ const HomePage = () => {
   const { t, i18n } = useTranslation();
   const { settings, fetchSettings, loading: settingsLoading } = useSettingsStore();
   const { categories, fetchCategories, loading: categoriesLoading } = useCategoryStore();
-  const { products, fetchProducts, loading: productsLoading } = useProductStore();
+  const { tours, fetchTours, loading: toursLoading } = useTourStore();
+  const { transfers, fetchTransfers, loading: transfersLoading } = useTransferStore();
   const [activeCategoryTab, setActiveCategoryTab] = useState('');
 
   // Check if any data is still loading
-  const isLoading = settingsLoading || categoriesLoading || productsLoading;
+  const isLoading = settingsLoading || categoriesLoading || toursLoading || transfersLoading;
   
   // Check if we have any data to show
-  const hasData = settings || categories?.length > 0 || products?.length > 0;
+  const hasData = settings || categories?.length > 0 || tours?.length > 0 || transfers?.length > 0;
 
   useEffect(() => {
     // Fetch all data in parallel for better performance
     Promise.all([
       fetchSettings(),
       fetchCategories(),
-      fetchProducts()
+      fetchTours(),
+      fetchTransfers()
     ]).catch(error => {
       console.error('Error fetching data:', error);
     });
-  }, [fetchSettings, fetchCategories, fetchProducts]);
+  }, [fetchSettings, fetchCategories, fetchTours, fetchTransfers]);
 
   const activeCategories = categories?.filter(cat => cat.isActive) || [];
   const tourCategories = activeCategories.filter(cat => cat.type === 'vietnam-tours');
   const transferCategories = activeCategories.filter(cat => cat.type === 'transfer-services');
   
-  const featuredTours = products?.filter(product => 
-    product.category?.type === 'vietnam-tours' && product.isFeatured
-  ).slice(0, 6) || [];
-  
-  const featuredTransfers = products?.filter(product => 
-    product.category?.type === 'transfer-services' && product.isFeatured
-  ).slice(0, 3) || [];
+  const featuredTours = tours?.filter(tour => tour.isFeatured).slice(0, 6) || [];
+  const featuredTransfers = transfers?.filter(transfer => transfer.isFeatured).slice(0, 3) || [];
 
   // Set default active tab to first category if available
   useEffect(() => {
@@ -60,12 +57,11 @@ const HomePage = () => {
     }
   }, [tourCategories, activeCategoryTab]);
 
-  // Get products for the active category tab
-  const getProductsByCategory = (categorySlug) => {
-    return products?.filter(product => 
-      product.category?.type === 'vietnam-tours' && 
-      product.category?.slug === categorySlug
-    ).slice(0, 4) || []; // Show max 4 products per category
+  // Get tours for the active category tab
+  const getToursByCategory = (categorySlug) => {
+    return tours?.filter(tour => 
+      tour.category?.slug === categorySlug
+    ).slice(0, 4) || []; // Show max 4 tours per category
   };
 
   const stats = [
@@ -244,9 +240,9 @@ const HomePage = () => {
               )}
             </div>
             
-            {/* Products Grid for Active Category */}
+            {/* Tours Grid for Active Category */}
             {isLoading ? (
-              // Loading skeleton for products grid
+              // Loading skeleton for tours grid
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {Array.from({ length: 4 }).map((_, index) => (
                   <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -268,20 +264,20 @@ const HomePage = () => {
               </div>
             ) : activeCategoryTab && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {getProductsByCategory(activeCategoryTab).map((product) => (
+                {getToursByCategory(activeCategoryTab).map((tour) => (
                   <Link
-                    key={product._id}
-                    to={`/tour/${product.slug}`}
+                    key={tour._id}
+                    to={`/tour/${tour.slug}`}
                     className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                   >
-                    {product.images && product.images.length > 0 ? (
+                    {tour.images && tour.images.length > 0 ? (
                       <div className="h-48 overflow-hidden relative">
                         <img
-                          src={product.images[0].url}
-                          alt={product.title?.[i18n.language] || product.title?.en || 'Product'}
+                          src={tour.images[0].url}
+                          alt={tour.title?.[i18n.language] || tour.title?.en || 'Tour'}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
-                        {product.isFeatured && (
+                        {tour.isFeatured && (
                           <div className="absolute top-2 left-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-semibold">
                             {t('home.tourCategories.featured')}
                           </div>
@@ -290,23 +286,23 @@ const HomePage = () => {
                     ) : (
                       <div className="h-48 bg-gradient-to-br from-green-400 to-blue-600 flex items-center justify-center">
                         <div className="text-white text-4xl font-bold">
-                          {(product.title?.[i18n.language] || product.title?.en || 'P').charAt(0)}
+                          {(tour.title?.[i18n.language] || tour.title?.en || 'T').charAt(0)}
                         </div>
                       </div>
                     )}
                     
                     <div className="p-4">
                       <div className="text-xs text-blue-600 font-medium mb-1">
-                        {product.category?.name?.[i18n.language] || product.category?.name?.en || 'Category'}
+                        {tour.category?.name?.[i18n.language] || tour.category?.name?.en || 'Category'}
                       </div>
                       <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
-                        {product.title?.[i18n.language] || product.title?.en || 'Product'}
+                        {tour.title?.[i18n.language] || tour.title?.en || 'Tour'}
                       </h3>
                       
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center text-gray-500 text-sm">
                           <ClockIcon className="h-3 w-3 mr-1" />
-                          {product.duration?.days || product.duration || 'Flexible'} {t('home.tourCategories.days')}
+                          {tour.duration?.days || tour.duration || 'Flexible'} {t('home.tourCategories.days')}
                         </div>
                         <div className="flex items-center text-yellow-400">
                           <StarIcon className="h-3 w-3 fill-current" />
@@ -316,7 +312,7 @@ const HomePage = () => {
                       
                       <div className="flex items-center justify-between">
                         <div className="text-lg font-bold text-blue-600">
-                          {product.pricing?.currency || 'USD'} {product.pricing?.adult || '0'}
+                          {tour.pricing?.currency || 'USD'} {tour.pricing?.adult || '0'}
                         </div>
                         <div className="text-xs text-gray-500">
                           {t('home.tourCategories.perPerson')}
@@ -376,20 +372,20 @@ const HomePage = () => {
                   </div>
                 ))
               ) : (
-                featuredTours.map((product) => (
+                featuredTours.map((tour) => (
                 <Link
-                  key={product._id}
-                  to={`/tour/${product.slug}`}
+                  key={tour._id}
+                  to={`/tour/${tour.slug}`}
                   className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
                 >
-                  {product.images && product.images.length > 0 ? (
+                  {tour.images && tour.images.length > 0 ? (
                     <div className="h-64 overflow-hidden relative">
                       <img
-                        src={product.images[0].url}
-                        alt={product.title?.[i18n.language] || product.title?.en || 'Product'}
+                        src={tour.images[0].url}
+                        alt={tour.title?.[i18n.language] || tour.title?.en || 'Tour'}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
-                      {product.isFeatured && (
+                      {tour.isFeatured && (
                         <div className="absolute top-4 left-4 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold">
                           {t('home.featuredTours.featured')}
                         </div>
@@ -401,33 +397,33 @@ const HomePage = () => {
                   ) : (
                     <div className="h-64 bg-gradient-to-br from-green-400 to-blue-600 flex items-center justify-center">
                       <div className="text-white text-6xl font-bold">
-                        {(product.title?.[i18n.language] || product.title?.en || 'P').charAt(0)}
+                        {(tour.title?.[i18n.language] || tour.title?.en || 'T').charAt(0)}
                       </div>
                     </div>
                   )}
                   
                   <div className="p-8">
                     <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-1 group-hover:text-blue-600 transition-colors">
-                      {product.title?.[i18n.language] || product.title?.en || 'Product'}
+                      {tour.title?.[i18n.language] || tour.title?.en || 'Tour'}
                     </h3>
                     <p className="text-gray-600 mb-4 line-clamp-2">
-                      {product.shortDescription?.[i18n.language] || product.shortDescription?.en || product.description?.[i18n.language] || product.description?.en || 'No description available'}
+                      {tour.shortDescription?.[i18n.language] || tour.shortDescription?.en || tour.description?.[i18n.language] || tour.description?.en || 'No description available'}
                     </p>
                     
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center text-gray-500 text-sm">
                         <MapPinIcon className="h-4 w-4 mr-1" />
-                        {product.location?.[i18n.language] || product.location?.en || product.category?.location?.[i18n.language] || product.category?.location?.en || 'Location'}
+                        {tour.location?.[i18n.language] || tour.location?.en || tour.category?.location?.[i18n.language] || tour.category?.location?.en || 'Location'}
                       </div>
                       <div className="flex items-center text-gray-500 text-sm">
                         <ClockIcon className="h-4 w-4 mr-1" />
-                        {product.duration?.days || product.duration || 'Flexible'} {t('home.featuredTours.days')}
+                        {tour.duration?.days || tour.duration || 'Flexible'} {t('home.featuredTours.days')}
                       </div>
                     </div>
                     
                     <div className="flex items-center justify-between">
                       <div className="text-2xl font-bold text-blue-600">
-                        {product.pricing?.currency || 'USD'} {product.pricing?.adult || '0'}
+                        {tour.pricing?.currency || 'USD'} {tour.pricing?.adult || '0'}
                       </div>
                       <div className="text-sm text-gray-500">
                         {t('home.featuredTours.perPerson')}
@@ -482,17 +478,17 @@ const HomePage = () => {
                   </div>
                 ))
               ) : (
-                featuredTransfers.map((product) => (
+                featuredTransfers.map((transfer) => (
                 <Link
-                  key={product._id}
-                  to={`/transfer/${product.slug}`}
+                  key={transfer._id}
+                  to={`/transfer/${transfer.slug}`}
                   className="group bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
                 >
-                  {product.images && product.images.length > 0 ? (
+                  {transfer.images && transfer.images.length > 0 ? (
                     <div className="h-48 overflow-hidden">
                       <img
-                        src={product.images[0].url}
-                        alt={product.title?.[i18n.language] || product.title?.en || 'Transfer'}
+                        src={transfer.images[0].url}
+                        alt={transfer.title?.[i18n.language] || transfer.title?.en || 'Transfer'}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
@@ -504,15 +500,15 @@ const HomePage = () => {
                   
                   <div className="p-6">
                     <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                      {product.title?.[i18n.language] || product.title?.en || 'Transfer'}
+                      {transfer.title?.[i18n.language] || transfer.title?.en || 'Transfer'}
                     </h3>
                     <p className="text-gray-600 mb-4 line-clamp-2">
-                      {product.shortDescription?.[i18n.language] || product.shortDescription?.en || product.description?.[i18n.language] || product.description?.en || 'No description available'}
+                      {transfer.shortDescription?.[i18n.language] || transfer.shortDescription?.en || transfer.description?.[i18n.language] || transfer.description?.en || 'No description available'}
                     </p>
                     
                     <div className="flex items-center justify-between">
                       <div className="text-xl font-bold text-blue-600">
-                        {product.pricing?.currency || 'USD'} {product.pricing?.adult || '0'}
+                        {transfer.pricing?.currency || 'USD'} {transfer.pricing?.adult || '0'}
                       </div>
                       <div className="text-sm text-gray-500">
                         {t('home.transfers.perTrip')}

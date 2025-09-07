@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeftIcon, PencilIcon, PhotoIcon, MapPinIcon, TagIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
-import apiClient from '../../utils/apiConfig';
+import { useTourStore, useTransferStore, useCategoryStore } from '../../stores';
 import toast from 'react-hot-toast';
 
 const CategoryDetailPage = () => {
   const { t } = useTranslation();
   const { id } = useParams();
+  const { categories, fetchCategories, getCategoryById } = useCategoryStore();
+  const { tours, fetchTours } = useTourStore();
+  const { transfers, fetchTransfers } = useTransferStore();
   const [category, setCategory] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,13 +19,17 @@ const CategoryDetailPage = () => {
   useEffect(() => {
     fetchCategory();
     fetchProducts();
-  }, [id]);
+  }, [id, fetchCategories, fetchTours, fetchTransfers]);
 
   const fetchCategory = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get(`/categories/${id}`);
-      setCategory(response.data.data);
+      let foundCategory = getCategoryById(id);
+      if (!foundCategory) {
+        await fetchCategories();
+        foundCategory = getCategoryById(id);
+      }
+      setCategory(foundCategory);
     } catch (error) {
       console.error('Error fetching category:', error);
       toast.error('Failed to load category');
@@ -34,8 +41,15 @@ const CategoryDetailPage = () => {
   const fetchProducts = async () => {
     try {
       setProductsLoading(true);
-      const response = await apiClient.get(`/products?category=${id}&populate=category`);
-      setProducts(response.data.data || []);
+      await Promise.all([fetchTours(), fetchTransfers()]);
+      
+      // Filter products by category
+      const categoryProducts = [
+        ...tours.filter(tour => tour.category?._id === id || tour.category === id),
+        ...transfers.filter(transfer => transfer.category?._id === id || transfer.category === id)
+      ];
+      
+      setProducts(categoryProducts);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast.error('Failed to load products');

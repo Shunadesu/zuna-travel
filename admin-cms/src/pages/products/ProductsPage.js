@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, PhotoIcon, MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
-import apiClient from '../../utils/apiConfig';
+import { useTourStore, useTransferStore, useCategoryStore } from '../../stores';
 import toast from 'react-hot-toast';
 
 const ProductsPage = () => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { tours, fetchTours, deleteTour, loading: toursLoading } = useTourStore();
+  const { transfers, fetchTransfers, deleteTransfer, loading: transfersLoading } = useTransferStore();
+  const { categories, fetchCategories } = useCategoryStore();
   const [deleteLoading, setDeleteLoading] = useState(null);
   
   // Filter states
@@ -19,43 +19,27 @@ const ProductsPage = () => {
   const [selectedFeatured, setSelectedFeatured] = useState('');
   const [activeTab, setActiveTab] = useState('vietnam-tours'); // 'vietnam-tours' or 'transfer-services'
 
+  const loading = toursLoading || transfersLoading;
+
   useEffect(() => {
-    fetchProducts();
+    fetchTours();
+    fetchTransfers();
     fetchCategories();
-  }, []);
+  }, [fetchTours, fetchTransfers, fetchCategories]);
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const response = await apiClient.get('/products?populate=category');
-      setProducts(response.data.data || []);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      toast.error('Failed to load products');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const response = await apiClient.get('/categories');
-      setCategories(response.data.data || []);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
-
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, type) => {
     if (!window.confirm('Are you sure you want to delete this product?')) {
       return;
     }
 
     try {
       setDeleteLoading(id);
-      await apiClient.delete(`/products/${id}`);
+      if (type === 'vietnam-tours') {
+        await deleteTour(id);
+      } else {
+        await deleteTransfer(id);
+      }
       toast.success('Product deleted successfully');
-      fetchProducts();
     } catch (error) {
       console.error('Error deleting product:', error);
       toast.error('Failed to delete product');
@@ -83,11 +67,11 @@ const ProductsPage = () => {
     }
   };
 
+  // Get current products based on active tab
+  const currentProducts = activeTab === 'vietnam-tours' ? tours : transfers;
+
   // Filter products by tab and other criteria
-  const filteredProducts = products.filter(product => {
-    // Filter by tab (product type)
-    const matchesTab = product.category?.type === activeTab;
-    
+  const filteredProducts = currentProducts.filter(product => {
     const matchesSearch = product.title.en.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.title.vi.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -101,7 +85,7 @@ const ProductsPage = () => {
                            (selectedFeatured === 'featured' && product.isFeatured) ||
                            (selectedFeatured === 'not-featured' && !product.isFeatured);
 
-    return matchesTab && matchesSearch && matchesCategory && matchesStatus && matchesFeatured;
+    return matchesSearch && matchesCategory && matchesStatus && matchesFeatured;
   });
 
   if (loading) {
@@ -241,7 +225,7 @@ const ProductsPage = () => {
 
         {/* Results Count */}
         <div className="mt-4 text-sm text-gray-600">
-          Showing {filteredProducts.length} of {products.filter(p => p.category?.type === activeTab).length} {activeTab === 'vietnam-tours' ? 'tours' : 'transfers'}
+          Showing {filteredProducts.length} of {currentProducts.length} {activeTab === 'vietnam-tours' ? 'tours' : 'transfers'}
         </div>
       </div>
 
@@ -363,7 +347,7 @@ const ProductsPage = () => {
                       </Link>
                     </div>
                     <button
-                      onClick={() => handleDelete(product._id)}
+                      onClick={() => handleDelete(product._id, activeTab)}
                       disabled={deleteLoading === product._id}
                       className="text-red-600 hover:text-red-900 disabled:opacity-50 p-1"
                       title="Delete Product"

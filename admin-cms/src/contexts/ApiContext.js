@@ -105,16 +105,16 @@ const apiMethods = {
     getStats: (id) => api.get(`/categories/${id}/stats`),
   },
 
-  // Products
-  products: {
-    getAll: (params = {}) => api.get('/products', { params }),
-    getBySlug: (slug) => api.get(`/products/slug/${slug}`),
-    getById: (id) => api.get(`/products/${id}`),
-    getFeatured: (params = {}) => api.get('/products/featured/list', { params }),
-    search: (query, params = {}) => api.get('/products/search/text', { params: { q: query, ...params } }),
-    create: (data) => api.post('/products', data),
-    update: (id, data) => api.put(`/products/${id}`, data),
-    delete: (id) => api.delete(`/products/${id}`),
+  // Tours
+  tours: {
+    getAll: (params = {}) => api.get('/tours', { params }),
+    getBySlug: (slug) => api.get(`/tours/slug/${slug}`),
+    getById: (id) => api.get(`/tours/${id}`),
+    getFeatured: (params = {}) => api.get('/tours/featured/list', { params }),
+    search: (query, params = {}) => api.get('/tours/search/text', { params: { q: query, ...params } }),
+    create: (data) => api.post('/tours', data),
+    update: (id, data) => api.put(`/tours/${id}`, data),
+    delete: (id) => api.delete(`/tours/${id}`),
   },
 
   // Transfer Services

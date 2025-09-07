@@ -9,7 +9,7 @@ import {
   StarIcon,
   AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
-import { useProductStore, useCategoryStore, useSettingsStore } from '../stores';
+import { useTourStore, useCategoryStore, useSettingsStore } from '../stores';
 import CategoryTabs from '../components/tours/CategoryTabs';
 
 const ToursPage = () => {
@@ -17,7 +17,7 @@ const ToursPage = () => {
   const { slug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   
-  const { products, fetchProducts, loading } = useProductStore();
+  const { tours, fetchTours, loading } = useTourStore();
   const { categories, fetchCategories } = useCategoryStore();
   const { settings, fetchSettings } = useSettingsStore();
   
@@ -26,12 +26,13 @@ const ToursPage = () => {
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [duration, setDuration] = useState('');
   const [sortBy, setSortBy] = useState('name');
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
 
   useEffect(() => {
-    fetchProducts();
+    fetchTours();
     fetchCategories();
     fetchSettings();
-  }, [fetchProducts, fetchCategories]); // Remove fetchSettings from dependencies
+  }, [fetchTours, fetchCategories]); // Remove fetchSettings from dependencies
 
   useEffect(() => {
     if (slug) {
@@ -41,50 +42,32 @@ const ToursPage = () => {
 
   // Re-filter when categories are loaded
   useEffect(() => {
-    // This will trigger re-render when categories are loaded
-    // and the filteredProducts will be recalculated
+    // Force re-render when categories are loaded
+    // This will trigger filteredProducts recalculation
+    if (categories && categories.length > 0) {
+      setCategoriesLoaded(true);
+    }
   }, [categories]);
 
-  // Filter and search products (only Vietnam Tours)
-  const filteredProducts = products?.filter(product => {
-    // Only show Vietnam Tours products
-    let isVietnamTour = false;
-    
-    // Check if category is populated object with type
-    if (product.category?.type === 'vietnam-tours') {
-      isVietnamTour = true;
-    } 
-    // Check if category is just a string (ID or slug) and we have categories loaded
-    else if (typeof product.category === 'string' && categories?.length > 0) {
-      const category = categories.find(cat => 
-        cat.slug === product.category || 
-        cat._id === product.category
-      );
-      isVietnamTour = category?.type === 'vietnam-tours';
-    }
-    // If categories haven't loaded yet, show all products temporarily
-    // This prevents the "no tours" state on initial load
-    else if (categories?.length === 0) {
-      isVietnamTour = true;
-    }
-    
-    const matchesSearch = product.title?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.shortDescription?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filter and search tours
+  const filteredTours = tours?.filter(tour => {
+    const matchesSearch = tour.title?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         tour.shortDescription?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         tour.description?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = !selectedCategory || 
-                           product.category?.slug === selectedCategory || 
-                           (typeof product.category === 'string' && product.category === selectedCategory);
+                           tour.category?.slug === selectedCategory || 
+                           (typeof tour.category === 'string' && tour.category === selectedCategory);
     
-    const matchesPrice = product.pricing?.adult >= priceRange[0] && product.pricing?.adult <= priceRange[1];
+    const matchesPrice = tour.pricing?.adult >= priceRange[0] && tour.pricing?.adult <= priceRange[1];
     
-    const matchesDuration = !duration || product.duration?.days === parseInt(duration);
+    const matchesDuration = !duration || tour.duration?.days === parseInt(duration);
     
-    return isVietnamTour && matchesSearch && matchesCategory && matchesPrice && matchesDuration;
+    return matchesSearch && matchesCategory && matchesPrice && matchesDuration;
   });
 
-  // Sort products
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
+  // Sort tours
+  const sortedTours = [...filteredTours].sort((a, b) => {
     switch (sortBy) {
       case 'name':
         return (a.title?.[i18n.language] || '').localeCompare(b.title?.[i18n.language] || '');
@@ -261,12 +244,12 @@ const ToursPage = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
               <div className="mb-4 sm:mb-0">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {t('tours.showing')} {sortedProducts.length} {t('tours.of')} {filteredProducts.length} {t('tours.tours')}
+                  {loading ? 'Loading...' : `Showing ${sortedTours.length} of ${filteredTours.length} tours`}
                 </h2>
               </div>
             </div>
 
-            {/* Products Grid */}
+            {/* Tours Grid */}
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
@@ -280,55 +263,55 @@ const ToursPage = () => {
                   </div>
                 ))}
               </div>
-            ) : sortedProducts.length === 0 ? (
+            ) : sortedTours.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-gray-400 mb-4">
                   <MagnifyingGlassIcon className="h-16 w-16 mx-auto" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">{t('tours.noResults')}</h3>
-                <p className="text-gray-600">{t('tours.noResultsDesc')}</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No tours found</h3>
+                <p className="text-gray-600">Try adjusting your search criteria or browse all tours.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sortedProducts.map((product) => (
+                {sortedTours.map((tour) => (
                   <Link
-                    key={product._id}
-                    to={`/tour/${product.slug}`}
+                    key={tour._id}
+                    to={`/tour/${tour.slug}`}
                     className="group bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                   >
-                    {product.images && product.images.length > 0 ? (
+                    {tour.images && tour.images.length > 0 ? (
                       <div className="h-48 overflow-hidden relative">
                         <img
-                          src={product.images[0].url}
-                          alt={product.title?.[i18n.language] || product.title?.en || 'Product'}
+                          src={tour.images[0].url}
+                          alt={tour.title?.[i18n.language] || tour.title?.en || 'Tour'}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />
-                        {product.isFeatured && (
+                        {tour.isFeatured && (
                           <div className="absolute top-2 left-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-semibold">
-                            {t('tours.featured')}
+                            Featured
                           </div>
                         )}
                       </div>
                     ) : (
                       <div className="h-48 bg-gradient-to-br from-green-400 to-blue-600 flex items-center justify-center">
                         <div className="text-white text-4xl font-bold">
-                          {(product.title?.[i18n.language] || product.title?.en || 'P').charAt(0)}
+                          {(tour.title?.[i18n.language] || tour.title?.en || 'T').charAt(0)}
                         </div>
                       </div>
                     )}
                     
                     <div className="p-4">
                       <div className="text-xs text-blue-600 font-medium mb-1">
-                        {product.category?.name?.[i18n.language] || product.category?.name?.en || 'Category'}
+                        {tour.category?.name?.[i18n.language] || tour.category?.name?.en || 'Category'}
                       </div>
                       <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
-                        {product.title?.[i18n.language] || product.title?.en || 'Product'}
+                        {tour.title?.[i18n.language] || tour.title?.en || 'Tour'}
                       </h3>
                       
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center text-gray-500 text-sm">
                           <ClockIcon className="h-3 w-3 mr-1" />
-                          {product.duration?.days || product.duration || 'Flexible'} {t('tours.days')}
+                          {tour.duration?.days || tour.duration || 'Flexible'} days
                         </div>
                         <div className="flex items-center text-yellow-400">
                           <StarIcon className="h-3 w-3 fill-current" />
@@ -338,10 +321,10 @@ const ToursPage = () => {
                       
                       <div className="flex items-center justify-between">
                         <div className="text-lg font-bold text-blue-600">
-                          {product.pricing?.currency || 'USD'} {product.pricing?.adult || '0'}
+                          {tour.pricing?.currency || 'USD'} {tour.pricing?.adult || '0'}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {t('common.perPerson')}
+                          per person
                         </div>
                       </div>
                     </div>

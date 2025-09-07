@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon, PencilIcon, PhotoIcon } from '@heroicons/react/24/outline';
-import apiClient from '../../utils/apiConfig';
+import { useTourStore, useTransferStore } from '../../stores';
 import toast from 'react-hot-toast';
 
 const ProductDetailPage = () => {
   const { t } = useTranslation();
   const { id } = useParams();
+  const { tours, fetchTours, getTourById } = useTourStore();
+  const { transfers, fetchTransfers, getTransferById } = useTransferStore();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -18,8 +20,17 @@ const ProductDetailPage = () => {
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get(`/products/${id}`);
-      setProduct(response.data.data);
+      let foundProduct = getTourById(id);
+      if (!foundProduct) {
+        foundProduct = getTransferById(id);
+      }
+      
+      if (!foundProduct) {
+        await Promise.all([fetchTours(), fetchTransfers()]);
+        foundProduct = getTourById(id) || getTransferById(id);
+      }
+      
+      setProduct(foundProduct);
     } catch (error) {
       console.error('Error fetching product:', error);
       toast.error('Failed to load product');

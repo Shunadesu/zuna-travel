@@ -833,3 +833,411 @@ const query = {
 ✅ **Filter hoạt động** đúng cách  
 ✅ **Search hoạt động** với tất cả transfers  
 ✅ **Frontend hiển thị** đầy đủ dữ liệu
+
+## 19. Tạo API Riêng Cho Tours `/api/tours`
+
+### Vấn Đề:
+
+- API `/api/products` trả về TẤT CẢ products (cả tours và transfers)
+- ToursPage phải filter ở frontend để chỉ lấy tours
+- Logic filter phức tạp và không hiệu quả
+- Race condition giữa `fetchProducts()` và `fetchCategories()`
+
+### Nguyên Nhân:
+
+- **API design không nhất quán**: `/api/transfers` đã filter sẵn, nhưng `/api/products` không
+- **Frontend logic phức tạp**: Phải kiểm tra `category.type === 'vietnam-tours'` ở frontend
+- **Performance kém**: Gọi API lấy tất cả products rồi filter ở frontend
+
+### Giải Pháp:
+
+- Tạo API riêng `/api/tours` giống như `/api/transfers`
+- Tạo store riêng `useTourStore` cho tours
+- Đơn giản hóa logic frontend
+
+### Các Thay Đổi:
+
+#### **Backend (server/routes/tours.js):**
+
+```javascript
+// Get all tours (public with optional auth)
+router.get("/", optionalAuth, async (req, res) => {
+  // Get all tour categories
+  const tourCategories = await Category.find({ type: "vietnam-tours" });
+
+  // Build query - only get products from tour categories
+  const query = {
+    category: { $in: tourCategories.map((cat) => cat._id) },
+  };
+
+  const tours = await Product.find(query)
+    .populate("category", "name slug type")
+    .sort(sort)
+    .limit(parseInt(limit))
+    .skip(skip)
+    .lean();
+});
+```
+
+#### **Frontend (client/src/stores/tourStore.js):**
+
+```javascript
+// Fetch all tours
+fetchTours: async (forceRefresh = false) => {
+  const response = await apiClient.get("/tours");
+  const fetchedTours = response.data.data;
+  set({ tours: fetchedTours });
+  return fetchedTours;
+};
+```
+
+#### **Frontend (client/src/pages/ToursPage.js):**
+
+```javascript
+// Trước: Logic phức tạp
+const filteredProducts = products?.filter((product) => {
+  let isVietnamTour = false;
+  if (product.category?.type === "vietnam-tours") {
+    isVietnamTour = true;
+  }
+  // ... logic phức tạp khác
+});
+
+// Sau: Logic đơn giản
+const filteredTours = tours?.filter((tour) => {
+  const matchesSearch = tour.title?.[i18n.language]
+    ?.toLowerCase()
+    .includes(searchTerm.toLowerCase());
+  const matchesCategory =
+    !selectedCategory || tour.category?.slug === selectedCategory;
+  return matchesSearch && matchesCategory;
+});
+```
+
+### API Endpoints Mới:
+
+1. **GET `/api/tours`** - Lấy tất cả tours
+2. **GET `/api/tours/slug/:slug`** - Lấy tour theo slug
+3. **GET `/api/tours/:id`** - Lấy tour theo ID (admin)
+4. **POST `/api/tours`** - Tạo tour mới (admin)
+5. **PUT `/api/tours/:id`** - Cập nhật tour (admin)
+6. **DELETE `/api/tours/:id`** - Xóa tour (admin)
+7. **GET `/api/tours/featured/list`** - Lấy featured tours
+8. **GET `/api/tours/search/text`** - Tìm kiếm tours
+
+### Kết Quả:
+
+✅ **API riêng** cho tours `/api/tours`  
+✅ **Store riêng** `useTourStore` cho tours  
+✅ **Logic đơn giản** không cần filter phức tạp  
+✅ **Performance tốt hơn** do API đã filter sẵn  
+✅ **Nhất quán** với `/api/transfers`  
+✅ **Không còn race condition** giữa products và categories
+
+## 20. Sửa HomePage Để Sử Dụng TourStore và TransferStore
+
+### Vấn Đề:
+
+- HomePage vẫn sử dụng `useProductStore` để lấy `products`
+- Phần "Khám phá các tour nổi tiếng" không hiển thị đúng
+- Logic filter phức tạp để tách tours và transfers từ products
+
+### Nguyên Nhân:
+
+- HomePage chưa được cập nhật để sử dụng `useTourStore` và `useTransferStore`
+- Vẫn dùng logic cũ filter `product.category?.type === 'vietnam-tours'`
+
+### Giải Pháp:
+
+- Cập nhật HomePage để sử dụng `useTourStore` và `useTransferStore`
+- Đơn giản hóa logic filter
+- Sửa tất cả references từ `product` → `tour` và `transfer`
+
+### Các Thay Đổi:
+
+#### **Import Stores:**
+
+```javascript
+// Trước
+import { useSettingsStore, useCategoryStore, useProductStore } from "../stores";
+
+// Sau
+import {
+  useSettingsStore,
+  useCategoryStore,
+  useTourStore,
+  useTransferStore,
+} from "../stores";
+```
+
+#### **Store Usage:**
+
+```javascript
+// Trước
+const { products, fetchProducts, loading: productsLoading } = useProductStore();
+
+// Sau
+const { tours, fetchTours, loading: toursLoading } = useTourStore();
+const {
+  transfers,
+  fetchTransfers,
+  loading: transfersLoading,
+} = useTransferStore();
+```
+
+#### **Data Fetching:**
+
+```javascript
+// Trước
+Promise.all([fetchSettings(), fetchCategories(), fetchProducts()]);
+
+// Sau
+Promise.all([
+  fetchSettings(),
+  fetchCategories(),
+  fetchTours(),
+  fetchTransfers(),
+]);
+```
+
+#### **Featured Data:**
+
+```javascript
+// Trước
+const featuredTours =
+  products
+    ?.filter(
+      (product) =>
+        product.category?.type === "vietnam-tours" && product.isFeatured
+    )
+    .slice(0, 6) || [];
+
+// Sau
+const featuredTours =
+  tours?.filter((tour) => tour.isFeatured).slice(0, 6) || [];
+```
+
+#### **Category Filtering:**
+
+```javascript
+// Trước
+const getProductsByCategory = (categorySlug) => {
+  return (
+    products
+      ?.filter(
+        (product) =>
+          product.category?.type === "vietnam-tours" &&
+          product.category?.slug === categorySlug
+      )
+      .slice(0, 4) || []
+  );
+};
+
+// Sau
+const getToursByCategory = (categorySlug) => {
+  return (
+    tours?.filter((tour) => tour.category?.slug === categorySlug).slice(0, 4) ||
+    []
+  );
+};
+```
+
+### Kết Quả:
+
+✅ **HomePage sử dụng** `useTourStore` và `useTransferStore`  
+✅ **Logic đơn giản** không cần filter phức tạp  
+✅ **Featured tours hiển thị** đúng cách  
+✅ **Category tabs hoạt động** với tours thực tế  
+✅ **Performance tốt hơn** do API đã filter sẵn  
+✅ **Nhất quán** với ToursPage và TransfersPage
+
+## 21. Cập Nhật Admin-CMS Để Sử Dụng TourStore và TransferStore
+
+### Vấn Đề:
+
+- Admin-CMS vẫn sử dụng trực tiếp API calls thay vì stores
+- ProductsPage, ProductFormPage, ProductDetailPage chưa được cập nhật
+- Không có `tourStore` và `transferStore` trong admin-cms
+
+### Nguyên Nhân:
+
+- Admin-CMS được tạo trước khi có API riêng cho tours và transfers
+- Vẫn sử dụng `/api/products` endpoint cũ
+- Chưa có stores riêng cho tours và transfers
+
+### Giải Pháp:
+
+- Tạo `tourStore` và `transferStore` cho admin-cms
+- Cập nhật tất cả product pages để sử dụng stores
+- Sử dụng API endpoints riêng `/api/tours` và `/api/transfers`
+
+### Các Thay Đổi:
+
+#### **1. Tạo Stores Mới:**
+
+**`admin-cms/src/stores/tourStore.js`:**
+
+```javascript
+import { create } from "zustand";
+import apiClient from "../utils/apiConfig";
+
+const useTourStore = create((set, get) => ({
+  tours: [],
+  loading: false,
+  error: null,
+  lastFetched: null,
+  cacheExpiry: 5 * 60 * 1000, // 5 minutes for admin
+  fetchPromise: null,
+
+  fetchTours: async (forceRefresh = false) => {
+    // ... implementation
+  },
+
+  createTour: async (tourData) => {
+    // ... implementation
+  },
+
+  updateTour: async (id, tourData) => {
+    // ... implementation
+  },
+
+  deleteTour: async (id) => {
+    // ... implementation
+  },
+
+  getTourById: (id) => {
+    const { tours } = get();
+    return tours.find((tour) => tour._id === id);
+  },
+}));
+```
+
+**`admin-cms/src/stores/transferStore.js`:**
+
+```javascript
+// Tương tự như tourStore nhưng cho transfers
+```
+
+#### **2. Cập Nhật Stores Index:**
+
+```javascript
+// admin-cms/src/stores/index.js
+export { default as useCategoryStore } from "./categoryStore";
+export { default as useTourStore } from "./tourStore";
+export { default as useTransferStore } from "./transferStore";
+export { default as useBlogStore } from "./blogStore";
+// ... other stores
+```
+
+#### **3. Cập Nhật ProductsPage:**
+
+```javascript
+// Trước
+const [products, setProducts] = useState([]);
+const fetchProducts = async () => {
+  const response = await apiClient.get("/products?populate=category");
+  setProducts(response.data.data || []);
+};
+
+// Sau
+const { tours, fetchTours, deleteTour } = useTourStore();
+const { transfers, fetchTransfers, deleteTransfer } = useTransferStore();
+const currentProducts = activeTab === "vietnam-tours" ? tours : transfers;
+```
+
+#### **4. Cập Nhật ProductFormPage:**
+
+```javascript
+// Trước
+const [categories, setCategories] = useState([]);
+const fetchCategories = async () => {
+  const response = await apiClient.get("/categories");
+  setCategories(response.data.data || []);
+};
+
+// Sau
+const { categories, fetchCategories } = useCategoryStore();
+const { createTour, updateTour, getTourById } = useTourStore();
+const { createTransfer, updateTransfer, getTransferById } = useTransferStore();
+```
+
+#### **5. Cập Nhật ProductDetailPage:**
+
+```javascript
+// Trước
+const fetchProduct = async () => {
+  const response = await apiClient.get(`/products/${id}`);
+  setProduct(response.data.data);
+};
+
+// Sau
+const { getTourById, fetchTours } = useTourStore();
+const { getTransferById, fetchTransfers } = useTransferStore();
+const fetchProduct = async () => {
+  let foundProduct = getTourById(id) || getTransferById(id);
+  if (!foundProduct) {
+    await Promise.all([fetchTours(), fetchTransfers()]);
+    foundProduct = getTourById(id) || getTransferById(id);
+  }
+  setProduct(foundProduct);
+};
+```
+
+### Kết Quả:
+
+✅ **Admin-CMS sử dụng** `useTourStore` và `useTransferStore`  
+✅ **API endpoints riêng** `/api/tours` và `/api/transfers`  
+✅ **Caching và performance** tốt hơn  
+✅ **CRUD operations** hoạt động với stores  
+✅ **Nhất quán** với client-side architecture  
+✅ **Dễ maintain** và debug hơn
+
+## 22. Hoàn Thiện Cập Nhật Admin-CMS
+
+### Các File Đã Được Kiểm Tra và Cập Nhật:
+
+#### **1. DashboardStore:**
+
+- **Trước**: Sử dụng `/products` endpoint
+- **Sau**: Sử dụng `/tours` và `/transfers` endpoints riêng biệt
+- **Kết quả**: Dashboard hiển thị đúng số lượng tours và transfers
+
+#### **2. CategoryDetailPage:**
+
+- **Trước**: `apiClient.get('/products?category=${id}')`
+- **Sau**: Sử dụng `useTourStore` và `useTransferStore` để filter products
+- **Logic**: Combine tours và transfers thuộc category đó
+
+#### **3. ApiContext:**
+
+- **Trước**: Chỉ có `products` API methods
+- **Sau**: Thêm `tours` API methods, giữ nguyên `transfers`
+- **Kết quả**: API context hỗ trợ đầy đủ tours và transfers
+
+### Các File Đã Kiểm Tra (Không Cần Thay Đổi):
+
+#### **✅ App.js** - Routes và navigation ổn
+
+#### **✅ BookingsPage** - Sử dụng useApi context, không liên quan đến products
+
+#### **✅ FeaturedContent** - Component hiển thị, không cần thay đổi
+
+#### **✅ CategoryStore** - Chỉ quản lý categories, không liên quan
+
+#### **✅ BlogStore** - Chỉ quản lý blogs, không liên quan
+
+#### **✅ UserStore** - Chỉ quản lý users, không liên quan
+
+#### **✅ SettingsStore** - Chỉ quản lý settings, không liên quan
+
+#### **✅ AdminLayout** - Chỉ có navigation links, không cần thay đổi
+
+### Kết Quả Cuối Cùng:
+
+✅ **Tất cả files** trong admin-cms đã được kiểm tra  
+✅ **Dashboard** hiển thị đúng stats từ tours và transfers  
+✅ **CategoryDetailPage** hiển thị đúng products thuộc category  
+✅ **ApiContext** hỗ trợ đầy đủ tours và transfers APIs  
+✅ **Architecture nhất quán** giữa client và admin-cms  
+✅ **Không còn references** đến `/products` endpoint cũ  
+✅ **Performance tối ưu** với caching và stores

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import apiClient from '../../utils/apiConfig';
+import { useTourStore, useTransferStore, useCategoryStore } from '../../stores';
 import toast from 'react-hot-toast';
 import ImageUpload from '../../components/common/ImageUpload';
 
@@ -13,7 +13,10 @@ const ProductFormPage = () => {
   const navigate = useNavigate();
   const isEditing = !!id;
 
-  const [categories, setCategories] = useState([]);
+  const { tours, fetchTours, createTour, updateTour, getTourById } = useTourStore();
+  const { transfers, fetchTransfers, createTransfer, updateTransfer, getTransferById } = useTransferStore();
+  const { categories, fetchCategories } = useCategoryStore();
+
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(isEditing);
 
@@ -72,39 +75,38 @@ const ProductFormPage = () => {
     if (isEditing) {
       fetchProduct();
     }
-  }, [id]);
+  }, [id, fetchCategories]);
 
-  const fetchCategories = async () => {
-    try {
-      const response = await apiClient.get('/categories');
-      const allCategories = response.data.data || [];
-      
-      // If type is specified, filter categories by type
-      if (type) {
-        const filteredCategories = allCategories.filter(cat => cat.type === type);
-        setCategories(filteredCategories);
-        
-        // Auto-select first category of the specified type
-        if (filteredCategories.length > 0 && !isEditing) {
-          setFormData(prev => ({
-            ...prev,
-            category: filteredCategories[0]._id
-          }));
-        }
-      } else {
-        setCategories(allCategories);
-      }
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      toast.error('Failed to load categories');
+  // Filter categories by type
+  const filteredCategories = categories.filter(cat => cat.type === type);
+  
+  // Auto-select first category of the specified type
+  useEffect(() => {
+    if (filteredCategories.length > 0 && !isEditing && !formData.category) {
+      setFormData(prev => ({
+        ...prev,
+        category: filteredCategories[0]._id
+      }));
     }
-  };
+  }, [filteredCategories, isEditing, formData.category]);
 
   const fetchProduct = async () => {
     try {
       setInitialLoading(true);
-      const response = await apiClient.get(`/products/${id}`);
-      const product = response.data.data;
+      let product;
+      if (type === 'vietnam-tours') {
+        product = getTourById(id);
+        if (!product) {
+          await fetchTours();
+          product = getTourById(id);
+        }
+      } else {
+        product = getTransferById(id);
+        if (!product) {
+          await fetchTransfers();
+          product = getTransferById(id);
+        }
+      }
       
       setFormData({
         title: {
@@ -386,10 +388,18 @@ const ProductFormPage = () => {
       };
 
       if (isEditing) {
-        await apiClient.put(`/products/${id}`, submitData);
+        if (type === 'vietnam-tours') {
+          await updateTour(id, submitData);
+        } else {
+          await updateTransfer(id, submitData);
+        }
         toast.success(t('products.updateSuccess'));
       } else {
-        await apiClient.post('/products', submitData);
+        if (type === 'vietnam-tours') {
+          await createTour(submitData);
+        } else {
+          await createTransfer(submitData);
+        }
         toast.success(t('products.createSuccess'));
       }
       
@@ -583,9 +593,9 @@ const ProductFormPage = () => {
               required
             >
               <option value="">Select a category</option>
-              {categories.map((category) => (
+              {filteredCategories.map((category) => (
                 <option key={category._id} value={category._id}>
-                  {category.name.en} ({category.type})
+                  {category.name.en}
                 </option>
               ))}
             </select>

@@ -116,9 +116,9 @@ const TransfersPage = () => {
                 </form>
               </div>
 
-                          {/* Transfer Type */}
+              {/* Transfer Types */}
               <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-900 mb-3">Transfer Type</h3>
+                <h3 className="text-sm font-medium text-gray-900 mb-3">Transfer Types</h3>
                 <div className="space-y-2">
                   <label className="flex items-center">
                     <input
@@ -141,12 +141,13 @@ const TransfersPage = () => {
                       </div>
                     ))
                   ) : (
-                    Array.from(new Set(transfers
+                    // Get unique categories from transfers
+                    Array.from(new Map(transfers
                       ?.filter(transfer => transfer.category?.slug)
-                      .map(transfer => ({
+                      .map(transfer => [transfer.category.slug, {
                         slug: transfer.category.slug,
                         name: transfer.category.name?.[i18n.language] || transfer.category.name?.en || transfer.category.slug
-                      })) || []))
+                      }]) || []).values())
                       .map(vehicleType => (
                       <label key={vehicleType.slug} className="flex items-center">
                         <input
@@ -164,7 +165,7 @@ const TransfersPage = () => {
                 </div>
               </div>
 
-                          {/* Seats */}
+              {/* Seats */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-gray-900 mb-3">Seats</h3>
                 <select
@@ -192,7 +193,7 @@ const TransfersPage = () => {
                 </select>
               </div>
 
-                          {/* Price Range */}
+              {/* Price Range */}
               <div className="mb-6">
                 <h3 className="text-sm font-medium text-gray-900 mb-3">Price Range</h3>
                 <div className="space-y-2">
@@ -228,7 +229,7 @@ const TransfersPage = () => {
           </div>
         </div>
 
-                  {/* Products Grid */}
+          {/* Transfers Grid */}
           <div className="lg:col-span-3">
             {/* Results Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -239,95 +240,97 @@ const TransfersPage = () => {
               )}
               <div className="mb-4 sm:mb-0">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {loading ? 'Loading...' : `Showing ${sortedTransfers.length} transfers`}
+                  {loading ? 'Loading...' : `Showing ${sortedTransfers.length} of ${filteredTransfers.length} transfers`}
                 </h2>
               </div>
             </div>
 
-                                 {/* Transfers List */}
-           {loading ? (
-             // Loading skeleton for transfers list
-             <div className="space-y-4">
-               {Array.from({ length: 6 }).map((_, index) => (
-                 <div key={index} className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                   <div className="flex justify-between items-start">
-                     <div className="flex-1">
-                       <div className="h-6 bg-gray-200 rounded mb-2 animate-pulse"></div>
-                       <div className="flex items-center space-x-6">
-                         <div className="h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
-                         <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
-                       </div>
-                     </div>
-                     <div className="text-right">
-                       <div className="h-4 bg-gray-200 rounded w-12 mb-1 animate-pulse"></div>
-                       <div className="h-6 bg-gray-200 rounded w-16 mb-2 animate-pulse"></div>
-                       <div className="h-8 bg-gray-200 rounded w-20 animate-pulse"></div>
-                     </div>
-                   </div>
-                 </div>
-               ))}
-             </div>
-           ) : sortedTransfers.length === 0 ? (
-             <div className="text-center py-12">
-               <FunnelIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-               <h3 className="text-lg font-medium text-gray-900 mb-2">No transfers found</h3>
-               <p className="text-gray-600">Try adjusting your filters to find more options.</p>
-             </div>
-           ) : (
-             <div className="space-y-4">
-               {sortedTransfers.map((transfer) => (
-                 <div key={transfer._id} className="bg-blue-50 border border-blue-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                   <div className="flex justify-between items-start">
-                     <div className="flex-1">
-                       <h3 className="text-lg font-bold text-gray-900 mb-2">
-                         {transfer.title?.[i18n.language] || transfer.title?.en || 'Transfer Service'}
-                       </h3>
-                       
-                       <p className="text-sm text-gray-600 mb-3">
-                         {transfer.description?.[i18n.language] || transfer.description?.en || 'Professional transfer service'}
-                       </p>
-                       
-                       <div className="flex items-center space-x-6 text-sm text-gray-600">
-                         <div className="flex items-center space-x-1">
-                           <span>👤</span>
-                           <span>
-                             {transfer.category?.seats === 40 ? '40-seats (Sleeping Bus)' : 
-                              transfer.category?.seats === 16 ? '16-seats (Shuttle Bus)' :
-                              transfer.category?.seats === 4 ? '4-seats (Private Car/LIMO)' :
-                              transfer.category?.seats ? `${transfer.category.seats}-seats` : 'Flexible'}
-                           </span>
-                         </div>
-                         <div className="flex items-center space-x-1">
-                           <span>🚗</span>
-                           <span>{transfer.category?.vehicleType || 'Transfer Service'}</span>
-                         </div>
-                         <div className="flex items-center space-x-1">
-                           <span>📍</span>
-                           <span>{transfer.category?.location?.[i18n.language] || transfer.category?.location?.en || 'Vietnam'}</span>
-                         </div>
-                       </div>
-                     </div>
-                     
-                     <div className="text-right">
-                       <div className="text-sm text-gray-600 mb-1">Price</div>
-                       <div className="text-xl font-bold text-gray-900 mb-2">
-                         ${transfer.pricing?.adult || 0}
-                       </div>
-                       <Link
-                         to={`/transfer/${transfer.slug}`}
-                         className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                       >
-                         Book
-                         <svg className="w-4 h-4 ml-1 transform rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17l9.2-9.2M17 17V7H7" />
-                         </svg>
-                       </Link>
-                     </div>
-                   </div>
-                 </div>
-               ))}
-             </div>
-           )}
+            {/* Transfers Grid */}
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-lg shadow-lg overflow-hidden animate-pulse">
+                    <div className="h-48 bg-gray-200"></div>
+                    <div className="p-4">
+                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : sortedTransfers.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <MagnifyingGlassIcon className="h-16 w-16 mx-auto" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No transfers found</h3>
+                <p className="text-gray-600">Try adjusting your filters to find more options.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sortedTransfers.map((transfer) => (
+                  <Link
+                    key={transfer._id}
+                    to={`/transfer/${transfer.slug}`}
+                    className="group bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  >
+                    {transfer.images && transfer.images.length > 0 ? (
+                      <div className="h-48 overflow-hidden relative">
+                        <img
+                          src={transfer.images[0].url}
+                          alt={transfer.title?.[i18n.language] || transfer.title?.en || 'Transfer Service'}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                        {transfer.isFeatured && (
+                          <div className="absolute top-2 left-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-semibold">
+                            Featured
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center">
+                        <div className="text-white text-4xl font-bold">
+                          {(transfer.title?.[i18n.language] || transfer.title?.en || 'T').charAt(0)}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="p-4">
+                      <div className="text-xs text-blue-600 font-medium mb-1">
+                        {transfer.category?.name?.[i18n.language] || transfer.category?.name?.en || 'Transfer Service'}
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                        {transfer.title?.[i18n.language] || transfer.title?.en || 'Transfer Service'}
+                      </h3>
+                      
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center text-gray-500 text-sm">
+                          <span className="mr-1">👤</span>
+                          {transfer.category?.seats === 40 ? '40-seats (Sleeping Bus)' : 
+                           transfer.category?.seats === 16 ? '16-seats (Shuttle Bus)' :
+                           transfer.category?.seats === 4 ? '4-seats (Private Car/LIMO)' :
+                           transfer.category?.seats ? `${transfer.category.seats}-seats` : 'Flexible'}
+                        </div>
+                        <div className="flex items-center text-yellow-400">
+                          <StarIcon className="h-3 w-3 fill-current" />
+                          <span className="ml-1 text-xs text-gray-600">4.8</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="text-lg font-bold text-blue-600">
+                          {transfer.pricing?.currency || 'USD'} {transfer.pricing?.adult || '0'}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          per trip
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

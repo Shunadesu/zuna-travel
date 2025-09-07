@@ -36,18 +36,22 @@ const useDashboardStore = create((set, get) => ({
 
     try {
       // Fetch all data in parallel
-      const [categoriesRes, productsRes, blogsRes, usersRes, featuredProductsRes, featuredBlogsRes] = await Promise.all([
-              apiClient.get('/categories'),
-      apiClient.get('/products'),
-      apiClient.get('/blogs'),
-      apiClient.get('/users'),
-      apiClient.get('/products/featured/list?limit=5'),
-      apiClient.get('/blogs/featured/list?limit=5')
+      const [categoriesRes, toursRes, transfersRes, blogsRes, usersRes, featuredToursRes, featuredTransfersRes, featuredBlogsRes] = await Promise.all([
+        apiClient.get('/categories'),
+        apiClient.get('/tours'),
+        apiClient.get('/transfers'),
+        apiClient.get('/blogs'),
+        apiClient.get('/users'),
+        apiClient.get('/tours/featured/list?limit=3'),
+        apiClient.get('/transfers/featured/list?limit=2'),
+        apiClient.get('/blogs/featured/list?limit=5')
       ]);
 
+      const allProducts = [...(toursRes.data.data || []), ...(transfersRes.data.data || [])];
+      
       const stats = {
         totalCategories: categoriesRes.data.data?.length || 0,
-        totalProducts: productsRes.data.data?.length || 0,
+        totalProducts: allProducts.length,
         totalBlogs: blogsRes.data.data?.length || 0,
         totalUsers: usersRes.data.data?.length || 0
       };
@@ -55,14 +59,20 @@ const useDashboardStore = create((set, get) => ({
       // Generate recent activities from the data
       const recentActivities = generateRecentActivities(
         categoriesRes.data.data,
-        productsRes.data.data,
+        allProducts,
         blogsRes.data.data
       );
+
+      // Combine featured tours and transfers
+      const featuredProducts = [
+        ...(featuredToursRes.data.data || []),
+        ...(featuredTransfersRes.data.data || [])
+      ];
 
       set({
         stats,
         recentActivities,
-        featuredProducts: featuredProductsRes.data.data || [],
+        featuredProducts,
         featuredBlogs: featuredBlogsRes.data.data || [],
         lastFetched: now,
         loading: false

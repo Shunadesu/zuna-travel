@@ -53,8 +53,7 @@ router.get('/', optionalAuth, async (req, res) => {
       if (categoryBySlug) {
         query.category = categoryBySlug._id;
       }
-    }
-    if (seats) {
+    } else if (seats) {
       const categoriesWithSeats = await Category.find({ 
         type: 'transfer-services', 
         seats: { $gte: parseInt(seats) } 
