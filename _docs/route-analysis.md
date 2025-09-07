@@ -1,8 +1,8 @@
-# Phân Tích Routes - Zuna Travel Tour
+# Phân Tích Routes - VnBestTravel Tour
 
 ## Tổng Quan Hệ Thống
 
-Dự án Zuna Travel Tour bao gồm 3 phần chính:
+Dự án VnBestTravel Tour bao gồm 3 phần chính:
 
 - **Backend API** (server/) - Node.js + Express + MongoDB
 - **Frontend Client** (client/) - React cho người dùng cuối

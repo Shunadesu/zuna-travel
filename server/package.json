@@ -1,7 +1,7 @@
 {
   "name": "zuna-travel-server",
   "version": "1.0.0",
-  "description": "Backend API for Zuna Travel Tour",
+  "description": "Backend API for VnBestTravel Tour",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -1,4 +1,4 @@
-# Zuna Travel Tour - MERN Stack Project
+# VnBestTravel Tour - MERN Stack Project
 
 Hệ thống quản lý tour du lịch được xây dựng bằng MERN Stack với Admin CMS.
 

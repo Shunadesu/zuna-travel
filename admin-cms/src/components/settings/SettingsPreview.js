@@ -85,7 +85,7 @@ const SettingsPreview = ({ settings, type }) => {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h6 className="text-lg font-semibold mb-2">Zuna Travel</h6>
+              <h6 className="text-lg font-semibold mb-2">VnBestTravel</h6>
               <p 
                 className="text-sm mb-3"
                 style={{
@@ -156,7 +156,7 @@ const SettingsPreview = ({ settings, type }) => {
               color: settings?.footer?.secondaryTextColor || '#D1D5DB'
             }}
           >
-            © 2024 Zuna Travel. All rights reserved.
+            © 2024 VnBestTravel. All rights reserved.
           </div>
         </div>
       </div>

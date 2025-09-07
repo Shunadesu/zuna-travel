@@ -52,7 +52,7 @@ const Footer = () => {
               <div className="w-10 h-10 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">Z</span>
               </div>
-              <span className="text-xl font-bold">Zuna Travel</span>
+              <span className="text-xl font-bold">VnBestTravel</span>
             </Link>
             <p className="text-gray-300 text-sm leading-relaxed">
               {t('footer.description')}

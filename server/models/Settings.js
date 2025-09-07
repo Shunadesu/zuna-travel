@@ -25,8 +25,8 @@ const settingsSchema = new mongoose.Schema({
   
   // Company Information
   companyName: {
-    en: { type: String, default: 'Zuna Travel' },
-    vi: { type: String, default: 'Zuna Travel' }
+    en: { type: String, default: 'VnBestTravel' },
+    vi: { type: String, default: 'VnBestTravel' }
   },
   companyDescription: {
     en: { type: String, default: 'Your trusted travel partner in Vietnam' },
@@ -91,16 +91,16 @@ const settingsSchema = new mongoose.Schema({
   
   // SEO
   metaTitle: {
-    en: { type: String, default: 'Zuna Travel - Your Vietnam Travel Partner' },
-    vi: { type: String, default: 'Zuna Travel - Đối tác du lịch Việt Nam của bạn' }
+    en: { type: String, default: 'VnBestTravel - Your Vietnam Travel Partner' },
+    vi: { type: String, default: 'VnBestTravel - Đối tác du lịch Việt Nam của bạn' }
   },
   metaDescription: {
-    en: { type: String, default: 'Discover Vietnam with Zuna Travel. Book your perfect tour package today.' },
-    vi: { type: String, default: 'Khám phá Việt Nam cùng Zuna Travel. Đặt gói tour hoàn hảo ngay hôm nay.' }
+    en: { type: String, default: 'Discover Vietnam with VnBestTravel. Book your perfect tour package today.' },
+    vi: { type: String, default: 'Khám phá Việt Nam cùng VnBestTravel. Đặt gói tour hoàn hảo ngay hôm nay.' }
   },
   metaKeywords: {
     type: [String],
-    default: ['Vietnam travel', 'tour packages', 'Zuna Travel', 'Vietnam tours']
+    default: ['Vietnam travel', 'tour packages', 'VnBestTravel', 'Vietnam tours']
   },
   
   // Top Bar Styling
@@ -183,8 +183,8 @@ const settingsSchema = new mongoose.Schema({
   
   // Footer
   footerText: {
-    en: { type: String, default: '© 2024 Zuna Travel. All rights reserved.' },
-    vi: { type: String, default: '© 2024 Zuna Travel. Tất cả quyền được bảo lưu.' }
+    en: { type: String, default: '© 2024 VnBestTravel. All rights reserved.' },
+    vi: { type: String, default: '© 2024 VnBestTravel. Tất cả quyền được bảo lưu.' }
   },
   
   // Features

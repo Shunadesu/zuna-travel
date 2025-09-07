@@ -158,42 +158,6 @@ const ServerWarmupLoader = ({ isWarmingUp, isServerReady, warmupError, onRetry }
           )}
         </h2>
 
-        {/* Description with fade effect */}
-        <div className="mb-8">
-          {isWarmingUp && (
-            <div className="space-y-2">
-              <p className="text-gray-600 text-lg animate-fade-in">
-                🚀 Đang đánh thức server từ chế độ ngủ...
-              </p>
-              <p className="text-gray-500 text-sm">
-                ⏱️ Thời gian dự kiến: 2-5 giây
-              </p>
-            </div>
-          )}
-          
-          {showSuccess && (
-            <div className="space-y-2 animate-fade-in">
-              <p className="text-green-600 text-lg font-medium">
-                ✨ Chào mừng bạn đến với Zuna Travel!
-              </p>
-              <p className="text-gray-500 text-sm">
-                🎯 Trải nghiệm du lịch tuyệt vời đang chờ bạn
-              </p>
-            </div>
-          )}
-          
-          {warmupError && (
-            <div className="space-y-2 animate-fade-in">
-              <p className="text-red-600 text-lg">
-                ❌ Không thể kết nối đến server
-              </p>
-              <p className="text-gray-500 text-sm">
-                🔄 Vui lòng kiểm tra kết nối và thử lại
-              </p>
-            </div>
-          )}
-        </div>
-
         {/* Advanced loading animation */}
         {isWarmingUp && (
           <div className="flex justify-center mb-6">
@@ -220,16 +184,6 @@ const ServerWarmupLoader = ({ isWarmingUp, isServerReady, warmupError, onRetry }
           >
             🔄 Thử lại
           </button>
-        )}
-
-        {/* Success countdown */}
-        {showSuccess && (
-          <div className="text-sm text-gray-500 animate-fade-in">
-            <div className="flex items-center justify-center space-x-2">
-              <RocketLaunchIcon className="h-4 w-4 animate-bounce" />
-              <span>Đang chuyển hướng...</span>
-            </div>
-          </div>
         )}
       </div>
     </div>

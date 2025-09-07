@@ -1,6 +1,6 @@
 # Seed Scripts
 
-Các script để tạo dữ liệu mẫu cho Zuna Travel Tour.
+Các script để tạo dữ liệu mẫu cho VnBestTravel Tour.
 
 ## Các Scripts Có Sẵn
 
@@ -28,6 +28,20 @@ npm run seed:complete
 
 # Tạo dữ liệu nhanh (ít dữ liệu hơn)
 npm run seed:quick
+```
+
+### 3. Tạo Transfer Services
+
+```bash
+# Tạo danh mục và dịch vụ transfer (tự động)
+node seeds/runTransferSeed.js
+
+# Hoặc tạo riêng lẻ
+node seeds/createTransferCategories.js
+node seeds/transferServices.js
+
+# Tạo các dịch vụ transfer đơn giản (dựa trên hình ảnh thực tế)
+node seeds/simpleTransferServices.js
 ```
 
 ## Chi Tiết Các Scripts
@@ -59,12 +73,34 @@ npm run seed:quick
 - Ít products và blogs hơn
 - Phù hợp cho testing
 
+### `createTransferCategories.js`
+
+- Tạo 8 danh mục transfer services chính
+- Bao gồm: Halong Bay Transfer, Hanoi Sapa Train, Ha Giang Transfer, Airport Transfer, Sapa Transfer, Ninh Binh Transfer, Cat Ba Transfer, All-in-One Package
+- Cấu hình vehicle type, seats, region cho từng danh mục
+- SEO metadata đầy đủ
+
 ### `transferServices.js`
 
 - Tạo 8 dịch vụ transfer chính dựa trên hình ảnh
 - Bao gồm: Halong Bay, Hanoi Sapa Train, Ha Giang, Airport Transfer, Sapa, Ninh Binh, Cat Ba, All-in-One Package
 - Dữ liệu song ngữ (English/Vietnamese)
 - Pricing và duration phù hợp
+
+### `runTransferSeed.js`
+
+- Script helper chạy cả categories và services
+- Tự động tạo categories trước, sau đó tạo services
+- Báo cáo chi tiết quá trình seeding
+
+### `simpleTransferServices.js`
+
+- Tạo 6 dịch vụ transfer đơn giản dựa trên hình ảnh thực tế
+- Bao gồm: Hanoi Airport Sapa Bus, Hanoi Sapa Sleeping Bus, Airport Transfer, Private Car, Cat Ba Bus, Halong Bay Limousine
+- Dữ liệu đơn giản: pricing, duration, includes, excludes, highlights
+- Thông tin thực tế: ratings, reviews
+- SEO metadata cơ bản
+- Không có lỗi validation
 
 ## Cách Sử Dụng
 
@@ -84,17 +120,24 @@ npm run seed:quick
    npm run seed:complete
    ```
 
-4. **Chạy script tạo transfer services (tùy chọn)**
+4. **Chạy script tạo transfer categories (tùy chọn)**
 
    ```bash
-   # Chạy trực tiếp
+   # Tạo danh mục cho transfer services
+   node seeds/createTransferCategories.js
+   ```
+
+5. **Chạy script tạo transfer services (tùy chọn)**
+
+   ```bash
+   # Chạy trực tiếp (cần categories trước)
    node seeds/transferServices.js
-   
-   # Hoặc sử dụng script helper
+
+   # Hoặc sử dụng script helper (tự động tạo categories trước)
    node seeds/runTransferSeed.js
    ```
 
-4. **Kiểm tra kết quả**
+6. **Kiểm tra kết quả**
    - Admin có thể đăng nhập vào admin panel
    - Website có dữ liệu để hiển thị
 

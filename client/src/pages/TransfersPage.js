@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useTransferStore, useCategoryStore } from '../stores';
+import { useTransferStore } from '../stores';
 import { 
   ClockIcon, 
   CurrencyDollarIcon,
@@ -13,7 +13,6 @@ import {
 const TransfersPage = () => {
   const { t, i18n } = useTranslation();
   const { transfers, fetchTransfers, loading, error } = useTransferStore();
-  const { categories, fetchCategories } = useCategoryStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVehicleType, setSelectedVehicleType] = useState('');
   const [selectedSeats, setSelectedSeats] = useState('');
@@ -36,53 +35,27 @@ const TransfersPage = () => {
 
   useEffect(() => {
     fetchTransfers();
-    fetchCategories();
-  }, [fetchTransfers, fetchCategories]);
+  }, [fetchTransfers]);
 
-  // Re-filter when categories are loaded
-  useEffect(() => {
-    // This will trigger re-render when categories are loaded
-    // and the filteredTransfers will be recalculated
-  }, [categories]);
-
-  // Filter and search transfers (only Transfer Services)
+  // Filter and search transfers
   const filteredTransfers = transfers?.filter(transfer => {
-    // Only show Transfer Services products
-    let isTransferService = false;
-    
-    // Check if category is populated object with type
-    if (transfer.category?.type === 'transfer-services') {
-      isTransferService = true;
-    } 
-    // Check if category is just a string (ID or slug) and we have categories loaded
-    else if (typeof transfer.category === 'string' && categories?.length > 0) {
-      const category = categories.find(cat => 
-        cat.slug === transfer.category || 
-        cat._id === transfer.category
-      );
-      isTransferService = category?.type === 'transfer-services';
-    }
-    // If categories haven't loaded yet, show all transfers temporarily
-    // This prevents the "no transfers" state on initial load
-    else if (categories?.length === 0) {
-      isTransferService = true;
-    }
-    
-    const matchesSearch = transfer.title?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    // Since API already filters for transfer-services, we can trust all transfers are valid
+    const matchesSearch = !searchTerm || 
+                         transfer.title?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          transfer.shortDescription?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          transfer.description?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Use category slug instead of transferService.type
+    // Filter by vehicle type (category slug)
     const matchesVehicleType = !selectedVehicleType || transfer.category?.slug === selectedVehicleType;
     
-    // Use category seats instead of transferService.seats
+    // Filter by seats
     const matchesSeats = !selectedSeats || transfer.category?.seats === parseInt(selectedSeats);
     
-    // Use pricing.adult instead of pricing.perTrip
+    // Filter by price
     const matchesPrice = (transfer.pricing?.adult || 0) >= priceRange[0] && (transfer.pricing?.adult || 0) <= priceRange[1];
     
-    return isTransferService && matchesSearch && matchesVehicleType && matchesSeats && matchesPrice;
-  });
+    return matchesSearch && matchesVehicleType && matchesSeats && matchesPrice;
+  }) || [];
 
   // Sort transfers
   const sortedTransfers = [...filteredTransfers].sort((a, b) => {
@@ -170,18 +143,21 @@ const TransfersPage = () => {
                   ) : (
                     Array.from(new Set(transfers
                       ?.filter(transfer => transfer.category?.slug)
-                      .map(transfer => transfer.category.slug) || []))
+                      .map(transfer => ({
+                        slug: transfer.category.slug,
+                        name: transfer.category.name?.[i18n.language] || transfer.category.name?.en || transfer.category.slug
+                      })) || []))
                       .map(vehicleType => (
-                      <label key={vehicleType} className="flex items-center">
+                      <label key={vehicleType.slug} className="flex items-center">
                         <input
                           type="radio"
                           name="vehicleType"
-                          value={vehicleType}
-                          checked={selectedVehicleType === vehicleType}
+                          value={vehicleType.slug}
+                          checked={selectedVehicleType === vehicleType.slug}
                           onChange={(e) => setSelectedVehicleType(e.target.value)}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         />
-                        <span className="ml-2 text-sm text-gray-700">{vehicleType}</span>
+                        <span className="ml-2 text-sm text-gray-700">{vehicleType.name}</span>
                       </label>
                     ))
                     )}
@@ -206,11 +182,9 @@ const TransfersPage = () => {
                       .sort((a, b) => a - b)
                       .map(seats => (
                         <option key={seats} value={seats.toString()}>
-                          {seats === 9 ? 'LIMO 9 seat' : 
-                           seats === 4 ? '4-seats' :
-                           seats === 16 ? '16-seats' :
-                           seats === 7 ? '7-seats' :
-                           seats === 45 ? '45 seat' :
+                          {seats === 40 ? '40-seats (Sleeping Bus)' : 
+                           seats === 16 ? '16-seats (Shuttle Bus)' :
+                           seats === 4 ? '4-seats (Private Car/LIMO)' :
                            `${seats}-seats`}
                         </option>
                       ))
@@ -309,21 +283,27 @@ const TransfersPage = () => {
                          {transfer.title?.[i18n.language] || transfer.title?.en || 'Transfer Service'}
                        </h3>
                        
+                       <p className="text-sm text-gray-600 mb-3">
+                         {transfer.description?.[i18n.language] || transfer.description?.en || 'Professional transfer service'}
+                       </p>
+                       
                        <div className="flex items-center space-x-6 text-sm text-gray-600">
                          <div className="flex items-center space-x-1">
                            <span>👤</span>
                            <span>
-                             {transfer.category?.seats === 9 ? '9 seat' : 
-                              transfer.category?.seats === 4 ? '4-seats' :
-                              transfer.category?.seats === 16 ? '16-seats' :
-                              transfer.category?.seats === 7 ? '7-seats' :
-                              transfer.category?.seats === 45 ? '45 seat' :
+                             {transfer.category?.seats === 40 ? '40-seats (Sleeping Bus)' : 
+                              transfer.category?.seats === 16 ? '16-seats (Shuttle Bus)' :
+                              transfer.category?.seats === 4 ? '4-seats (Private Car/LIMO)' :
                               transfer.category?.seats ? `${transfer.category.seats}-seats` : 'Flexible'}
                            </span>
                          </div>
                          <div className="flex items-center space-x-1">
-                           <span>📄</span>
-                           <span>{transfer.category?.name?.[i18n.language] || transfer.category?.name?.en || 'Private Car'}</span>
+                           <span>🚗</span>
+                           <span>{transfer.category?.vehicleType || 'Transfer Service'}</span>
+                         </div>
+                         <div className="flex items-center space-x-1">
+                           <span>📍</span>
+                           <span>{transfer.category?.location?.[i18n.language] || transfer.category?.location?.en || 'Vietnam'}</span>
                          </div>
                        </div>
                      </div>

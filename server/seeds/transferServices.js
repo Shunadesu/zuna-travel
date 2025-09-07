@@ -18,7 +18,7 @@ const transferServices = [
       en: 'Experience seamless travel to Halong Bay with our premium transfer service. We offer comfortable vehicles, professional drivers, and flexible scheduling to ensure your journey is as enjoyable as your destination.',
       vi: 'Trải nghiệm hành trình mượt mà đến Vịnh Hạ Long với dịch vụ đưa đón cao cấp của chúng tôi. Chúng tôi cung cấp xe thoải mái, tài xế chuyên nghiệp và lịch trình linh hoạt để đảm bảo hành trình của bạn thú vị như điểm đến.'
     },
-    category: 'private-car',
+    category: 'halong-bay-transfer',
     pricing: {
       adult: 45,
       child: 35,
@@ -51,7 +51,7 @@ const transferServices = [
       en: 'Travel in comfort from Hanoi to Sapa aboard our modern sleeper train. Enjoy the scenic journey through the Vietnamese countryside while resting in comfortable berths.',
       vi: 'Du lịch thoải mái từ Hà Nội đến Sapa trên tàu ngủ hiện đại của chúng tôi. Tận hưởng hành trình đẹp mắt qua vùng nông thôn Việt Nam trong khi nghỉ ngơi trên giường nằm thoải mái.'
     },
-    category: 'sleeping-bus',
+    category: 'hanoi-sapa-train',
     pricing: {
       adult: 35,
       child: 25,
@@ -84,7 +84,7 @@ const transferServices = [
       en: 'Embark on an adventure to Ha Giang with our specialized transfer service. Navigate through stunning mountain passes and experience the raw beauty of northern Vietnam.',
       vi: 'Bắt đầu cuộc phiêu lưu đến Hà Giang với dịch vụ đưa đón chuyên biệt của chúng tôi. Đi qua những đèo núi tuyệt đẹp và trải nghiệm vẻ đẹp hoang dã của miền Bắc Việt Nam.'
     },
-    category: 'private-car',
+    category: 'ha-giang-transfer',
     pricing: {
       adult: 55,
       child: 40,
@@ -117,7 +117,7 @@ const transferServices = [
       en: 'Start and end your journey with our reliable airport transfer service. Professional drivers, clean vehicles, and meet-and-greet service ensure a stress-free travel experience.',
       vi: 'Bắt đầu và kết thúc hành trình với dịch vụ đưa đón sân bay đáng tin cậy của chúng tôi. Tài xế chuyên nghiệp, xe sạch sẽ và dịch vụ đón tiếp đảm bảo trải nghiệm du lịch không căng thẳng.'
     },
-    category: 'shuttle-bus',
+    category: 'airport-transfer',
     pricing: {
       adult: 25,
       child: 15,
@@ -150,7 +150,7 @@ const transferServices = [
       en: 'Travel directly to Sapa with our comfortable transfer service. Enjoy the scenic mountain views as you journey to this popular hill station.',
       vi: 'Du lịch trực tiếp đến Sapa với dịch vụ đưa đón thoải mái của chúng tôi. Tận hưởng cảnh quan núi non đẹp mắt khi hành trình đến trạm nghỉ dưỡng nổi tiếng này.'
     },
-    category: 'shuttle-bus',
+    category: 'sapa-transfer',
     pricing: {
       adult: 30,
       child: 20,
@@ -183,7 +183,7 @@ const transferServices = [
       en: 'Discover the beauty of Ninh Binh with our transfer service. Visit ancient temples, explore limestone mountains, and experience the peaceful countryside of northern Vietnam.',
       vi: 'Khám phá vẻ đẹp của Ninh Bình với dịch vụ đưa đón của chúng tôi. Thăm chùa cổ, khám phá núi đá vôi và trải nghiệm vùng nông thôn yên bình của miền Bắc Việt Nam.'
     },
-    category: 'private-car',
+    category: 'ninh-binh-transfer',
     pricing: {
       adult: 40,
       child: 30,
@@ -216,7 +216,7 @@ const transferServices = [
       en: 'Embark on an island adventure with our Cat Ba transfer service. Combine ferry and road transport to reach this beautiful island in the Gulf of Tonkin.',
       vi: 'Bắt đầu cuộc phiêu lưu đảo với dịch vụ đưa đón Cát Bà của chúng tôi. Kết hợp phà và vận chuyển đường bộ để đến hòn đảo xinh đẹp này ở Vịnh Bắc Bộ.'
     },
-    category: 'shuttle-bus',
+    category: 'cat-ba-transfer',
     pricing: {
       adult: 50,
       child: 35,
@@ -249,7 +249,7 @@ const transferServices = [
       en: 'Experience the ultimate convenience with our All-in-One Transfers Package. Visit multiple destinations across Vietnam with seamless transportation arrangements and professional service throughout your journey.',
       vi: 'Trải nghiệm sự tiện lợi tối đa với Gói Đưa Đón Tất Trong Một của chúng tôi. Thăm nhiều điểm đến trên khắp Việt Nam với sự sắp xếp vận chuyển mượt mà và dịch vụ chuyên nghiệp trong suốt hành trình.'
     },
-    category: 'luxury-limo',
+    category: 'all-in-one-transfers-package',
     pricing: {
       adult: 200,
       child: 150,
@@ -326,7 +326,7 @@ const seedTransferServices = async () => {
 if (require.main === module) {
   require('dotenv').config();
   
-  mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/zuna-travel')
+  mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://namp280918:zunatravel@cluster0.od0rj5u.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
     .then(() => {
       console.log('🔗 Connected to MongoDB');
       return seedTransferServices();

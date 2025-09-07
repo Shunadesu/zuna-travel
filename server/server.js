@@ -74,7 +74,7 @@ app.use('/api/bookings', bookingRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
-    message: 'Zuna Travel API is running',
+    message: 'VnBestTravel API is running',
     timestamp: new Date().toISOString()
   });
 });

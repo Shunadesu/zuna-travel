@@ -1,7 +1,7 @@
 {
   "name": "zuna-travel-tour",
   "version": "1.0.0",
-  "description": "Zuna Travel Tour - Full Stack Application",
+  "description": "VnBestTravel Tour - Full Stack Application",
   "private": true,
   "workspaces": [
     "server",

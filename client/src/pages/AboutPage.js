@@ -73,7 +73,7 @@ const AboutPage = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Hero Section */}
       <div className="text-center mb-16">
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">About Zuna Travel</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-6">About VnBestTravel</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
           We are passionate about creating unforgettable travel experiences in Vietnam and beyond. 
           Our mission is to connect travelers with authentic local experiences while providing exceptional service.
@@ -87,7 +87,7 @@ const AboutPage = () => {
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
             <div className="space-y-4 text-gray-600">
               <p>
-                Founded in 2014, Zuna Travel began as a small local tour operator with a big dream: 
+                Founded in 2014, VnBestTravel began as a small local tour operator with a big dream: 
                 to show the world the authentic beauty of Vietnam through the eyes of locals.
               </p>
               <p>
@@ -103,7 +103,7 @@ const AboutPage = () => {
           <div className="relative">
             <img
               src="https://statics.vinpearl.com/pho-co-ha-noi-10_1687918089.jpg"
-              alt="Zuna Travel Team"
+              alt="VnBestTravel Team"
               className="rounded-lg shadow-lg"
             />
             <div className="absolute inset-0 bg-blue-600 opacity-20 rounded-lg"></div>
@@ -167,7 +167,7 @@ const AboutPage = () => {
 
       {/* Why Choose Us */}
       <div className="mb-16 bg-gray-50 rounded-lg p-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Why Choose Zuna Travel?</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Why Choose VnBestTravel?</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h3 className="text-xl font-semibold text-gray-900 mb-4">What Makes Us Different</h3>

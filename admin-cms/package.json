@@ -1,7 +1,7 @@
 {
   "name": "zuna-travel-admin",
   "version": "1.0.0",
-  "description": "Admin CMS for Zuna Travel Tour",
+  "description": "Admin CMS for VnBestTravel Tour",
   "private": true,
   "dependencies": {
     "@headlessui/react": "^1.7.17",

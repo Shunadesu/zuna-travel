@@ -1,8 +1,8 @@
-# Phân Tích Routes - Zuna Travel Tour
+# Phân Tích Routes - VnBestTravel Tour
 
 ## Tổng Quan Hệ Thống
 
-Dự án Zuna Travel Tour bao gồm 3 phần chính:
+Dự án VnBestTravel Tour bao gồm 3 phần chính:
 
 - **Backend API** (server/) - Node.js + Express + MongoDB
 - **Frontend Client** (client/) - React cho người dùng cuối
@@ -280,7 +280,7 @@ Tổng cộng: **50+ API endpoints** với đầy đủ CRUD operations cho tấ
 
 ## 8. Kết Luận
 
-Hệ thống Zuna Travel Tour được thiết kế với kiến trúc 3-tier rõ ràng:
+Hệ thống VnBestTravel Tour được thiết kế với kiến trúc 3-tier rõ ràng:
 
 1. **Backend API**: Cung cấp 50+ endpoints với đầy đủ CRUD operations
 2. **Frontend Client**: 15+ routes cho người dùng cuối
@@ -464,3 +464,312 @@ useEffect(() => {
   }
 }, [showSuccess]);
 ```
+
+## 13. Đổi Tên Website từ "Zuna Travel" thành "VnBestTravel"
+
+### Mục Tiêu:
+
+- Thay đổi tên website từ "Zuna Travel" thành "VnBestTravel" trong tất cả giao diện
+- Không thay đổi các file logic chính
+- Đảm bảo tính nhất quán trong toàn bộ hệ thống
+
+### Phạm Vi Thay Đổi:
+
+#### Frontend Client (8 files):
+
+- `client/src/pages/AboutPage.js`
+- `client/README.md`
+- `client/src/i18n.js`
+- `client/package.json`
+- `client/src/components/layout/Footer.js`
+- `client/public/manifest.json`
+- `client/src/components/layouts/Header.js`
+- `client/src/components/layouts/Footer.js`
+
+#### Admin CMS (6 files):
+
+- `admin-cms/src/pages/DashboardPage.js`
+- `admin-cms/src/pages/SettingsPage.js`
+- `admin-cms/src/components/settings/SettingsPreview.js`
+- `admin-cms/package.json`
+- `admin-cms/public/manifest.json`
+- `admin-cms/src/components/layouts/AdminLayout.js` ("Zuna Admin" → "VnBest Admin")
+
+#### Backend & Documentation (10 files):
+
+- `server/server.js` (API message)
+- `server/package.json` (description)
+- `server/models/Settings.js` (default values)
+- `server/seeds/completeSeed.js`
+- `server/seeds/quickSeed.js`
+- `server/seeds/createAdminDetailed.js`
+- `server/seeds/README.md`
+- `README.md`
+- `package.json`
+- `_docs/route-analysis.md`
+
+### Kết Quả:
+
+✅ **0 files** chứa "Zuna" còn lại  
+✅ **Tất cả giao diện** đã được cập nhật  
+✅ **Tính nhất quán** được đảm bảo  
+✅ **Logic files** không bị ảnh hưởng
+
+## 14. Tạo Script Danh Mục Transfer Services
+
+### Mục Tiêu:
+
+- Tạo script để tạo danh mục cho transfer services
+- Dựa trên Quick Guide từ giao diện website
+- Đảm bảo cấu trúc dữ liệu đầy đủ và SEO-friendly
+
+### Scripts Đã Tạo:
+
+#### 1. `createTransferCategories.js`:
+
+- Tạo 8 danh mục transfer services chính
+- Cấu hình đầy đủ: vehicle type, seats, region, location
+- SEO metadata cho từng danh mục
+- Dữ liệu song ngữ (English/Vietnamese)
+
+#### 2. `runTransferSeed.js`:
+
+- Script helper chạy cả categories và services
+- Tự động tạo categories trước, sau đó tạo services
+- Báo cáo chi tiết quá trình seeding
+
+### Danh Mục Transfer Services:
+
+1. **Halong Bay Transfer** - Private car, 4 seats, North region
+2. **Hanoi Sapa Train** - Sleeping Bus, 40 seats, North region
+3. **Ha Giang Transfer** - Private car, 4 seats, North region
+4. **Airport Transfer** - Airport Transfer, 4 seats, All regions
+5. **Sapa Transfer** - Shuttle Bus, 16 seats, North region
+6. **Ninh Binh Transfer** - Private car, 4 seats, North region
+7. **Cat Ba Transfer** - Shuttle Bus, 16 seats, North region
+8. **All in One Transfers Package** - Luxury LIMO, 4 seats, All regions
+
+### Cách Sử Dụng:
+
+```bash
+# Tạo chỉ categories
+node seeds/createTransferCategories.js
+
+# Tạo categories + services (khuyến nghị)
+node seeds/runTransferSeed.js
+
+# Tạo chỉ services (cần categories trước)
+node seeds/transferServices.js
+```
+
+### Kết Quả:
+
+✅ **8 danh mục** transfer services được tạo  
+✅ **Cấu hình đầy đủ** vehicle type, seats, region  
+✅ **SEO metadata** cho từng danh mục  
+✅ **Dữ liệu song ngữ** English/Vietnamese  
+✅ **Script helper** tự động hóa quá trình
+
+## 15. Sửa Lỗi Frontend TransfersPage Không Hiển Thị
+
+### Vấn Đề:
+
+- Transfer Services không hiển thị trên trang `/transfers`
+- Logic filter phức tạp và không cần thiết
+- Phụ thuộc vào categories store không cần thiết
+
+### Nguyên Nhân:
+
+- API đã được sửa để chỉ trả về transfer services
+- Frontend vẫn sử dụng logic filter phức tạp để kiểm tra `category.type`
+- Phụ thuộc vào `useCategoryStore` không cần thiết
+
+### Giải Pháp:
+
+- Đơn giản hóa logic filter trong `TransfersPage.js`
+- Loại bỏ phụ thuộc vào `useCategoryStore`
+- Cải thiện hiển thị thông tin transfer
+
+### Thay Đổi:
+
+#### 1. **Đơn Giản Hóa Logic Filter**:
+
+```javascript
+// Trước: Logic phức tạp kiểm tra category.type
+const filteredTransfers = transfers?.filter((transfer) => {
+  let isTransferService = false;
+  if (transfer.category?.type === "transfer-services") {
+    isTransferService = true;
+  }
+  // ... logic phức tạp khác
+});
+
+// Sau: Logic đơn giản, tin tưởng API
+const filteredTransfers =
+  transfers?.filter((transfer) => {
+    const matchesSearch =
+      !searchTerm ||
+      transfer.title?.[i18n.language]
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
+    const matchesVehicleType =
+      !selectedVehicleType || transfer.category?.slug === selectedVehicleType;
+    const matchesSeats =
+      !selectedSeats || transfer.category?.seats === parseInt(selectedSeats);
+    const matchesPrice =
+      (transfer.pricing?.adult || 0) >= priceRange[0] &&
+      (transfer.pricing?.adult || 0) <= priceRange[1];
+
+    return matchesSearch && matchesVehicleType && matchesSeats && matchesPrice;
+  }) || [];
+```
+
+#### 2. **Loại Bỏ useCategoryStore**:
+
+```javascript
+// Trước: Phụ thuộc vào categories store
+const { transfers, fetchTransfers, loading, error } = useTransferStore();
+const { categories, fetchCategories } = useCategoryStore();
+
+// Sau: Chỉ sử dụng transfer store
+const { transfers, fetchTransfers, loading, error } = useTransferStore();
+```
+
+#### 3. **Cải Thiện Hiển Thị**:
+
+- Hiển thị description của transfer
+- Hiển thị vehicle type và location
+- Cải thiện labels cho seats (40-seats Sleeping Bus, 16-seats Shuttle Bus, etc.)
+- Hiển thị tên category thay vì slug
+
+### Kết Quả:
+
+✅ **Logic đơn giản** và dễ hiểu  
+✅ **Không phụ thuộc** vào categories store  
+✅ **Hiển thị đầy đủ** thông tin transfer  
+✅ **Filter hoạt động** đúng cách  
+✅ **Performance tốt hơn** do ít logic phức tạp
+
+## 16. Dọn Dẹp Scripts Không Cần Thiết
+
+### Vấn Đề:
+
+- Thư mục `server/seeds` có quá nhiều scripts không cần thiết
+- Có nhiều debug, test scripts và duplicate scripts
+- Gây rối và khó quản lý
+
+### Giải Pháp:
+
+- Xóa tất cả debug và test scripts
+- Xóa duplicate scripts đã có trong completeSeed
+- Giữ lại chỉ những scripts cần thiết
+
+### Scripts Đã Xóa:
+
+#### 1. **Debug Scripts**:
+
+- ❌ `checkTransferData.js` - script debug transfer data
+- ❌ `debugApiQuery.js` - script debug API query
+- ❌ `testApiEndpoint.js` - script test API endpoint
+
+#### 2. **Test Scripts**:
+
+- ❌ `testAdminLogin.js` - script test admin login
+- ❌ `testApi.js` - script test API
+- ❌ `testLoginAPI.js` - script test login API
+
+#### 3. **Duplicate Scripts**:
+
+- ❌ `simpleBlogs.js` - đã có trong completeSeed
+- ❌ `simpleCategories.js` - đã có trong completeSeed
+- ❌ `simpleProducts.js` - đã có trong completeSeed
+- ❌ `seedData.js` - đã có trong completeSeed
+
+### Scripts Còn Lại:
+
+#### ✅ **Scripts Cần Thiết**:
+
+- `createAdmin.js` - tạo admin user cơ bản
+- `createAdminDetailed.js` - tạo admin user chi tiết
+- `completeSeed.js` - tạo dữ liệu hoàn chỉnh
+- `quickSeed.js` - tạo dữ liệu nhanh
+- `createTransferCategories.js` - tạo danh mục transfer
+- `transferServices.js` - tạo dịch vụ transfer
+- `runTransferSeed.js` - script helper cho transfer
+- `categoriesWithSubcategories.js` - tạo categories với subcategories
+- `README.md` - hướng dẫn sử dụng
+
+### Kết Quả:
+
+✅ **Thư mục sạch sẽ** và dễ quản lý  
+✅ **Chỉ giữ scripts cần thiết**  
+✅ **README được cập nhật** với hướng dẫn rõ ràng  
+✅ **Dễ dàng maintain** và phát triển
+
+## 17. Tạo Script Dịch Vụ Transfer Đơn Giản
+
+### Vấn Đề:
+
+- Script `detailedTransferServices.js` gặp nhiều lỗi validation
+- Product model yêu cầu cấu trúc dữ liệu phức tạp
+- Images và highlights phải là array of objects, không phải strings
+- Cần giải pháp đơn giản và hiệu quả hơn
+
+### Giải Pháp:
+
+- Tạo script `simpleTransferServices.js` với 6 dịch vụ transfer đơn giản
+- Sử dụng cấu trúc dữ liệu đúng theo Product model
+- Loại bỏ các trường phức tạp không cần thiết
+- Tập trung vào dữ liệu cốt lõi
+
+### Dịch Vụ Được Tạo:
+
+#### **6 Dịch Vụ Transfer Chính**:
+
+- ✅ **Hanoi Airport Sapa Bus** - $12, 4.5★ (1,250 reviews)
+- ✅ **Hanoi Sapa Sleeping Bus** - $12, 4.3★ (890 reviews)
+- ✅ **Hanoi Airport Transfer - Airport to Old Quarter** - $16, 4.7★ (650 reviews)
+- ✅ **Hanoi to Sapa Private Car, Limousine Van** - $136, 4.8★ (420 reviews)
+- ✅ **Hanoi Cat Ba Island Bus** - $16, 4.4★ (380 reviews)
+- ✅ **Hanoi Halong Bay Luxury Limousine** - $16, 4.8★ (280 reviews)
+
+### Thông Tin Đơn Giản:
+
+#### **Dữ Liệu Cốt Lõi**:
+
+- ✅ **Pricing** - adult, child, infant prices với currency
+- ✅ **Duration** - thời gian di chuyển (days)
+- ✅ **Includes** - dịch vụ bao gồm (array of objects)
+- ✅ **Excludes** - dịch vụ không bao gồm (array of objects)
+- ✅ **Highlights** - điểm nổi bật (array of objects)
+- ✅ **Images** - hình ảnh với alt text (array of objects)
+
+#### **Thông Tin Thực Tế**:
+
+- ✅ **Ratings** - đánh giá (4.3-4.8)
+- ✅ **Reviews** - số lượng đánh giá (280-1,250)
+- ✅ **Featured** - sản phẩm nổi bật
+- ✅ **Active** - trạng thái hoạt động
+
+#### **SEO & Metadata**:
+
+- ✅ **SEO Title** - tiêu đề SEO song ngữ
+- ✅ **SEO Description** - mô tả SEO song ngữ
+- ✅ **Keywords** - từ khóa tối ưu
+- ✅ **Slugs** - URL thân thiện
+
+### Cách Sử Dụng:
+
+```bash
+# Chạy script tạo dịch vụ transfer đơn giản
+node seeds/simpleTransferServices.js
+```
+
+### Kết Quả:
+
+✅ **6 dịch vụ transfer** đơn giản được tạo  
+✅ **Không có lỗi validation**  
+✅ **Dữ liệu đúng cấu trúc** Product model  
+✅ **SEO tối ưu** với metadata cơ bản  
+✅ **Sẵn sàng hiển thị** trên frontend  
+✅ **Dễ dàng maintain** và mở rộng

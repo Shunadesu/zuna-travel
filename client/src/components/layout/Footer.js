@@ -73,7 +73,7 @@ const Footer = () => {
           <div className="lg:col-span-1">
             <div className="mb-4">
               <div className="text-2xl font-bold" style={{ color: settings?.primaryColor || '#3B82F6' }}>
-                {settings?.companyName?.[i18n.language] || 'Zuna Travel'}
+                {settings?.companyName?.[i18n.language] || 'VnBestTravel'}
               </div>
             </div>
             {settings?.companyDescription?.[i18n.language] && (
@@ -245,7 +245,7 @@ const Footer = () => {
                 color: settings?.footer?.secondaryTextColor || '#D1D5DB'
               }}
             >
-              © {currentYear} {settings?.companyName?.[i18n.language] || 'Zuna Travel'}. {t('footer.allRightsReserved')}
+              © {currentYear} {settings?.companyName?.[i18n.language] || 'VnBestTravel'}. {t('footer.allRightsReserved')}
             </div>
             
             {settings?.footerText?.[i18n.language] && (

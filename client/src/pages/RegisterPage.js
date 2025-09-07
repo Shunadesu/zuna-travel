@@ -80,7 +80,7 @@ const RegisterPage = () => {
     try {
       const { confirmPassword, ...registerData } = formData;
       await register(registerData);
-      toast.success('Registration successful! Welcome to Zuna Travel!');
+      toast.success('Registration successful! Welcome to VnBestTravel!');
       navigate('/');
     } catch (error) {
       // Error is handled by the store

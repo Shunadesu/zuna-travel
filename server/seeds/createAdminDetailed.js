@@ -25,7 +25,7 @@ const createAdminDetailed = async () => {
 
     // Create admin user with detailed information
     const adminData = {
-      name: 'Zuna Travel Admin',
+      name: 'VnBestTravel Admin',
       email: 'admin@gmail.com',
       password: 'admin123',
       role: 'admin',

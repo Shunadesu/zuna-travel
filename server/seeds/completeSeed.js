@@ -155,7 +155,7 @@ const blogsData = [
 // Sample Settings
 const settingsData = {
   siteInfo: {
-    name: { en: 'Zuna Travel', vi: 'Zuna Travel' },
+    name: { en: 'VnBestTravel', vi: 'VnBestTravel' },
     description: {
       en: 'Your trusted partner for Vietnam travel',
       vi: 'Đối tác đáng tin cậy cho du lịch Việt Nam'

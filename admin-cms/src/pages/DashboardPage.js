@@ -62,7 +62,7 @@ const DashboardPage = () => {
       <div className="mb-8 flex justify-between items-start">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
-          <p className="mt-2 text-gray-600">Welcome to Zuna Travel Admin Panel</p>
+          <p className="mt-2 text-gray-600">Welcome to VnBestTravel Admin Panel</p>
         </div>
         <RefreshButton 
           onRefresh={() => fetchDashboardData(true)} 

@@ -187,7 +187,7 @@ const SettingsPage = () => {
                       value={formData.companyName?.en || ''}
                       onChange={(e) => handleInputChange('companyName', { ...formData.companyName, en: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                      placeholder="Zuna Travel"
+                      placeholder="VnBestTravel"
                     />
                   </div>
 
@@ -200,7 +200,7 @@ const SettingsPage = () => {
                       value={formData.companyName?.vi || ''}
                       onChange={(e) => handleInputChange('companyName', { ...formData.companyName, vi: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                      placeholder="Zuna Travel"
+                      placeholder="VnBestTravel"
                     />
                   </div>
 

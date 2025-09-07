@@ -26,8 +26,16 @@ router.get('/', optionalAuth, async (req, res) => {
     } = req.query;
 
     // Build query - get products with transfer-services category type
+    // First, get the transfer services category
+    const transferCategory = await Category.findOne({ type: 'transfer-services' });
+    if (!transferCategory) {
+      return res.status(404).json({
+        message: 'Transfer services category not found'
+      });
+    }
+    
     const query = {
-      'category.type': 'transfer-services'
+      category: transferCategory._id
     };
 
     // For public access, only show active transfers unless user is admin
@@ -40,8 +48,21 @@ router.get('/', optionalAuth, async (req, res) => {
     if (featured !== undefined) query.isFeatured = featured === 'true';
 
     // Simple filters - only use what exists in current data structure
-    if (type) query['category.slug'] = type;
-    if (seats) query['category.seats'] = { $gte: parseInt(seats) };
+    if (type) {
+      const categoryBySlug = await Category.findOne({ slug: type, type: 'transfer-services' });
+      if (categoryBySlug) {
+        query.category = categoryBySlug._id;
+      }
+    }
+    if (seats) {
+      const categoriesWithSeats = await Category.find({ 
+        type: 'transfer-services', 
+        seats: { $gte: parseInt(seats) } 
+      });
+      if (categoriesWithSeats.length > 0) {
+        query.category = { $in: categoriesWithSeats.map(c => c._id) };
+      }
+    }
 
     // Price filter
     if (minPrice || maxPrice) {
@@ -57,7 +78,9 @@ router.get('/', optionalAuth, async (req, res) => {
     if (sortBy === 'price') {
       sort['pricing.adult'] = sortOrder === 'asc' ? 1 : -1;
     } else if (sortBy === 'seats') {
-      sort['category.seats'] = sortOrder === 'asc' ? 1 : -1;
+      // For seats sorting, we need to populate category first
+      // This will be handled in the frontend for now
+      sort['createdAt'] = sortOrder === 'asc' ? 1 : -1;
     } else if (sortBy === 'rating') {
       sort['rating.average'] = sortOrder === 'asc' ? 1 : -1;
     } else if (sortBy === 'title') {

@@ -87,7 +87,7 @@ const resources = {
         },
         tourCategories: {
           title: 'Browse our famous tours',
-          subtitle: 'Vietnam, with its tourist destinations likened to rare gems, has been meticulously selected and crafted by Zuna Travel to offer unforgettable travel experiences to our esteemed guests.',
+          subtitle: 'Vietnam, with its tourist destinations likened to rare gems, has been meticulously selected and crafted by VnBestTravel to offer unforgettable travel experiences to our esteemed guests.',
           featured: 'Featured',
           days: 'Days',
           perPerson: 'per person',
@@ -114,7 +114,7 @@ const resources = {
           support: 'Support'
         },
         features: {
-          title: 'Why Choose Zuna Travel',
+          title: 'Why Choose VnBestTravel',
           subtitle: 'Experience the difference with our exceptional service',
           safety: {
             title: 'Safety First',
@@ -171,7 +171,7 @@ const resources = {
         featured: 'Featured',
         days: 'Days',
         viewAllTours: 'View All Tours',
-        whyChooseUs: 'Why Choose Zuna Travel',
+        whyChooseUs: 'Why Choose VnBestTravel',
         whyChooseUsSubtitle: 'Experience the difference with our exceptional service',
         expertGuides: 'Expert Local Guides',
         expertGuidesDesc: 'Our knowledgeable guides provide authentic insights into Vietnamese culture',
@@ -306,7 +306,7 @@ const resources = {
           subscribe: 'Subscribe'
         },
         allRightsReserved: 'All rights reserved.',
-        copyright: '© 2024 Zuna Travel. All rights reserved.',
+        copyright: '© 2024 VnBestTravel. All rights reserved.',
         privacy: 'Privacy Policy',
         terms: 'Terms of Service'
       },
@@ -341,7 +341,7 @@ const resources = {
         subtitle: 'Discover our story and mission',
         story: {
           title: 'Our Story',
-          content: 'Founded with a passion for showcasing the beauty of Vietnam, Zuna Travel has been connecting travelers with authentic experiences since our establishment. We believe in creating meaningful journeys that go beyond typical tourism.'
+          content: 'Founded with a passion for showcasing the beauty of Vietnam, VnBestTravel has been connecting travelers with authentic experiences since our establishment. We believe in creating meaningful journeys that go beyond typical tourism.'
         },
         mission: {
           title: 'Our Mission',
@@ -356,7 +356,7 @@ const resources = {
         },
         team: {
           title: 'Our Team',
-          subtitle: 'Meet the passionate people behind Zuna Travel'
+          subtitle: 'Meet the passionate people behind VnBestTravel'
         },
         stats: {
           title: 'Our Numbers',
@@ -452,7 +452,7 @@ const resources = {
         },
         tourCategories: {
           title: 'Khám phá các tour nổi tiếng',
-          subtitle: 'Việt Nam, với những điểm du lịch được ví như những viên ngọc quý, đã được Zuna Travel tuyển chọn và thiết kế cẩn thận để mang đến những trải nghiệm du lịch khó quên cho quý khách.',
+          subtitle: 'Việt Nam, với những điểm du lịch được ví như những viên ngọc quý, đã được VnBestTravel tuyển chọn và thiết kế cẩn thận để mang đến những trải nghiệm du lịch khó quên cho quý khách.',
           featured: 'Nổi Bật',
           days: 'Ngày',
           perPerson: 'mỗi người',
@@ -479,7 +479,7 @@ const resources = {
           support: 'Hỗ Trợ'
         },
         features: {
-          title: 'Tại Sao Chọn Zuna Travel',
+          title: 'Tại Sao Chọn VnBestTravel',
           subtitle: 'Trải nghiệm sự khác biệt với dịch vụ xuất sắc của chúng tôi',
           safety: {
             title: 'An Toàn Hàng Đầu',
@@ -536,7 +536,7 @@ const resources = {
         featured: 'Nổi Bật',
         days: 'Ngày',
         viewAllTours: 'Xem Tất Cả Tour',
-        whyChooseUs: 'Tại Sao Chọn Zuna Travel',
+        whyChooseUs: 'Tại Sao Chọn VnBestTravel',
         whyChooseUsSubtitle: 'Trải nghiệm sự khác biệt với dịch vụ xuất sắc của chúng tôi',
         expertGuides: 'Hướng Dẫn Viên Địa Phương',
         expertGuidesDesc: 'Hướng dẫn viên am hiểu cung cấp hiểu biết chân thực về văn hóa Việt Nam',
@@ -671,7 +671,7 @@ const resources = {
           subscribe: 'Đăng Ký'
         },
         allRightsReserved: 'Tất cả các quyền được bảo lưu.',
-        copyright: '© 2024 Zuna Travel. Tất cả các quyền được bảo lưu.',
+        copyright: '© 2024 VnBestTravel. Tất cả các quyền được bảo lưu.',
         privacy: 'Chính Sách Bảo Mật',
         terms: 'Điều Khoản Dịch Vụ'
       },
@@ -706,7 +706,7 @@ const resources = {
         subtitle: 'Khám phá câu chuyện và sứ mệnh của chúng tôi',
         story: {
           title: 'Câu Chuyện Của Chúng Tôi',
-          content: 'Được thành lập với niềm đam mê giới thiệu vẻ đẹp của Việt Nam, Zuna Travel đã kết nối du khách với những trải nghiệm chân thực từ khi thành lập. Chúng tôi tin vào việc tạo ra những hành trình có ý nghĩa vượt xa du lịch thông thường.'
+          content: 'Được thành lập với niềm đam mê giới thiệu vẻ đẹp của Việt Nam, VnBestTravel đã kết nối du khách với những trải nghiệm chân thực từ khi thành lập. Chúng tôi tin vào việc tạo ra những hành trình có ý nghĩa vượt xa du lịch thông thường.'
         },
         mission: {
           title: 'Sứ Mệnh Của Chúng Tôi',
@@ -721,7 +721,7 @@ const resources = {
         },
         team: {
           title: 'Đội Ngũ Của Chúng Tôi',
-          subtitle: 'Gặp gỡ những con người đam mê đằng sau Zuna Travel'
+          subtitle: 'Gặp gỡ những con người đam mê đằng sau VnBestTravel'
         },
         stats: {
           title: 'Con Số Của Chúng Tôi',

@@ -1,7 +1,7 @@
 {
   "name": "zuna-travel-client",
   "version": "1.0.0",
-  "description": "Frontend client for Zuna Travel Tour",
+  "description": "Frontend client for VnBestTravel Tour",
   "private": true,
   "dependencies": {
     "@heroicons/react": "^2.2.0",
