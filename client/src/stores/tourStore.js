@@ -117,6 +117,37 @@ const useTourStore = create((set, get) => ({
     return tours.find(tour => tour.slug === slug);
   },
 
+  // Fetch tour by slug from API
+  fetchTourBySlug: async (slug) => {
+    try {
+      set({ loading: true, error: null });
+      const response = await apiClient.get(`/tours/slug/${slug}`);
+      const tour = response.data.data;
+      
+      // Update tours array with the fetched tour
+      const { tours } = get();
+      const existingIndex = tours.findIndex(t => t._id === tour._id);
+      
+      if (existingIndex >= 0) {
+        // Update existing tour
+        const updatedTours = [...tours];
+        updatedTours[existingIndex] = tour;
+        set({ tours: updatedTours, loading: false });
+      } else {
+        // Add new tour to the array
+        set({ tours: [...tours, tour], loading: false });
+      }
+      
+      return tour;
+    } catch (error) {
+      set({ 
+        error: error.response?.data?.message || 'Failed to fetch tour',
+        loading: false
+      });
+      throw error;
+    }
+  },
+
   // Get tours by category
   getToursByCategory: (categorySlug) => {
     const { tours } = get();

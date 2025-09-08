@@ -19,6 +19,10 @@ const bookingSchema = new mongoose.Schema({
     phone: {
       type: String,
       required: true
+    },
+    countryCode: {
+      type: String,
+      required: false
     }
   },
   

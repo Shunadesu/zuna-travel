@@ -1311,3 +1311,152 @@ const fetchProduct = async () => {
 ✅ **Không còn duplicate** scripts  
 ✅ **Dễ maintain** hơn  
 ✅ **Scripts còn lại** đều hoạt động tốt
+
+## 24. Sửa Lỗi Tour Detail Page
+
+### Vấn Đề:
+
+- Trang chi tiết tour hiển thị "Tour not found"
+- `TourDetailPage` đang sử dụng `useProductStore` thay vì `useTourStore`
+- Logic fetch tour không đúng với architecture mới
+
+### Giải Pháp:
+
+- Cập nhật `TourDetailPage` để sử dụng `useTourStore`
+- Thêm method `fetchTourBySlug` vào `tourStore`
+- Sửa logic fetch tour để hoạt động với API `/api/tours/slug/:slug`
+
+### Các Thay Đổi:
+
+#### **1. TourDetailPage.js:**
+
+```javascript
+// Trước
+import { useProductStore, useBookingStore } from "../stores";
+const { getProductBySlug, loading, error } = useProductStore();
+
+// Sau
+import { useTourStore, useBookingStore } from "../stores";
+const { getTourBySlug, fetchTourBySlug, loading, error } = useTourStore();
+```
+
+#### **2. Logic Fetch Tour:**
+
+```javascript
+// Trước
+const tourData = await getProductBySlug(slug);
+
+// Sau
+let tourData = getTourBySlug(slug);
+if (!tourData) {
+  tourData = await fetchTourBySlug(slug);
+}
+```
+
+#### **3. TourStore.js - Thêm Method:**
+
+```javascript
+// Fetch tour by slug from API
+fetchTourBySlug: async (slug) => {
+  try {
+    set({ loading: true, error: null });
+    const response = await apiClient.get(`/tours/slug/${slug}`);
+    const tour = response.data.data;
+
+    // Update tours array with the fetched tour
+    const { tours } = get();
+    const existingIndex = tours.findIndex((t) => t._id === tour._id);
+
+    if (existingIndex >= 0) {
+      const updatedTours = [...tours];
+      updatedTours[existingIndex] = tour;
+      set({ tours: updatedTours, loading: false });
+    } else {
+      set({ tours: [...tours, tour], loading: false });
+    }
+
+    return tour;
+  } catch (error) {
+    set({
+      error: error.response?.data?.message || "Failed to fetch tour",
+      loading: false,
+    });
+    throw error;
+  }
+};
+```
+
+### Kết Quả:
+
+✅ **TourDetailPage** sử dụng đúng `useTourStore`  
+✅ **API endpoint** `/api/tours/slug/:slug` được sử dụng  
+✅ **Logic fetch** hoạt động với cache và API  
+✅ **Error handling** được cải thiện  
+✅ **Architecture nhất quán** với tours/transfers separation  
+✅ **Không còn "Tour not found"** error
+
+## 25. Sửa Lỗi "Not Found" Hiển Thị Trước Khi Load Xong
+
+### Vấn Đề:
+
+- Trang chi tiết tour/transfer hiển thị "not found" ngay lập tức
+- Sau vài giây thì hiện chi tiết bình thường
+- Logic loading không đúng - hiện "not found" khi đang fetch data
+
+### Giải Pháp:
+
+- Thêm state `isInitialLoad` để track việc fetch ban đầu
+- Sửa logic hiển thị để không show "not found" khi đang load
+- Cải thiện UX bằng cách hiện loading spinner thay vì error
+
+### Các Thay Đổi:
+
+#### **1. TourDetailPage.js:**
+
+```javascript
+// Thêm state
+const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+// Sửa useEffect
+useEffect(() => {
+  const fetchTour = async () => {
+    try {
+      setIsInitialLoad(true);
+      // ... fetch logic
+    } catch (error) {
+      // ... error handling
+    } finally {
+      setIsInitialLoad(false);
+    }
+  };
+  fetchTour();
+}, [slug, getTourBySlug, fetchTourBySlug]);
+
+// Sửa loading condition
+if (loading || isInitialLoad) {
+  return <LoadingSpinner />;
+}
+
+// Sửa error condition
+if (error || (!tour && !isInitialLoad)) {
+  return <NotFoundError />;
+}
+```
+
+#### **2. TransferDetailPage.js:**
+
+```javascript
+// Tương tự như TourDetailPage
+const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+// Logic tương tự để tránh hiện "not found" khi đang load
+```
+
+### Kết Quả:
+
+✅ **Không còn hiện "not found"** khi đang fetch data  
+✅ **Loading spinner** hiển thị đúng cách  
+✅ **UX được cải thiện** - không có flash của error message  
+✅ **Logic loading** hoạt động chính xác  
+✅ **Cả tour và transfer** detail pages đều được sửa  
+✅ **i18n keys** được xử lý đúng (transfers.notFound, transfers.notFoundDesc)
