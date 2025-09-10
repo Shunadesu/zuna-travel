@@ -363,45 +363,45 @@ const ProductFormPage = () => {
       setValidationErrors(prev => ({ ...prev, images: 'At least one image is required' }));
     }
 
-    // Requirements validation
-    if (!formData.requirements.en.trim()) {
-      errors.push('English requirements are required');
-      setValidationErrors(prev => ({ ...prev, requirements_en: 'English requirements are required' }));
-    }
-    if (!formData.requirements.vi.trim()) {
-      errors.push('Vietnamese requirements are required');
-      setValidationErrors(prev => ({ ...prev, requirements_vi: 'Vietnamese requirements are required' }));
-    }
+    // Requirements validation - OPTIONAL
+    // if (!formData.requirements.en.trim()) {
+    //   errors.push('English requirements are required');
+    //   setValidationErrors(prev => ({ ...prev, requirements_en: 'English requirements are required' }));
+    // }
+    // if (!formData.requirements.vi.trim()) {
+    //   errors.push('Vietnamese requirements are required');
+    //   setValidationErrors(prev => ({ ...prev, requirements_vi: 'Vietnamese requirements are required' }));
+    // }
 
-    // Cancellation policy validation
-    if (!formData.cancellationPolicy.en.trim()) {
-      errors.push('English cancellation policy is required');
-      setValidationErrors(prev => ({ ...prev, cancellationPolicy_en: 'English cancellation policy is required' }));
-    }
-    if (!formData.cancellationPolicy.vi.trim()) {
-      errors.push('Vietnamese cancellation policy is required');
-      setValidationErrors(prev => ({ ...prev, cancellationPolicy_vi: 'Vietnamese cancellation policy is required' }));
-    }
+    // Cancellation policy validation - OPTIONAL
+    // if (!formData.cancellationPolicy.en.trim()) {
+    //   errors.push('English cancellation policy is required');
+    //   setValidationErrors(prev => ({ ...prev, cancellationPolicy_en: 'English cancellation policy is required' }));
+    // }
+    // if (!formData.cancellationPolicy.vi.trim()) {
+    //   errors.push('Vietnamese cancellation policy is required');
+    //   setValidationErrors(prev => ({ ...prev, cancellationPolicy_vi: 'Vietnamese cancellation policy is required' }));
+    // }
 
-    // Tour specific validations
+    // Tour specific validations - OPTIONAL
     if (type === 'vietnam-tours') {
-      // Highlights validation
-      if (!formData.highlights || formData.highlights.length === 0) {
-        errors.push('At least one highlight is required');
-        setValidationErrors(prev => ({ ...prev, highlights: 'At least one highlight is required' }));
-      }
+      // Highlights validation - OPTIONAL
+      // if (!formData.highlights || formData.highlights.length === 0) {
+      //   errors.push('At least one highlight is required');
+      //   setValidationErrors(prev => ({ ...prev, highlights: 'At least one highlight is required' }));
+      // }
 
-      // Included validation
-      if (!formData.included || formData.included.length === 0) {
-        errors.push('At least one included item is required');
-        setValidationErrors(prev => ({ ...prev, included: 'At least one included item is required' }));
-      }
+      // Included validation - OPTIONAL
+      // if (!formData.included || formData.included.length === 0) {
+      //   errors.push('At least one included item is required');
+      //   setValidationErrors(prev => ({ ...prev, included: 'At least one included item is required' }));
+      // }
 
-      // Excluded validation
-      if (!formData.excluded || formData.excluded.length === 0) {
-        errors.push('At least one excluded item is required');
-        setValidationErrors(prev => ({ ...prev, excluded: 'At least one excluded item is required' }));
-      }
+      // Excluded validation - OPTIONAL
+      // if (!formData.excluded || formData.excluded.length === 0) {
+      //   errors.push('At least one excluded item is required');
+      //   setValidationErrors(prev => ({ ...prev, excluded: 'At least one excluded item is required' }));
+      // }
     }
 
     // Show all validation errors

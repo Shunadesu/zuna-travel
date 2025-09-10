@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTourStore, useBookingStore } from '../stores';
 import { countries } from '../utils/countries';
 import { 
@@ -17,6 +18,7 @@ import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
 
 const TourDetailPage = () => {
+  const { t, i18n } = useTranslation();
   const { slug } = useParams();
   const { getTourBySlug, fetchTourBySlug, loading, error } = useTourStore();
   const { createBooking, loading: bookingLoading } = useBookingStore();
@@ -341,48 +343,75 @@ const TourDetailPage = () => {
             </div>
           </div>
 
-          {/* Itinerary */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Itinerary</h2>
-            <div className="space-y-4">
-              {[1, 2, 3].map((day) => (
-                <div key={day} className="border border-gray-200 rounded-lg p-4">
-                  <h3 className="font-medium text-gray-900 mb-2">Day {day}</h3>
-                  <p className="text-gray-600">
-                    {day === 1 && 'Arrival and welcome dinner'}
-                    {day === 2 && 'Full day exploration of local attractions'}
-                    {day === 3 && 'Departure and farewell'}
-                  </p>
-                </div>
-              ))}
+          {/* Highlights */}
+          {tour?.highlights && tour.highlights.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('tours.details.highlights')}</h2>
+              <div className="space-y-4">
+                {tour.highlights.map((highlight, index) => (
+                  <div key={index} className="border border-gray-200 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900 mb-2">Day {index + 1}</h3>
+                    <p className="text-gray-600">
+                      {i18n.language === 'vi' ? (highlight.vi || highlight.en) : (highlight.en || highlight.vi)}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* What's Included */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">What's Included</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h3 className="font-medium text-green-600 mb-2">✓ Included</h3>
-                <ul className="space-y-1 text-sm text-gray-600">
-                  <li>• Hotel accommodation</li>
-                  <li>• Daily breakfast</li>
-                  <li>• Professional guide</li>
-                  <li>• Transportation</li>
-                  <li>• Entrance fees</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-medium text-red-600 mb-2">✗ Not Included</h3>
-                <ul className="space-y-1 text-sm text-gray-600">
-                  <li>• International flights</li>
-                  <li>• Personal expenses</li>
-                  <li>• Travel insurance</li>
-                  <li>• Tips and gratuities</li>
-                </ul>
+          {(tour?.included?.length > 0 || tour?.excluded?.length > 0) && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('tours.details.included')}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {tour?.included?.length > 0 && (
+                  <div>
+                    <h3 className="font-medium text-green-600 mb-2">✓ Included</h3>
+                    <ul className="space-y-1 text-sm text-gray-600">
+                      {tour.included.map((item, index) => (
+                        <li key={index}>• {i18n.language === 'vi' ? (item.vi || item.en) : (item.en || item.vi)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {tour?.excluded?.length > 0 && (
+                  <div>
+                    <h3 className="font-medium text-red-600 mb-2">✗ Not Included</h3>
+                    <ul className="space-y-1 text-sm text-gray-600">
+                      {tour.excluded.map((item, index) => (
+                        <li key={index}>• {i18n.language === 'vi' ? (item.vi || item.en) : (item.en || item.vi)}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Requirements */}
+          {(tour?.requirements?.en || tour?.requirements?.vi) && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('tours.details.requirements')}</h2>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-gray-700">
+                  {i18n.language === 'vi' ? (tour.requirements.vi || tour.requirements.en) : (tour.requirements.en || tour.requirements.vi)}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Cancellation Policy */}
+          {(tour?.cancellationPolicy?.en || tour?.cancellationPolicy?.vi) && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('tours.details.cancellation')}</h2>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <p className="text-gray-700">
+                  {i18n.language === 'vi' ? (tour.cancellationPolicy.vi || tour.cancellationPolicy.en) : (tour.cancellationPolicy.en || tour.cancellationPolicy.vi)}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}

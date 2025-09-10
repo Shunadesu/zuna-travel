@@ -4432,3 +4432,138 @@ shortDescription: shortDescription || {
 - ✅ **Dễ dàng tạo tour** mới hơn
 
 **Tour model giờ đã đơn giản và linh hoạt hơn!** 🎯
+
+## 🔧 Sửa Frontend Validation cho Tour Form
+
+### ❌ **Vấn đề:**
+
+- **Backend đã sửa** nhưng frontend vẫn có validation bắt buộc
+- **Toast errors** vẫn hiển thị yêu cầu các trường không cần thiết
+- **Frontend validation** chưa đồng bộ với backend model
+
+### ✅ **Giải pháp:**
+
+**1. Comment out frontend validation:**
+
+```javascript
+// ❌ Trước - validation bắt buộc
+if (!formData.requirements.en.trim()) {
+  errors.push("English requirements are required");
+}
+if (!formData.highlights || formData.highlights.length === 0) {
+  errors.push("At least one highlight is required");
+}
+
+// ✅ Sau - validation tùy chọn
+// Requirements validation - OPTIONAL
+// if (!formData.requirements.en.trim()) {
+//   errors.push('English requirements are required');
+// }
+
+// Highlights validation - OPTIONAL
+// if (!formData.highlights || formData.highlights.length === 0) {
+//   errors.push('At least one highlight is required');
+// }
+```
+
+**2. Các validation đã comment out:**
+
+- ✅ `requirements` (en/vi) - không bắt buộc
+- ✅ `cancellationPolicy` (en/vi) - không bắt buộc
+- ✅ `highlights` - không bắt buộc
+- ✅ `included` - không bắt buộc
+- ✅ `excluded` - không bắt buộc
+
+**3. Kết quả:**
+
+- ✅ **Frontend validation** đồng bộ với backend
+- ✅ **Không còn toast errors** cho các trường tùy chọn
+- ✅ **Form submit** thành công với dữ liệu tối thiểu
+- ✅ **Tạo tour** dễ dàng hơn
+
+**Frontend và Backend giờ đã đồng bộ hoàn toàn!** 🎯
+
+## 🔧 Sửa Client Tour Details - Sử dụng API Data
+
+### ❌ **Vấn đề:**
+
+- **Client tour details** sử dụng mockup data thay vì API data
+- **Itinerary và What's Included** hiển thị dữ liệu cố định
+- **Không hiển thị** requirements và cancellation policy từ API
+
+### ✅ **Giải pháp:**
+
+**1. Thay thế mockup data bằng API data:**
+
+```javascript
+// ❌ Trước - mockup data
+{
+  [1, 2, 3].map((day) => (
+    <div key={day}>
+      <h3>Day {day}</h3>
+      <p>{day === 1 && "Arrival and welcome dinner"}</p>
+    </div>
+  ));
+}
+
+// ✅ Sau - API data
+{
+  tour.highlights.map((highlight, index) => (
+    <div key={index}>
+      <h3>Day {index + 1}</h3>
+      <p>
+        {i18n.language === "vi"
+          ? highlight.vi || highlight.en
+          : highlight.en || highlight.vi}
+      </p>
+    </div>
+  ));
+}
+```
+
+**2. Hiển thị included/excluded từ API:**
+
+```javascript
+{
+  tour?.included?.length > 0 && (
+    <div>
+      <h3>✓ Included</h3>
+      <ul>
+        {tour.included.map((item, index) => (
+          <li key={index}>
+            • {i18n.language === "vi" ? item.vi || item.en : item.en || item.vi}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+**3. Thêm Requirements và Cancellation Policy:**
+
+```javascript
+{
+  (tour?.requirements?.en || tour?.requirements?.vi) && (
+    <div>
+      <h2>{t("tours.details.requirements")}</h2>
+      <p>
+        {i18n.language === "vi"
+          ? tour.requirements.vi || tour.requirements.en
+          : tour.requirements.en || tour.requirements.vi}
+      </p>
+    </div>
+  );
+}
+```
+
+**4. Kết quả:**
+
+- ✅ **Highlights** hiển thị từ API data
+- ✅ **Included/Excluded** hiển thị từ API data
+- ✅ **Requirements** hiển thị từ API data
+- ✅ **Cancellation Policy** hiển thị từ API data
+- ✅ **Multilingual support** với i18n
+- ✅ **Conditional rendering** - chỉ hiển thị khi có dữ liệu
+
+**Client giờ đã sử dụng API data thay vì mockup!** 🎯
