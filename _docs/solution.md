@@ -4567,3 +4567,89 @@ if (!formData.highlights || formData.highlights.length === 0) {
 - ✅ **Conditional rendering** - chỉ hiển thị khi có dữ liệu
 
 **Client giờ đã sử dụng API data thay vì mockup!** 🎯
+
+## 🔧 Sửa Frontend Settings Validation
+
+### ❌ **Vấn đề:**
+
+- **Lỗi validation** khi save settings
+- **Mismatch** giữa format client gửi và validation rules
+- **Features field** expect array nhưng client gửi object
+- **Thiếu validation** cho các trường mới
+
+### ✅ **Giải pháp:**
+
+**1. Sửa validation cho features:**
+
+```javascript
+// ❌ Trước - expect array
+body("features").optional().isArray();
+
+// ✅ Sau - expect object với nested validation
+body("features").optional().isObject(),
+  body("features.enableBooking").optional().isBoolean(),
+  body("features.enableReviews").optional().isBoolean(),
+  body("features.enableNewsletter").optional().isBoolean(),
+  body("features.enableSocialLogin").optional().isBoolean(),
+  body("features.maintenanceMode").optional().isBoolean();
+```
+
+**2. Thêm validation cho analytics:**
+
+```javascript
+body("googleAnalyticsId").optional().isString().trim(),
+  body("facebookPixelId").optional().isString().trim();
+```
+
+**3. Thêm validation cho styling:**
+
+```javascript
+body("topBar").optional().isObject(),
+  body("topBar.backgroundColor").optional().isString().trim(),
+  body("topBar.textColor").optional().isString().trim(),
+  body("topBar.hoverColor").optional().isString().trim(),
+  body("footer").optional().isObject(),
+  body("footer.backgroundColor").optional().isString().trim(),
+  body("footer.textColor").optional().isString().trim(),
+  body("footer.secondaryTextColor").optional().isString().trim(),
+  body("footer.borderColor").optional().isString().trim();
+```
+
+**4. Cập nhật allowedFields:**
+
+```javascript
+const allowedFields = [
+  "companyName",
+  "companyDescription",
+  "email",
+  "phone",
+  "whatsapp",
+  "address",
+  "businessHours",
+  "primaryColor",
+  "secondaryColor",
+  "facebook",
+  "instagram",
+  "youtube",
+  "tiktok",
+  "metaTitle",
+  "metaDescription",
+  "metaKeywords",
+  "footerText",
+  "features",
+  "googleAnalyticsId",
+  "facebookPixelId",
+  "topBar",
+  "footer",
+];
+```
+
+**5. Kết quả:**
+
+- ✅ **Features** validation đúng format object
+- ✅ **Analytics** fields được validate
+- ✅ **Styling** fields (topBar, footer) được validate
+- ✅ **All fields** được allow trong update
+- ✅ **Settings save** thành công
+
+**Frontend Settings giờ đã hoạt động hoàn hảo!** 🎯

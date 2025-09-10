@@ -81,7 +81,23 @@ router.put('/', authenticateToken, [
   body('footerText').optional().isObject(),
   body('footerText.en').optional().isString().trim(),
   body('footerText.vi').optional().isString().trim(),
-  body('features').optional().isArray()
+  body('features').optional().isObject(),
+  body('features.enableBooking').optional().isBoolean(),
+  body('features.enableReviews').optional().isBoolean(),
+  body('features.enableNewsletter').optional().isBoolean(),
+  body('features.enableSocialLogin').optional().isBoolean(),
+  body('features.maintenanceMode').optional().isBoolean(),
+  body('googleAnalyticsId').optional().isString().trim(),
+  body('facebookPixelId').optional().isString().trim(),
+  body('topBar').optional().isObject(),
+  body('topBar.backgroundColor').optional().isString().trim(),
+  body('topBar.textColor').optional().isString().trim(),
+  body('topBar.hoverColor').optional().isString().trim(),
+  body('footer').optional().isObject(),
+  body('footer.backgroundColor').optional().isString().trim(),
+  body('footer.textColor').optional().isString().trim(),
+  body('footer.secondaryTextColor').optional().isString().trim(),
+  body('footer.borderColor').optional().isString().trim()
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -100,7 +116,8 @@ router.put('/', authenticateToken, [
       'companyName', 'companyDescription', 'email', 'phone', 'whatsapp',
       'address', 'businessHours', 'primaryColor', 'secondaryColor',
       'facebook', 'instagram', 'youtube', 'tiktok', 'metaTitle',
-      'metaDescription', 'metaKeywords', 'footerText', 'features'
+      'metaDescription', 'metaKeywords', 'footerText', 'features',
+      'googleAnalyticsId', 'facebookPixelId', 'topBar', 'footer'
     ];
     
     allowedFields.forEach(field => {
