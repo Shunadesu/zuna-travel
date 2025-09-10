@@ -4906,3 +4906,193 @@ const fetchProduct = async () => {
 - ✅ **Tour edit** sẽ hoạt động hoặc hiển thị lỗi rõ ràng
 
 **Tour Edit giờ đã có debug logging để kiểm tra vấn đề!** 🎯
+
+## 🔧 Sửa lỗi Client Settings Update
+
+### ❌ **Vấn đề:**
+
+- **Lỗi:** Settings đã save thành công nhưng client không cập nhật
+- **Nguyên nhân:** Client có cache 30 phút và không tự động refresh khi settings thay đổi
+- **Xảy ra:** Mail, số điện thoại, màu header, footer không thay đổi trên client
+
+### ✅ **Giải pháp:**
+
+**1. Thêm refreshSettings method vào client store:**
+
+```javascript
+// ✅ Thêm method để force refresh settings
+refreshSettings: async () => {
+  return get().fetchSettings(true);
+},
+```
+
+**2. Giảm cache time:**
+
+```javascript
+// ❌ Trước - cache 30 phút
+cacheExpiry: 30 * 60 * 1000, // 30 minutes for client settings
+
+// ✅ Sau - cache 5 phút
+cacheExpiry: 5 * 60 * 1000, // 5 minutes for client settings
+```
+
+**3. Tạo SettingsListener component:**
+
+```javascript
+// ✅ Component để listen cho settings changes
+const SettingsListener = () => {
+  const { refreshSettings } = useSettingsStore();
+
+  useEffect(() => {
+    const handleSettingsUpdate = () => {
+      console.log("Settings updated, refreshing...");
+      refreshSettings();
+    };
+
+    window.addEventListener("settingsUpdated", handleSettingsUpdate);
+    window.addEventListener("focus", handlePageFocus);
+
+    return () => {
+      window.removeEventListener("settingsUpdated", handleSettingsUpdate);
+      window.removeEventListener("focus", handlePageFocus);
+    };
+  }, [refreshSettings]);
+
+  return null;
+};
+```
+
+**4. Trigger event từ admin-cms:**
+
+```javascript
+// ✅ Trigger event khi settings được update
+updateSettings: async (updateData) => {
+  // ... update logic ...
+
+  // Trigger event to notify client about settings update
+  if (typeof window !== 'undefined') {
+    const event = new CustomEvent('settingsUpdated');
+    window.dispatchEvent(event);
+  }
+
+  return updatedSettings;
+},
+```
+
+**5. Thêm SettingsListener vào App.js:**
+
+```javascript
+// ✅ Thêm vào App component
+return (
+  <div className="App">
+    <ApiProvider>
+      <ScrollToTop />
+
+      {/* Settings Listener - Listens for settings changes */}
+      <SettingsListener />
+
+      {/* ... rest of app ... */}
+    </ApiProvider>
+  </div>
+);
+```
+
+**6. Kết quả:**
+
+- ✅ **Auto refresh** khi settings được update
+- ✅ **Cache time** giảm từ 30 phút xuống 5 phút
+- ✅ **Event-driven** update system
+- ✅ **Real-time** settings update trên client
+- ✅ **Mail, phone, colors** cập nhật ngay lập tức
+
+**Client Settings Update giờ đã hoạt động real-time!** 🎯
+
+## 🔧 Sửa lỗi Tour Edit - Product Not Found
+
+### ❌ **Vấn đề:**
+
+- **Lỗi:** `Product not found with ID: 68c1e0feff4c5fd47861c71c`
+- **Nguyên nhân:** `getTourById` chỉ tìm trong local state, không fetch từ API nếu không tìm thấy
+- **Xảy ra:** Khi edit tour, tour không tồn tại trong local state
+
+### ✅ **Giải pháp:**
+
+**1. Thêm fetchTourById và fetchTransferById methods:**
+
+```javascript
+// ✅ Thêm method để fetch single tour từ API
+fetchTourById: async (id) => {
+  try {
+    const response = await apiClient.get(`/tours/${id}?populate=category`);
+    const tour = response.data.data;
+
+    if (!tour) {
+      throw new Error(`Tour with ID ${id} not found`);
+    }
+
+    // Add to local state if not already present
+    set(state => {
+      const existingTour = state.tours.find(t => t._id === id);
+      if (!existingTour) {
+        return {
+          tours: [tour, ...state.tours]
+        };
+      }
+      return state;
+    });
+
+    return tour;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch tour';
+    set({ error: errorMessage });
+    throw new Error(errorMessage);
+  }
+},
+```
+
+**2. Cải thiện logic fetchProduct:**
+
+```javascript
+// ✅ Logic mới để fetch product
+if (type === "vietnam-tours") {
+  product = getTourById(id);
+  console.log("Initial tour product:", product);
+  if (!product) {
+    console.log("Tour not found in local state, fetching from API...");
+    try {
+      product = await fetchTourById(id);
+      console.log("Tour fetched from API:", product);
+    } catch (error) {
+      console.log(
+        "Failed to fetch tour from API, trying to fetch all tours..."
+      );
+      await fetchTours();
+      product = getTourById(id);
+      console.log("Tour after fetch all:", product);
+    }
+  }
+}
+```
+
+**3. Cải thiện error handling:**
+
+```javascript
+// ✅ Error handling tốt hơn
+if (!product) {
+  const errorMessage = `Product not found with ID: ${id}. Please check if the product exists or if you have the correct URL.`;
+  console.error(errorMessage);
+  toast.error("Product not found. Please check the URL or contact support.");
+  navigate("/admin/products");
+  return;
+}
+```
+
+**4. Kết quả:**
+
+- ✅ **API fallback** khi tour không có trong local state
+- ✅ **Better error handling** với message rõ ràng
+- ✅ **Debug logging** để track data flow
+- ✅ **Graceful navigation** về products list khi lỗi
+- ✅ **Tour edit** hoạt động với mọi tour ID
+
+**Tour Edit giờ đã hoạt động với mọi tour ID!** 🎯

@@ -120,6 +120,35 @@ const useTourStore = create((set, get) => ({
     return tours.find(tour => tour._id === id);
   },
 
+  // Fetch single tour by ID (from API)
+  fetchTourById: async (id) => {
+    try {
+      const response = await apiClient.get(`/tours/${id}?populate=category`);
+      const tour = response.data.data;
+      
+      if (!tour) {
+        throw new Error(`Tour with ID ${id} not found`);
+      }
+      
+      // Add to local state if not already present
+      set(state => {
+        const existingTour = state.tours.find(t => t._id === id);
+        if (!existingTour) {
+          return {
+            tours: [tour, ...state.tours]
+          };
+        }
+        return state;
+      });
+      
+      return tour;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch tour';
+      set({ error: errorMessage });
+      throw new Error(errorMessage);
+    }
+  },
+
   // Get tours by category
   getToursByCategory: (categorySlug) => {
     const { tours } = get();

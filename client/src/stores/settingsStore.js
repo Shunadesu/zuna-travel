@@ -7,7 +7,7 @@ const useSettingsStore = create((set, get) => ({
   loading: false,
   error: null,
   lastFetched: null,
-  cacheExpiry: 30 * 60 * 1000, // 30 minutes for client settings
+  cacheExpiry: 5 * 60 * 1000, // 5 minutes for client settings
   fetchPromise: null, // To prevent multiple simultaneous requests
 
   // Actions
@@ -79,6 +79,11 @@ const useSettingsStore = create((set, get) => ({
       });
       throw error;
     }
+  },
+
+  // Force refresh settings (bypass cache)
+  refreshSettings: async () => {
+    return get().fetchSettings(true);
   },
 
   // Clear cache

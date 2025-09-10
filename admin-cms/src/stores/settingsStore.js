@@ -60,6 +60,12 @@ const useSettingsStore = create((set, get) => ({
         loading: false 
       });
 
+      // Trigger event to notify client about settings update
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('settingsUpdated');
+        window.dispatchEvent(event);
+      }
+
       return updatedSettings;
     } catch (error) {
       set({ 
@@ -82,6 +88,12 @@ const useSettingsStore = create((set, get) => ({
         settings: resetSettings,
         loading: false 
       });
+
+      // Trigger event to notify client about settings update
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('settingsUpdated');
+        window.dispatchEvent(event);
+      }
 
       return resetSettings;
     } catch (error) {

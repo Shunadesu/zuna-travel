@@ -22,6 +22,9 @@ const Header = () => {
   const { settings, fetchSettings } = useSettingsStore();
   const { categories, fetchCategories } = useCategoryStore();
   const { user, isAuthenticated, logout } = useAuthStore();
+  
+  // Use settings refresh hook
+  useSettingsRefresh();
 
   useEffect(() => {
     fetchSettings();

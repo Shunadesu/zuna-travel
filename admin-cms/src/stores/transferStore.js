@@ -120,6 +120,35 @@ const useTransferStore = create((set, get) => ({
     return transfers.find(transfer => transfer._id === id);
   },
 
+  // Fetch single transfer by ID (from API)
+  fetchTransferById: async (id) => {
+    try {
+      const response = await apiClient.get(`/transfers/${id}?populate=category`);
+      const transfer = response.data.data;
+      
+      if (!transfer) {
+        throw new Error(`Transfer with ID ${id} not found`);
+      }
+      
+      // Add to local state if not already present
+      set(state => {
+        const existingTransfer = state.transfers.find(t => t._id === id);
+        if (!existingTransfer) {
+          return {
+            transfers: [transfer, ...state.transfers]
+          };
+        }
+        return state;
+      });
+      
+      return transfer;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch transfer';
+      set({ error: errorMessage });
+      throw new Error(errorMessage);
+    }
+  },
+
   // Get transfers by category
   getTransfersByCategory: (categorySlug) => {
     const { transfers } = get();

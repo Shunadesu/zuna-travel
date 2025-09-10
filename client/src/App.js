@@ -8,6 +8,7 @@ import Layout from './components/layout/Layout';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ScrollToTop from './components/common/ScrollToTop';
 import ServerWarmupLoader from './components/common/ServerWarmupLoader';
+import SettingsListener from './components/common/SettingsListener';
 
 // Hooks
 import useServerWarmup from './hooks/useServerWarmup';
@@ -50,6 +51,9 @@ function App() {
     <div className="App">
       <ApiProvider>
         <ScrollToTop />
+        
+        {/* Settings Listener - Listens for settings changes */}
+        <SettingsListener />
         
         {/* Server Warmup Loader - Only shows when needed */}
         <ServerWarmupLoader 

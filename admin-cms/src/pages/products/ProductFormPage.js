@@ -13,8 +13,8 @@ const ProductFormPage = () => {
   const navigate = useNavigate();
   const isEditing = !!id;
 
-  const { tours, fetchTours, createTour, updateTour, getTourById } = useTourStore();
-  const { transfers, fetchTransfers, createTransfer, updateTransfer, getTransferById } = useTransferStore();
+  const { tours, fetchTours, createTour, updateTour, getTourById, fetchTourById } = useTourStore();
+  const { transfers, fetchTransfers, createTransfer, updateTransfer, getTransferById, fetchTransferById } = useTransferStore();
   const { categories: tourCategories, fetchCategories: fetchTourCategories } = useTourCategoryStore();
   const { categories: transferCategories, fetchCategories: fetchTransferCategories } = useTransferCategoryStore();
 
@@ -118,26 +118,43 @@ const ProductFormPage = () => {
         product = getTourById(id);
         console.log('Initial tour product:', product);
         if (!product) {
-          console.log('Tour not found, fetching tours...');
-          await fetchTours();
-          product = getTourById(id);
-          console.log('Tour after fetch:', product);
+          console.log('Tour not found in local state, fetching from API...');
+          try {
+            product = await fetchTourById(id);
+            console.log('Tour fetched from API:', product);
+          } catch (error) {
+            console.log('Failed to fetch tour from API, trying to fetch all tours...');
+            await fetchTours();
+            product = getTourById(id);
+            console.log('Tour after fetch all:', product);
+          }
         }
       } else {
         product = getTransferById(id);
         console.log('Initial transfer product:', product);
         if (!product) {
-          console.log('Transfer not found, fetching transfers...');
-          await fetchTransfers();
-          product = getTransferById(id);
-          console.log('Transfer after fetch:', product);
+          console.log('Transfer not found in local state, fetching from API...');
+          try {
+            product = await fetchTransferById(id);
+            console.log('Transfer fetched from API:', product);
+          } catch (error) {
+            console.log('Failed to fetch transfer from API, trying to fetch all transfers...');
+            await fetchTransfers();
+            product = getTransferById(id);
+            console.log('Transfer after fetch all:', product);
+          }
         }
       }
       
       console.log('Final product:', product);
       
       if (!product) {
-        throw new Error(`Product not found with ID: ${id}`);
+        // Check if the error is because the product doesn't exist
+        const errorMessage = `Product not found with ID: ${id}. Please check if the product exists or if you have the correct URL.`;
+        console.error(errorMessage);
+        toast.error('Product not found. Please check the URL or contact support.');
+        navigate('/admin/products');
+        return;
       }
       
       setFormData({
