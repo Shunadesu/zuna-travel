@@ -155,9 +155,12 @@ router.post('/', protect, async (req, res) => {
 
     const transfer = new Transfer({
       title,
-      slug,
+      slug: slug || title?.en?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
       description,
-      shortDescription,
+      shortDescription: shortDescription || {
+        en: description?.en?.substring(0, 200) || '',
+        vi: description?.vi?.substring(0, 200) || ''
+      },
       category,
       pricing,
       duration,

@@ -7,7 +7,6 @@ const transferSchema = new mongoose.Schema({
   },
   slug: {
     type: String,
-    required: true,
     unique: true,
     lowercase: true
   },
@@ -16,8 +15,8 @@ const transferSchema = new mongoose.Schema({
     vi: { type: String, required: true }
   },
   shortDescription: {
-    en: { type: String, required: true },
-    vi: { type: String, required: true }
+    en: { type: String },
+    vi: { type: String }
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
@@ -92,16 +91,13 @@ const transferSchema = new mongoose.Schema({
     default: 0
   },
   region: {
-    type: String,
-    required: true
+    type: String
   },
   route: {
-    type: String,
-    required: true
+    type: String
   },
   distance: {
-    type: Number, // in kilometers
-    required: true
+    type: Number // in kilometers
   }
 }, {
   timestamps: true

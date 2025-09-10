@@ -4273,3 +4273,109 @@ if (key === "images" && Array.isArray(req.body[key])) {
 - ✅ **Format mapping** đúng giữa client và server
 
 **Cả Tour và Transfer Categories đều hiển thị hình ảnh đúng!** 🎯
+
+## 🔧 Đơn giản hóa Transfer Model
+
+### ❌ **Vấn đề:**
+
+- **Transfer model** có quá nhiều trường `required: true`
+- **Gây khó khăn** khi tạo transfer mới
+- **Requirements và Cancellation Policy** đã không required nhưng các trường khác vẫn bắt buộc
+
+### ✅ **Giải pháp:**
+
+**1. Bỏ required cho các trường không cần thiết:**
+
+```javascript
+// ❌ Trước
+slug: { type: String, required: true, unique: true, lowercase: true }
+shortDescription: { en: { type: String, required: true }, vi: { type: String, required: true } }
+region: { type: String, required: true }
+route: { type: String, required: true }
+distance: { type: Number, required: true }
+
+// ✅ Sau
+slug: { type: String, unique: true, lowercase: true }
+shortDescription: { en: { type: String }, vi: { type: String } }
+region: { type: String }
+route: { type: String }
+distance: { type: Number }
+```
+
+**2. Auto-generation trong route POST:**
+
+```javascript
+slug: slug || title?.en?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+shortDescription: shortDescription || {
+  en: description?.en?.substring(0, 200) || '',
+  vi: description?.vi?.substring(0, 200) || ''
+}
+```
+
+**3. Kết quả:**
+
+- ✅ **Requirements và Cancellation Policy** không bắt buộc (đã có sẵn)
+- ✅ **Slug, shortDescription, region, route, distance** không bắt buộc
+- ✅ **Auto-generation** cho slug và shortDescription
+- ✅ **Dễ dàng tạo transfer** mới hơn
+
+**Transfer model giờ đã đơn giản và linh hoạt hơn!** 🎯
+
+## 🔧 Sửa lỗi validation Contact Settings
+
+### ❌ **Vấn đề:**
+
+- **Lỗi validation** khi save contact settings
+- **Mismatch** giữa format client gửi và validation rules
+- **Client gửi objects** `{en, vi}` nhưng server expect strings
+
+### ✅ **Giải pháp:**
+
+**1. Sửa validation rules:**
+
+```javascript
+// ❌ Trước - expect strings
+body("companyName").optional().isString().trim().isLength({ min: 1, max: 100 });
+body("address").optional().isString().trim();
+body("businessHours").optional().isString().trim();
+body("metaTitle").optional().isString().trim().isLength({ max: 60 });
+body("metaDescription").optional().isString().trim().isLength({ max: 160 });
+body("footerText").optional().isString().trim();
+
+// ✅ Sau - expect objects với nested validation
+body("companyName").optional().isObject();
+body("companyName.en")
+  .optional()
+  .isString()
+  .trim()
+  .isLength({ min: 1, max: 100 });
+body("companyName.vi")
+  .optional()
+  .isString()
+  .trim()
+  .isLength({ min: 1, max: 100 });
+body("address").optional().isObject();
+body("address.en").optional().isString().trim();
+body("address.vi").optional().isString().trim();
+// ... tương tự cho các trường khác
+```
+
+**2. Các trường đã sửa:**
+
+- ✅ `companyName` - object với en/vi
+- ✅ `companyDescription` - object với en/vi
+- ✅ `address` - object với en/vi
+- ✅ `businessHours` - object với en/vi
+- ✅ `metaTitle` - object với en/vi
+- ✅ `metaDescription` - object với en/vi
+- ✅ `footerText` - object với en/vi
+- ✅ `metaKeywords` - array of strings
+
+**3. Kết quả:**
+
+- ✅ **Contact settings** save thành công
+- ✅ **Validation** đúng format object `{en, vi}`
+- ✅ **Nested validation** cho từng ngôn ngữ
+- ✅ **Tương thích** với admin CMS form
+
+**Contact settings giờ đã hoạt động hoàn hảo!** 🎯
