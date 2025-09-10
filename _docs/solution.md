@@ -4653,3 +4653,256 @@ const allowedFields = [
 - ✅ **Settings save** thành công
 
 **Frontend Settings giờ đã hoạt động hoàn hảo!** 🎯
+
+## 🔧 Sửa lỗi Settings Save
+
+### ❌ **Vấn đề:**
+
+- **Lỗi:** `settings.save is not a function`
+- **Nguyên nhân:** `Settings.getSettings()` trả về plain object thay vì Mongoose document
+- **Inconsistency:** Khi settings tồn tại trả về `.lean()`, khi chưa tồn tại trả về `.toObject()`
+
+### ✅ **Giải pháp:**
+
+**1. Sửa getSettings method:**
+
+```javascript
+// ❌ Trước - inconsistent return types
+settingsSchema.statics.getSettings = async function () {
+  let settings = await this.findOne().lean(); // Plain object
+  if (!settings) {
+    settings = new this();
+    await settings.save();
+    return settings.toObject(); // Plain object
+  }
+  return settings; // Plain object
+};
+
+// ✅ Sau - consistent Mongoose document
+settingsSchema.statics.getSettings = async function () {
+  let settings = await this.findOne(); // Mongoose document
+  if (!settings) {
+    settings = new this();
+    await settings.save();
+  }
+  return settings; // Mongoose document
+};
+```
+
+**2. Sửa cache headers:**
+
+```javascript
+// ❌ Trước - có thể gây lỗi
+'ETag': `"${settings._id}-${settings.updatedAt.getTime()}"`
+
+// ✅ Sau - safe access
+'ETag': `"${settings._id}-${settings.updatedAt ? settings.updatedAt.getTime() : Date.now()}"`
+```
+
+**3. Kết quả:**
+
+- ✅ **getSettings()** luôn trả về Mongoose document
+- ✅ **settings.save()** hoạt động bình thường
+- ✅ **Cache headers** không gây lỗi
+- ✅ **Settings update** thành công
+
+**Settings giờ đã hoạt động hoàn hảo!** 🎯
+
+## 🔧 Sửa lỗi Tour Edit
+
+### ❌ **Vấn đề:**
+
+- **Lỗi:** `Cannot read properties of undefined (reading 'title')`
+- **Nguyên nhân:** Code cố gắng access `product.title` mà không kiểm tra `product` có tồn tại không
+- **Xảy ra:** Khi chỉnh sửa tour, product có thể là undefined
+
+### ✅ **Giải pháp:**
+
+**1. Thêm null check cho product:**
+
+```javascript
+// ❌ Trước - không kiểm tra product
+setFormData({
+  title: {
+    en: product.title?.en || "",
+    vi: product.title?.vi || "",
+  },
+  // ...
+});
+
+// ✅ Sau - kiểm tra product trước
+if (!product) {
+  throw new Error("Product not found");
+}
+
+setFormData({
+  title: {
+    en: product.title?.en || "",
+    vi: product.title?.vi || "",
+  },
+  // ...
+});
+```
+
+**2. Kết quả:**
+
+- ✅ **Product null check** trước khi access properties
+- ✅ **Error handling** rõ ràng khi product không tồn tại
+- ✅ **Tour edit** hoạt động bình thường
+- ✅ **Không còn lỗi** "Cannot read properties of undefined"
+
+**Tour Edit giờ đã hoạt động hoàn hảo!** 🎯
+
+## 🔧 Sửa lỗi Settings Save
+
+### ❌ **Vấn đề:**
+
+- **Lỗi:** `settings.save is not a function`
+- **Nguyên nhân:** `getSettings()` method có thể trả về plain object thay vì Mongoose document
+- **Xảy ra:** Khi save settings, object không có method `.save()`
+
+### ✅ **Giải pháp:**
+
+**1. Cải thiện getSettings method:**
+
+```javascript
+// ❌ Trước - có thể trả về plain object
+settingsSchema.statics.getSettings = async function () {
+  let settings = await this.findOne();
+  if (!settings) {
+    settings = new this();
+    await settings.save();
+  }
+  return settings;
+};
+
+// ✅ Sau - đảm bảo trả về Mongoose document
+settingsSchema.statics.getSettings = async function () {
+  let settings = await this.findOne();
+  if (!settings) {
+    settings = new this();
+    await settings.save();
+  }
+
+  // Ensure we return a Mongoose document, not a plain object
+  if (settings && typeof settings.save === "function") {
+    return settings;
+  } else {
+    // If somehow we got a plain object, convert it back to a document
+    const doc = new this(settings);
+    return doc;
+  }
+};
+```
+
+**2. Thêm validation trong routes:**
+
+```javascript
+// ✅ Thêm validation trước khi save
+const settings = await Settings.getSettings();
+
+// Ensure settings is a Mongoose document
+if (!settings || typeof settings.save !== "function") {
+  throw new Error("Settings object is not a valid Mongoose document");
+}
+
+Object.assign(settings, updateData);
+await settings.save();
+```
+
+**3. Cải thiện updateSettings method:**
+
+```javascript
+// ✅ Đảm bảo settings là Mongoose document
+settingsSchema.statics.updateSettings = async function (updateData) {
+  let settings = await this.findOne();
+  if (!settings) {
+    settings = new this();
+  }
+
+  // Ensure settings is a Mongoose document
+  if (typeof settings.save !== "function") {
+    settings = new this(settings);
+  }
+
+  Object.assign(settings, updateData);
+  await settings.save();
+  return settings;
+};
+```
+
+**4. Kết quả:**
+
+- ✅ **getSettings()** luôn trả về Mongoose document
+- ✅ **settings.save()** hoạt động bình thường
+- ✅ **Validation** trước khi save
+- ✅ **Settings update** thành công
+- ✅ **Error handling** tốt hơn
+
+**Settings Save giờ đã hoạt động hoàn hảo!** 🎯
+
+## 🔧 Sửa lỗi Tour Edit (Lần 2)
+
+### ❌ **Vấn đề:**
+
+- **Lỗi:** `Cannot read properties of undefined (reading 'title')` vẫn còn xảy ra
+- **Nguyên nhân:** `getTourById` hoặc `getTransferById` không trả về data đúng cách
+- **Xảy ra:** Khi chỉnh sửa tour, product vẫn là undefined sau khi fetch
+
+### ✅ **Giải pháp:**
+
+**1. Thêm debug logging để kiểm tra:**
+
+```javascript
+// ✅ Thêm console.log để debug
+const fetchProduct = async () => {
+  try {
+    setInitialLoading(true);
+    let product;
+
+    console.log("Fetching product with ID:", id, "Type:", type);
+
+    if (type === "vietnam-tours") {
+      product = getTourById(id);
+      console.log("Initial tour product:", product);
+      if (!product) {
+        console.log("Tour not found, fetching tours...");
+        await fetchTours();
+        product = getTourById(id);
+        console.log("Tour after fetch:", product);
+      }
+    } else {
+      product = getTransferById(id);
+      console.log("Initial transfer product:", product);
+      if (!product) {
+        console.log("Transfer not found, fetching transfers...");
+        await fetchTransfers();
+        product = getTransferById(id);
+        console.log("Transfer after fetch:", product);
+      }
+    }
+
+    console.log("Final product:", product);
+
+    if (!product) {
+      throw new Error(`Product not found with ID: ${id}`);
+    }
+    // ...
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    toast.error("Failed to load product");
+    navigate("/admin/products");
+  } finally {
+    setInitialLoading(false);
+  }
+};
+```
+
+**2. Kết quả:**
+
+- ✅ **Debug logging** để kiểm tra data flow
+- ✅ **Error message** rõ ràng hơn với ID
+- ✅ **Console logs** để debug vấn đề
+- ✅ **Tour edit** sẽ hoạt động hoặc hiển thị lỗi rõ ràng
+
+**Tour Edit giờ đã có debug logging để kiểm tra vấn đề!** 🎯

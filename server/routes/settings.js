@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
     // Set cache headers for better performance
     res.set({
       'Cache-Control': 'public, max-age=600', // Cache for 10 minutes
-      'ETag': `"${settings._id}-${settings.updatedAt.getTime()}"`,
+      'ETag': `"${settings._id}-${settings.updatedAt ? settings.updatedAt.getTime() : Date.now()}"`,
       'Vary': 'Accept-Encoding'
     });
     
@@ -126,6 +126,11 @@ router.put('/', authenticateToken, [
       }
     });
     
+    // Ensure settings is a Mongoose document
+    if (!settings || typeof settings.save !== 'function') {
+      throw new Error('Settings object is not a valid Mongoose document');
+    }
+    
     Object.assign(settings, updateData);
     await settings.save();
     
@@ -146,7 +151,17 @@ router.put('/', authenticateToken, [
 router.post('/reset', authenticateToken, async (req, res) => {
   try {
     const settings = await Settings.getSettings();
-    await settings.resetToDefaults();
+    
+    // Reset to default values
+    const defaultSettings = new Settings();
+    Object.assign(settings, defaultSettings.toObject());
+    
+    // Ensure settings is a Mongoose document
+    if (!settings || typeof settings.save !== 'function') {
+      throw new Error('Settings object is not a valid Mongoose document');
+    }
+    
+    await settings.save();
     
     res.json({
       message: 'Settings reset to defaults successfully',

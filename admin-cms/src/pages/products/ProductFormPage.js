@@ -111,18 +111,33 @@ const ProductFormPage = () => {
     try {
       setInitialLoading(true);
       let product;
+      
+      console.log('Fetching product with ID:', id, 'Type:', type);
+      
       if (type === 'vietnam-tours') {
         product = getTourById(id);
+        console.log('Initial tour product:', product);
         if (!product) {
+          console.log('Tour not found, fetching tours...');
           await fetchTours();
           product = getTourById(id);
+          console.log('Tour after fetch:', product);
         }
       } else {
         product = getTransferById(id);
+        console.log('Initial transfer product:', product);
         if (!product) {
+          console.log('Transfer not found, fetching transfers...');
           await fetchTransfers();
           product = getTransferById(id);
+          console.log('Transfer after fetch:', product);
         }
+      }
+      
+      console.log('Final product:', product);
+      
+      if (!product) {
+        throw new Error(`Product not found with ID: ${id}`);
       }
       
       setFormData({

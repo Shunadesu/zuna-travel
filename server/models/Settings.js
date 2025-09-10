@@ -211,13 +211,20 @@ const settingsSchema = new mongoose.Schema({
 
 // Ensure only one settings document exists
 settingsSchema.statics.getSettings = async function() {
-  let settings = await this.findOne().lean();
+  let settings = await this.findOne();
   if (!settings) {
     settings = new this();
     await settings.save();
-    return settings.toObject();
   }
-  return settings;
+  
+  // Ensure we return a Mongoose document, not a plain object
+  if (settings && typeof settings.save === 'function') {
+    return settings;
+  } else {
+    // If somehow we got a plain object, convert it back to a document
+    const doc = new this(settings);
+    return doc;
+  }
 };
 
 // Update settings
@@ -225,6 +232,11 @@ settingsSchema.statics.updateSettings = async function(updateData) {
   let settings = await this.findOne();
   if (!settings) {
     settings = new this();
+  }
+  
+  // Ensure settings is a Mongoose document
+  if (typeof settings.save !== 'function') {
+    settings = new this(settings);
   }
   
   Object.assign(settings, updateData);
