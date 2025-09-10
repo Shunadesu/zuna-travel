@@ -5218,3 +5218,95 @@ if (!product) {
 - ✅ **Fallback values** khi settings chưa load
 
 **Get in Touch giờ đã sử dụng API data!** 🎯
+
+## 🔧 Sửa lỗi Tour/Transfer Confusion - Edit Mode
+
+### ❌ **Vấn đề:**
+
+- **Lỗi:** "Transfer not found" khi edit tour
+- **Nguyên nhân:** Edit button không có type parameter, ProductFormPage không biết đó là tour hay transfer
+- **Xảy ra:** Khi click edit từ ProductsPage, URL chỉ có `/admin/products/:id/edit` không có type
+
+### ✅ **Giải pháp:**
+
+**1. Thêm logic tự động xác định type:**
+
+```javascript
+// ✅ Logic mới để tự động xác định product type
+if (!type && isEditing) {
+  console.log("No type in URL, trying to determine from product data...");
+
+  // Try to find in tours first
+  product = getTourById(id);
+  if (product) {
+    detectedType = "vietnam-tours";
+    console.log("Found product in tours, type:", detectedType);
+  } else {
+    // Try to find in transfers
+    product = getTransferById(id);
+    if (product) {
+      detectedType = "transfer-services";
+      console.log("Found product in transfers, type:", detectedType);
+    }
+  }
+
+  // If still not found, try API calls
+  if (!product) {
+    console.log("Product not found in local state, trying API calls...");
+    try {
+      product = await fetchTourById(id);
+      if (product) {
+        detectedType = "vietnam-tours";
+        console.log("Found product via tour API, type:", detectedType);
+      }
+    } catch (error) {
+      console.log("Tour API failed, trying transfer API...");
+      try {
+        product = await fetchTransferById(id);
+        if (product) {
+          detectedType = "transfer-services";
+          console.log("Found product via transfer API, type:", detectedType);
+        }
+      } catch (transferError) {
+        console.log("Both API calls failed");
+      }
+    }
+  }
+}
+```
+
+**2. Thêm productType state:**
+
+```javascript
+// ✅ Thêm state để track product type
+const [productType, setProductType] = useState(type);
+
+// ✅ Set product type sau khi detect
+setProductType(detectedType);
+```
+
+**3. Sử dụng currentType thay vì type:**
+
+```javascript
+// ✅ Sử dụng currentType cho tất cả logic
+const currentType = productType || type;
+const categories =
+  currentType === "vietnam-tours" ? tourCategories : transferCategories;
+
+// ✅ Validation và submit logic
+if (currentType === "vietnam-tours") {
+  // Tour logic
+} else {
+  // Transfer logic
+}
+```
+
+**4. Kết quả:**
+
+- ✅ **Auto-detect type** khi edit không có type parameter
+- ✅ **Fallback logic** từ local state đến API calls
+- ✅ **Proper routing** cho cả tour và transfer
+- ✅ **Debug logging** để track detection process
+- ✅ **Edit functionality** hoạt động cho cả tour và transfer
+
+**Tour/Transfer Edit giờ đã hoạt động chính xác!** 🎯

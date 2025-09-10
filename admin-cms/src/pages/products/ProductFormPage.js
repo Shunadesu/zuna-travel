@@ -20,6 +20,7 @@ const ProductFormPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(isEditing);
+  const [productType, setProductType] = useState(type);
 
   const [formData, setFormData] = useState({
     title: {
@@ -93,8 +94,9 @@ const ProductFormPage = () => {
     }
   }, [id, fetchTourCategories, fetchTransferCategories]);
 
-  // Get current categories based on type
-  const categories = type === 'vietnam-tours' ? tourCategories : transferCategories;
+  // Get current categories based on type (use productType if available, fallback to type)
+  const currentType = productType || type;
+  const categories = currentType === 'vietnam-tours' ? tourCategories : transferCategories;
   const filteredCategories = categories || [];
   
   // Auto-select first category of the specified type
@@ -111,10 +113,51 @@ const ProductFormPage = () => {
     try {
       setInitialLoading(true);
       let product;
+      let detectedType = type; // Use type from URL if available
       
-      console.log('Fetching product with ID:', id, 'Type:', type);
+      console.log('Fetching product with ID:', id, 'Type from URL:', type);
       
-      if (type === 'vietnam-tours') {
+      // If no type in URL (edit mode), try to determine from product data
+      if (!type && isEditing) {
+        console.log('No type in URL, trying to determine from product data...');
+        
+        // Try to find in tours first
+        product = getTourById(id);
+        if (product) {
+          detectedType = 'vietnam-tours';
+          console.log('Found product in tours, type:', detectedType);
+        } else {
+          // Try to find in transfers
+          product = getTransferById(id);
+          if (product) {
+            detectedType = 'transfer-services';
+            console.log('Found product in transfers, type:', detectedType);
+          }
+        }
+        
+        // If still not found, try API calls
+        if (!product) {
+          console.log('Product not found in local state, trying API calls...');
+          try {
+            product = await fetchTourById(id);
+            if (product) {
+              detectedType = 'vietnam-tours';
+              console.log('Found product via tour API, type:', detectedType);
+            }
+          } catch (error) {
+            console.log('Tour API failed, trying transfer API...');
+            try {
+              product = await fetchTransferById(id);
+              if (product) {
+                detectedType = 'transfer-services';
+                console.log('Found product via transfer API, type:', detectedType);
+              }
+            } catch (transferError) {
+              console.log('Both API calls failed');
+            }
+          }
+        }
+      } else if (type === 'vietnam-tours') {
         product = getTourById(id);
         console.log('Initial tour product:', product);
         if (!product) {
@@ -129,7 +172,7 @@ const ProductFormPage = () => {
             console.log('Tour after fetch all:', product);
           }
         }
-      } else {
+      } else if (type === 'transfer-services') {
         product = getTransferById(id);
         console.log('Initial transfer product:', product);
         if (!product) {
@@ -146,7 +189,10 @@ const ProductFormPage = () => {
         }
       }
       
-      console.log('Final product:', product);
+      console.log('Final product:', product, 'Final detectedType:', detectedType);
+      
+      // Set the product type state
+      setProductType(detectedType);
       
       if (!product) {
         // Check if the error is because the product doesn't exist
@@ -366,7 +412,7 @@ const ProductFormPage = () => {
     }
 
     // Duration validation
-    if (type === 'vietnam-tours') {
+    if (currentType === 'vietnam-tours') {
       if (!formData.duration.days || parseInt(formData.duration.days) <= 0) {
         errors.push('Duration days must be greater than 0');
         setValidationErrors(prev => ({ ...prev, duration: 'Duration days must be greater than 0' }));
@@ -416,7 +462,7 @@ const ProductFormPage = () => {
     // }
 
     // Tour specific validations - OPTIONAL
-    if (type === 'vietnam-tours') {
+    if (currentType === 'vietnam-tours') {
       // Highlights validation - OPTIONAL
       // if (!formData.highlights || formData.highlights.length === 0) {
       //   errors.push('At least one highlight is required');
@@ -457,7 +503,7 @@ const ProductFormPage = () => {
       };
 
       // Handle duration based on type
-      if (type === 'vietnam-tours') {
+      if (currentType === 'vietnam-tours') {
         submitData.duration = {
           days: formData.duration.days ? parseInt(formData.duration.days) : undefined,
           nights: formData.duration.nights ? parseInt(formData.duration.nights) : undefined
@@ -478,7 +524,7 @@ const ProductFormPage = () => {
       }
 
       // Only include tour-specific fields for tours
-      if (type === 'vietnam-tours') {
+      if (currentType === 'vietnam-tours') {
         submitData.highlights = formData.highlights;
         submitData.included = formData.included;
         submitData.excluded = formData.excluded;
@@ -490,14 +536,14 @@ const ProductFormPage = () => {
       }
 
       if (isEditing) {
-        if (type === 'vietnam-tours') {
+        if (currentType === 'vietnam-tours') {
           await updateTour(id, submitData);
         } else {
           await updateTransfer(id, submitData);
         }
         toast.success(t('products.updateSuccess'));
       } else {
-        if (type === 'vietnam-tours') {
+        if (currentType === 'vietnam-tours') {
           await createTour(submitData);
         } else {
           await createTransfer(submitData);
@@ -749,7 +795,7 @@ const ProductFormPage = () => {
           </div>
 
           {/* Duration */}
-          {type === 'vietnam-tours' ? (
+          {currentType === 'vietnam-tours' ? (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -951,7 +997,7 @@ const ProductFormPage = () => {
           )}
 
           {/* Highlights - Only for tours */}
-          {type === 'vietnam-tours' && (
+          {currentType === 'vietnam-tours' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('products.highlights')}
@@ -1001,7 +1047,7 @@ const ProductFormPage = () => {
           )}
 
           {/* Included - Only for tours */}
-          {type === 'vietnam-tours' && (
+          {currentType === 'vietnam-tours' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('products.included')}
@@ -1051,7 +1097,7 @@ const ProductFormPage = () => {
           )}
 
           {/* Excluded - Only for tours */}
-          {type === 'vietnam-tours' && (
+          {currentType === 'vietnam-tours' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t('products.excluded')}
