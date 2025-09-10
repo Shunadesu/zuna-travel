@@ -136,10 +136,19 @@ const TransferDetailPage = () => {
         customerInfo: bookingData.customerInfo,
         transferDetails: {
           name: transfer.title?.en || transfer.title,
+          from: transfer.from?.en || transfer.from,
+          to: transfer.to?.en || transfer.to,
+          duration: transfer.duration || 0,
+          vehicleType: transfer.category?.vehicleType,
+          serviceType: transfer.category?.serviceType,
           category: transfer.category?.name?.en || transfer.category?.name,
-          seats: transfer.category?.seats,
-          duration: transfer.duration?.days || 1,
-          price: transfer.pricing?.adult
+          route: transfer.route,
+          distance: transfer.distance,
+          pricing: {
+            adult: transfer.pricing?.adult,
+            child: transfer.pricing?.child,
+            currency: transfer.pricing?.currency
+          }
         },
         specialRequests: bookingData.specialRequests
       };
@@ -282,7 +291,7 @@ const TransferDetailPage = () => {
               <div className="flex items-center">
                 <CurrencyDollarIcon className="h-5 w-5 text-blue-600 mr-2" />
                 <span className="text-gray-700">
-                  {transfer.pricing?.currency || 'USD'} {transfer.pricing?.perTrip || '0'} {t('transfers.perTrip') || 'per trip'}
+                  {transfer.pricing?.currency || 'USD'} {transfer.pricing?.adult || '0'} {t('transfers.perTrip') || 'per trip'}
                 </span>
               </div>
             </div>
@@ -381,12 +390,20 @@ const TransferDetailPage = () => {
                       <p className="font-medium">{transfer.category?.name?.en || transfer.category?.name || 'Transfer Service'}</p>
                     </div>
                     <div>
-                      <span className="text-gray-600">Seats:</span>
-                      <p className="font-medium">{transfer.category?.seats || 'Flexible'} seats</p>
+                      <span className="text-gray-600">Vehicle:</span>
+                      <p className="font-medium">{transfer.category?.vehicleType || 'Car'}</p>
                     </div>
                     <div>
                       <span className="text-gray-600">Duration:</span>
-                      <p className="font-medium">{transfer.duration?.days || 1} day</p>
+                      <p className="font-medium">{transfer.duration || 0} minutes</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">From:</span>
+                      <p className="font-medium">{transfer.from?.en || transfer.from}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">To:</span>
+                      <p className="font-medium">{transfer.to?.en || transfer.to}</p>
                     </div>
                   </div>
                 </div>

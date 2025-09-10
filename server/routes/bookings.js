@@ -1,9 +1,52 @@
 const express = require('express');
 const Booking = require('../models/Booking');
-const Product = require('../models/Product');
+const Tour = require('../models/Tour');
+const Transfer = require('../models/Transfer');
 const { protect, optionalAuth } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Helper function to populate product based on type
+const populateProduct = async (booking) => {
+  if (booking.productType === 'tour') {
+    await booking.populate({
+      path: 'productId',
+      model: 'Tour',
+      populate: {
+        path: 'category',
+        model: 'TourCategory'
+      }
+    });
+  } else if (booking.productType === 'transfer') {
+    await booking.populate({
+      path: 'productId',
+      model: 'Transfer',
+      populate: {
+        path: 'category',
+        model: 'TransferCategory'
+      }
+    });
+  } else {
+    // Fallback to Product model
+    await booking.populate({
+      path: 'productId',
+      model: 'Product',
+      populate: {
+        path: 'category',
+        model: 'Category'
+      }
+    });
+  }
+  return booking;
+};
+
+// Helper function to populate multiple bookings
+const populateBookings = async (bookings) => {
+  for (let booking of bookings) {
+    await populateProduct(booking);
+  }
+  return bookings;
+};
 
 // @desc    Create a new booking
 // @route   POST /api/bookings
@@ -22,8 +65,16 @@ router.post('/', optionalAuth, async (req, res) => {
       specialRequests
     } = req.body;
 
-    // Validate product exists
-    const product = await Product.findById(productId);
+    // Validate product exists based on type
+    let product;
+    if (productType === 'tour') {
+      product = await Tour.findById(productId);
+    } else if (productType === 'transfer') {
+      product = await Transfer.findById(productId);
+    } else {
+      return res.status(400).json({ message: 'Invalid product type. Must be tour or transfer.' });
+    }
+    
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
@@ -62,7 +113,7 @@ router.post('/', optionalAuth, async (req, res) => {
     const booking = await Booking.create(bookingData);
     
     // Populate product details
-    await booking.populate('productId');
+    await populateProduct(booking);
 
     res.status(201).json({
       message: 'Booking created successfully',
@@ -89,10 +140,12 @@ router.get('/my-bookings', protect, async (req, res) => {
     }
 
     const bookings = await Booking.find(query)
-      .populate('productId')
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip((page - 1) * limit);
+
+    // Populate products
+    await populateBookings(bookings);
 
     const total = await Booking.countDocuments(query);
 
@@ -117,8 +170,11 @@ router.get('/my-bookings', protect, async (req, res) => {
 router.get('/:id', protect, async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id)
-      .populate('productId')
       .populate('user', 'name email phone');
+    
+    if (booking) {
+      await populateProduct(booking);
+    }
 
     if (!booking) {
       return res.status(404).json({ message: 'Booking not found' });
@@ -252,10 +308,12 @@ router.get('/guest/:email', async (req, res) => {
     }
 
     const bookings = await Booking.find(query)
-      .populate('productId')
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip((page - 1) * limit);
+
+    // Populate products
+    await populateBookings(bookings);
 
     const total = await Booking.countDocuments(query);
 
@@ -279,10 +337,6 @@ router.get('/guest/:email', async (req, res) => {
 // @access  Private/Admin
 router.get('/', protect, async (req, res) => {
   try {
-    // Check if user is admin
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Admin access required' });
-    }
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -306,11 +360,13 @@ router.get('/', protect, async (req, res) => {
      }
 
     const bookings = await Booking.find(query)
-      .populate('productId')
       .populate('user', 'name email phone')
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip((page - 1) * limit);
+
+    // Populate products
+    await populateBookings(bookings);
 
     const total = await Booking.countDocuments(query);
 

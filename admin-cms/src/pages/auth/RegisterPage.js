@@ -68,15 +68,13 @@ const RegisterPage = () => {
       setLoading(true);
 
       const response = await apiClient.post('/auth/register', {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
-        phone: formData.phone,
         password: formData.password
       });
 
       toast.success('Registration successful! Please log in.');
-      navigate('/login');
+      navigate('/auth/login');
     } catch (error) {
       console.error('Registration error:', error);
       toast.error(error.response?.data?.message || 'Registration failed');
@@ -95,7 +93,7 @@ const RegisterPage = () => {
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}
             <Link
-              to="/login"
+              to="/auth/login"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               sign in to your existing account

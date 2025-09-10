@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, PhotoIcon, MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
-import { useTourStore, useTransferStore, useCategoryStore } from '../../stores';
+import { useTourStore, useTransferStore, useTourCategoryStore, useTransferCategoryStore } from '../../stores';
 import toast from 'react-hot-toast';
 
 const ProductsPage = () => {
   const { t } = useTranslation();
   const { tours, fetchTours, deleteTour, loading: toursLoading } = useTourStore();
   const { transfers, fetchTransfers, deleteTransfer, loading: transfersLoading } = useTransferStore();
-  const { categories, fetchCategories } = useCategoryStore();
+  const { categories: tourCategories, fetchCategories: fetchTourCategories } = useTourCategoryStore();
+  const { categories: transferCategories, fetchCategories: fetchTransferCategories } = useTransferCategoryStore();
   const [deleteLoading, setDeleteLoading] = useState(null);
   
   // Filter states
@@ -21,11 +22,15 @@ const ProductsPage = () => {
 
   const loading = toursLoading || transfersLoading;
 
+  // Get current categories based on active tab
+  const categories = activeTab === 'vietnam-tours' ? tourCategories : transferCategories;
+
   useEffect(() => {
     fetchTours();
     fetchTransfers();
-    fetchCategories();
-  }, [fetchTours, fetchTransfers, fetchCategories]);
+    fetchTourCategories();
+    fetchTransferCategories();
+  }, [fetchTours, fetchTransfers, fetchTourCategories, fetchTransferCategories]);
 
   const handleDelete = async (id, type) => {
     if (!window.confirm('Are you sure you want to delete this product?')) {
@@ -71,9 +76,9 @@ const ProductsPage = () => {
   const currentProducts = activeTab === 'vietnam-tours' ? tours : transfers;
 
   // Filter products by tab and other criteria
-  const filteredProducts = currentProducts.filter(product => {
-    const matchesSearch = product.title.en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.title.vi.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredProducts = (currentProducts || []).filter(product => {
+    const matchesSearch = product.title?.en?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.title?.vi?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = !selectedCategory || product.category?.slug === selectedCategory;
     
@@ -184,8 +189,7 @@ const ProductsPage = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">All Categories</option>
-              {categories
-                .filter(category => category.type === activeTab)
+              {(categories || [])
                 .map((category) => (
                   <option key={category._id} value={category.slug}>
                     {category.name.en}

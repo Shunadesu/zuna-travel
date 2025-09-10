@@ -29,7 +29,6 @@ const bookingSchema = new mongoose.Schema({
   // Product information
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
     required: true
   },
   productType: {
@@ -54,7 +53,16 @@ const bookingSchema = new mongoose.Schema({
     from: String,
     to: String,
     duration: Number,
-    vehicle: String
+    vehicleType: String,
+    serviceType: String,
+    category: String,
+    route: String,
+    distance: Number,
+    pricing: {
+      adult: Number,
+      child: Number,
+      currency: String
+    }
   },
   
   // Booking details

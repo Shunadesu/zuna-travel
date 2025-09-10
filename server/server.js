@@ -6,16 +6,20 @@ const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 require('dotenv').config();
 
+// Initialize Cloudinary
+require('./config/cloudinary');
+
 const authRoutes = require('./routes/auth');
-const usersRoutes = require('./routes/users');
+const userRoutes = require('./routes/users');
 const categoryRoutes = require('./routes/categories');
-const productRoutes = require('./routes/products');
-const tourRoutes = require('./routes/tours');
-const transferRoutes = require('./routes/transfers');
 const blogRoutes = require('./routes/blogs');
 const uploadRoutes = require('./routes/upload');
 const settingsRoutes = require('./routes/settings');
 const bookingRoutes = require('./routes/bookings');
+const tourRoutes = require('./routes/tours');
+const transferRoutes = require('./routes/transfers');
+const tourCategoryRoutes = require('./routes/tourCategories');
+const transferCategoryRoutes = require('./routes/transferCategories');
 
 const app = express();
 
@@ -62,15 +66,16 @@ mongoose.connect(process.env.MONGODB_URI, {
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/users', usersRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/tours', tourRoutes);
-app.use('/api/transfers', transferRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/tours', tourRoutes);
+app.use('/api/transfers', transferRoutes);
+app.use('/api/tour-categories', tourCategoryRoutes);
+app.use('/api/transfer-categories', transferCategoryRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

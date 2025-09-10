@@ -13,49 +13,50 @@ import {
   TruckIcon,
   PhoneIcon
 } from '@heroicons/react/24/outline';
-import { useSettingsStore, useCategoryStore, useTourStore, useTransferStore } from '../stores';
+import { useSettingsStore, useTourCategoryStore, useTransferCategoryStore, useTourStore, useTransferStore } from '../stores';
 import HeroSwiper from '../components/home/HeroSwiper';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const HomePage = () => {
   const { t, i18n } = useTranslation();
   const { settings, fetchSettings, loading: settingsLoading } = useSettingsStore();
-  const { categories, fetchCategories, loading: categoriesLoading } = useCategoryStore();
+  const { categories: tourCategories, fetchCategories: fetchTourCategories, loading: tourCategoriesLoading } = useTourCategoryStore();
+  const { categories: transferCategories, fetchCategories: fetchTransferCategories, loading: transferCategoriesLoading } = useTransferCategoryStore();
   const { tours, fetchTours, loading: toursLoading } = useTourStore();
   const { transfers, fetchTransfers, loading: transfersLoading } = useTransferStore();
   const [activeCategoryTab, setActiveCategoryTab] = useState('');
 
   // Check if any data is still loading
-  const isLoading = settingsLoading || categoriesLoading || toursLoading || transfersLoading;
+  const isLoading = settingsLoading || tourCategoriesLoading || transferCategoriesLoading || toursLoading || transfersLoading;
   
   // Check if we have any data to show
-  const hasData = settings || categories?.length > 0 || tours?.length > 0 || transfers?.length > 0;
+  const hasData = settings || tourCategories?.length > 0 || transferCategories?.length > 0 || tours?.length > 0 || transfers?.length > 0;
 
   useEffect(() => {
     // Fetch all data in parallel for better performance
     Promise.all([
       fetchSettings(),
-      fetchCategories(),
+      fetchTourCategories(),
+      fetchTransferCategories(),
       fetchTours(),
       fetchTransfers()
     ]).catch(error => {
       console.error('Error fetching data:', error);
     });
-  }, [fetchSettings, fetchCategories, fetchTours, fetchTransfers]);
+  }, [fetchSettings, fetchTourCategories, fetchTransferCategories, fetchTours, fetchTransfers]);
 
-  const activeCategories = categories?.filter(cat => cat.isActive) || [];
-  const tourCategories = activeCategories.filter(cat => cat.type === 'vietnam-tours');
-  const transferCategories = activeCategories.filter(cat => cat.type === 'transfer-services');
+  const activeTourCategories = tourCategories?.filter(cat => cat.isActive) || [];
+  const activeTransferCategories = transferCategories?.filter(cat => cat.isActive) || [];
   
   const featuredTours = tours?.filter(tour => tour.isFeatured).slice(0, 6) || [];
   const featuredTransfers = transfers?.filter(transfer => transfer.isFeatured).slice(0, 3) || [];
 
   // Set default active tab to first category if available
   useEffect(() => {
-    if (tourCategories.length > 0 && !activeCategoryTab) {
-      setActiveCategoryTab(tourCategories[0].slug);
+    if (activeTourCategories.length > 0 && !activeCategoryTab) {
+      setActiveCategoryTab(activeTourCategories[0].slug);
     }
-  }, [tourCategories, activeCategoryTab]);
+  }, [activeTourCategories, activeCategoryTab]);
 
   // Get tours for the active category tab
   const getToursByCategory = (categorySlug) => {
@@ -150,7 +151,7 @@ const HomePage = () => {
                   </div>
                 ))
               ) : (
-                tourCategories.slice(0, 4).map((category, index) => (
+                activeTourCategories.slice(0, 4).map((category, index) => (
                 <Link 
                   key={category._id} 
                   to={`/tours?category=${category.slug}`} 
@@ -204,7 +205,7 @@ const HomePage = () => {
         </section>
 
         {/* Tour Categories Tabs Section */}
-      {(isLoading || tourCategories.length > 0) && (
+      {(isLoading || activeTourCategories.length > 0) && (
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
@@ -224,7 +225,7 @@ const HomePage = () => {
                   <div key={index} className="h-12 w-32 bg-gray-200 rounded-full animate-pulse"></div>
                 ))
               ) : (
-                tourCategories.map((category) => (
+                activeTourCategories.map((category) => (
                 <button
                   key={category._id}
                   onClick={() => setActiveCategoryTab(category.slug)}

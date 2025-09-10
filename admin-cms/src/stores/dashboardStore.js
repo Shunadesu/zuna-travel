@@ -7,7 +7,11 @@ const useDashboardStore = create((set, get) => ({
     totalCategories: 0,
     totalProducts: 0,
     totalBlogs: 0,
-    totalUsers: 0
+    totalUsers: 0,
+    totalTours: 0,
+    totalTransfers: 0,
+    totalTourCategories: 0,
+    totalTransferCategories: 0
   },
   recentActivities: [],
   featuredProducts: [],
@@ -36,8 +40,9 @@ const useDashboardStore = create((set, get) => ({
 
     try {
       // Fetch all data in parallel
-      const [categoriesRes, toursRes, transfersRes, blogsRes, usersRes, featuredToursRes, featuredTransfersRes, featuredBlogsRes] = await Promise.all([
-        apiClient.get('/categories'),
+      const [tourCategoriesRes, transferCategoriesRes, toursRes, transfersRes, blogsRes, usersRes, featuredToursRes, featuredTransfersRes, featuredBlogsRes] = await Promise.all([
+        apiClient.get('/tour-categories'),
+        apiClient.get('/transfer-categories'),
         apiClient.get('/tours'),
         apiClient.get('/transfers'),
         apiClient.get('/blogs'),
@@ -48,17 +53,22 @@ const useDashboardStore = create((set, get) => ({
       ]);
 
       const allProducts = [...(toursRes.data.data || []), ...(transfersRes.data.data || [])];
+      const allCategories = [...(tourCategoriesRes.data.data || []), ...(transferCategoriesRes.data.data || [])];
       
       const stats = {
-        totalCategories: categoriesRes.data.data?.length || 0,
+        totalCategories: allCategories.length,
         totalProducts: allProducts.length,
         totalBlogs: blogsRes.data.data?.length || 0,
-        totalUsers: usersRes.data.data?.length || 0
+        totalUsers: usersRes.data.data?.length || 0,
+        totalTours: toursRes.data.data?.length || 0,
+        totalTransfers: transfersRes.data.data?.length || 0,
+        totalTourCategories: tourCategoriesRes.data.data?.length || 0,
+        totalTransferCategories: transferCategoriesRes.data.data?.length || 0
       };
 
       // Generate recent activities from the data
       const recentActivities = generateRecentActivities(
-        categoriesRes.data.data,
+        allCategories,
         allProducts,
         blogsRes.data.data
       );
@@ -95,7 +105,11 @@ const useDashboardStore = create((set, get) => ({
       totalCategories: 0,
       totalProducts: 0,
       totalBlogs: 0,
-      totalUsers: 0
+      totalUsers: 0,
+      totalTours: 0,
+      totalTransfers: 0,
+      totalTourCategories: 0,
+      totalTransferCategories: 0
     },
     recentActivities: [],
     featuredProducts: [],

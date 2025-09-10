@@ -33,14 +33,9 @@ export const AuthProvider = ({ children }) => {
       const response = await apiClient.post('/auth/login', { email, password });
       const userData = response.data;
       
-      // Store token and user based on role
-      if (userData.role === 'admin') {
-        localStorage.setItem('adminToken', userData.token);
-        localStorage.setItem('adminUser', JSON.stringify(userData));
-      } else {
-        localStorage.setItem('userToken', userData.token);
-        localStorage.setItem('user', JSON.stringify(userData));
-      }
+      // Store token and user
+      localStorage.setItem('adminToken', userData.token);
+      localStorage.setItem('adminUser', JSON.stringify(userData));
       
       apiClient.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
       setUser(userData);
@@ -55,11 +50,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // Clear all auth data
+    // Clear auth data
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
-    localStorage.removeItem('userToken');
-    localStorage.removeItem('user');
     delete apiClient.defaults.headers.common['Authorization'];
     setUser(null);
     navigate('/auth/login');

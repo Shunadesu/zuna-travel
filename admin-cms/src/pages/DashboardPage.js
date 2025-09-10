@@ -7,7 +7,9 @@ import {
   CubeIcon, 
   DocumentTextIcon,
   PlusIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  MapIcon,
+  TruckIcon
 } from '@heroicons/react/24/outline';
 import useDashboardStore from '../stores/dashboardStore';
 import LoadingState from '../components/common/LoadingState';
@@ -43,10 +45,12 @@ const DashboardPage = () => {
   }, [error, clearError]);
 
   const statsData = [
-    { name: t('dashboard.stats.totalCategories'), value: stats.totalCategories, icon: FolderIcon, color: 'bg-blue-500' },
-    { name: t('dashboard.stats.totalProducts'), value: stats.totalProducts, icon: CubeIcon, color: 'bg-green-500' },
-    { name: t('dashboard.stats.totalBlogs'), value: stats.totalBlogs, icon: DocumentTextIcon, color: 'bg-purple-500' },
-    { name: 'Total Users', value: stats.totalUsers, icon: UsersIcon, color: 'bg-yellow-500' },
+    { name: 'Total Tours', value: stats.totalTours, icon: MapIcon, color: 'bg-blue-500', link: '/admin/products?type=vietnam-tours' },
+    { name: 'Total Transfers', value: stats.totalTransfers, icon: TruckIcon, color: 'bg-green-500', link: '/admin/products?type=transfer-services' },
+    { name: 'Tour Categories', value: stats.totalTourCategories, icon: FolderIcon, color: 'bg-purple-500', link: '/admin/categories?type=vietnam-tours' },
+    { name: 'Transfer Categories', value: stats.totalTransferCategories, icon: FolderIcon, color: 'bg-orange-500', link: '/admin/categories?type=transfer-services' },
+    { name: t('dashboard.stats.totalBlogs'), value: stats.totalBlogs, icon: DocumentTextIcon, color: 'bg-indigo-500', link: '/admin/blogs' },
+    { name: 'Total Users', value: stats.totalUsers, icon: UsersIcon, color: 'bg-yellow-500', link: '/admin/users' },
   ];
 
   if (loading) {
@@ -70,7 +74,7 @@ const DashboardPage = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {statsData.map((item) => (
           <StatCard
             key={item.name}
@@ -78,6 +82,7 @@ const DashboardPage = () => {
             value={item.value}
             icon={item.icon}
             color={item.color}
+            link={item.link}
           />
         ))}
       </div>
@@ -108,18 +113,32 @@ const DashboardPage = () => {
           <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
           <div className="space-y-3">
             <Link
-              to="/admin/products/create"
+              to="/admin/products/create/vietnam-tours"
               className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
             >
               <PlusIcon className="h-4 w-4 mr-2" />
-              Add New Product
+              Add New Tour
             </Link>
             <Link
-              to="/admin/categories/create"
+              to="/admin/products/create/transfer-services"
               className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
             >
               <PlusIcon className="h-4 w-4 mr-2" />
-              Create New Category
+              Add New Transfer
+            </Link>
+            <Link
+              to="/admin/categories/create/vietnam-tours"
+              className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Create Tour Category
+            </Link>
+            <Link
+              to="/admin/categories/create/transfer-services"
+              className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Create Transfer Category
             </Link>
             <Link
               to="/admin/blogs/create"

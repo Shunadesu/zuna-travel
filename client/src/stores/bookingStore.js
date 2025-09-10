@@ -13,12 +13,38 @@ const useBookingStore = create((set, get) => ({
   createBooking: async (bookingData) => {
     try {
       set({ loading: true, error: null });
+      
+      // Validate booking data
+      if (!bookingData.productId || !bookingData.productType) {
+        throw new Error('Thiếu thông tin sản phẩm');
+      }
+      
+      if (!bookingData.customerInfo?.email || !bookingData.customerInfo?.phone) {
+        throw new Error('Thiếu thông tin liên hệ');
+      }
+      
+      if (!bookingData.travelDate) {
+        throw new Error('Thiếu ngày du lịch');
+      }
+      
       const response = await api.bookings.create(bookingData);
-      set({ loading: false });
+      
+      // Add to local bookings if it's a user booking
+      const { bookings } = get();
+      if (response.data.booking) {
+        set({ 
+          bookings: [response.data.booking, ...bookings],
+          loading: false 
+        });
+      } else {
+        set({ loading: false });
+      }
+      
       return response.data;
     } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'Không thể tạo booking';
       set({ 
-        error: error.response?.data?.message || 'Failed to create booking', 
+        error: errorMessage, 
         loading: false 
       });
       throw error;
@@ -141,6 +167,15 @@ const useBookingStore = create((set, get) => ({
   fetchGuestBookings: async (email, params = {}) => {
     try {
       set({ loading: true, error: null });
+      
+      // Validate email format if provided
+      if (email && !params.phone) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          throw new Error('Địa chỉ email không hợp lệ');
+        }
+      }
+      
       const response = await api.bookings.getGuestBookings(email, params);
       set({ 
         bookings: response.data.bookings, 
@@ -149,8 +184,9 @@ const useBookingStore = create((set, get) => ({
       });
       return response.data;
     } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || 'Không thể tìm thấy booking';
       set({ 
-        error: error.response?.data?.message || 'Failed to fetch guest bookings', 
+        error: errorMessage, 
         loading: false 
       });
       throw error;

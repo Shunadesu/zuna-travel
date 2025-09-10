@@ -22,7 +22,10 @@ const FeaturedContent = ({ title, items, type, emptyMessage }) => {
 
   const getSubtitle = (item) => {
     if (type === 'product') {
-      return `$${item.pricing?.adult || 0}`;
+      const price = item.pricing?.adult || 0;
+      const currency = item.pricing?.currency || 'USD';
+      const productType = item.category?.type || 'product';
+      return `${currency} ${price} • ${productType === 'vietnam-tours' ? 'Tour' : 'Transfer'}`;
     } else if (type === 'blog') {
       return item.author?.name || 'Unknown Author';
     }
@@ -83,6 +86,7 @@ const FeaturedContent = ({ title, items, type, emptyMessage }) => {
 };
 
 export default FeaturedContent;
+
 
 
 

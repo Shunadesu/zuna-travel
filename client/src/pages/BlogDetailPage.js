@@ -74,14 +74,14 @@ const BlogDetailPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Blog not found</h2>
-          <p className="text-gray-600 mb-6">The blog post you're looking for doesn't exist.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Không tìm thấy blog</h2>
+          <p className="text-gray-600 mb-6">Bài viết blog bạn đang tìm kiếm không tồn tại.</p>
           <Link 
             to="/blog" 
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             <ArrowLeftIcon className="w-4 h-4 mr-2" />
-            Back to Blog
+            Quay lại Blog
           </Link>
         </div>
       </div>
@@ -169,7 +169,7 @@ const BlogDetailPage = () => {
               </div>
               <div className="flex items-center text-sm text-gray-500">
                 <EyeIcon className="w-4 h-4 mr-1" />
-                {blog?.views || 0} views
+                {blog?.views || 0} lượt xem
               </div>
             </div>
           )}
@@ -232,7 +232,7 @@ const BlogDetailPage = () => {
           <div className="mt-8 pt-8 border-t border-gray-200">
             <div className="flex items-center space-x-2">
               <TagIcon className="w-5 h-5 text-gray-400" />
-              <span className="text-sm font-medium text-gray-700">Tags:</span>
+              <span className="text-sm font-medium text-gray-700">Thẻ:</span>
               {blog.tags.map((tag, index) => (
                 <span
                   key={index}
@@ -259,8 +259,8 @@ const BlogDetailPage = () => {
             <div>
               <h3 className="font-semibold text-gray-900">{blog.author?.name || 'Admin'}</h3>
               <p className="text-gray-600">
-                Travel enthusiast and writer with years of experience exploring the world. 
-                Passionate about sharing travel tips and inspiring others to discover new destinations.
+                Người đam mê du lịch và viết lách với nhiều năm kinh nghiệm khám phá thế giới. 
+                Đam mê chia sẻ mẹo du lịch và truyền cảm hứng cho người khác khám phá những điểm đến mới.
               </p>
             </div>
           </div>
@@ -270,7 +270,7 @@ const BlogDetailPage = () => {
       {/* Related Posts */}
       {relatedBlogs.length > 0 && (
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Posts</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Bài viết liên quan</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {relatedBlogs.map((relatedBlog) => (
               <article key={relatedBlog._id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
@@ -300,7 +300,7 @@ const BlogDetailPage = () => {
                     to={`/blog/${relatedBlog.slug}`}
                     className="text-blue-600 hover:text-blue-700 text-sm font-medium"
                   >
-                    Read More →
+                    Đọc thêm →
                   </Link>
                 </div>
               </article>
@@ -311,10 +311,10 @@ const BlogDetailPage = () => {
 
       {/* Comments Section */}
       <div className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Comments</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Bình luận</h2>
         <div className="bg-gray-50 rounded-lg p-6">
           <p className="text-gray-600 text-center">
-            Comments feature coming soon! Share your thoughts and experiences.
+            Tính năng bình luận sắp ra mắt! Chia sẻ suy nghĩ và trải nghiệm của bạn.
           </p>
         </div>
       </div>
@@ -322,18 +322,18 @@ const BlogDetailPage = () => {
       {/* Newsletter Signup */}
       <div className="bg-blue-50 rounded-lg p-8">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Stay Updated</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Cập nhật thông tin</h2>
           <p className="text-gray-600 mb-6">
-            Subscribe to our newsletter for the latest travel tips, destination guides, and exclusive offers.
+            Đăng ký nhận bản tin để nhận những mẹo du lịch mới nhất, hướng dẫn điểm đến và ưu đãi độc quyền.
           </p>
           <div className="max-w-md mx-auto flex">
             <input
               type="email"
-              placeholder="Enter your email"
+              placeholder="Nhập email của bạn"
               className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <button className="bg-blue-600 text-white px-6 py-2 rounded-r-lg hover:bg-blue-700 transition-colors">
-              Subscribe
+              Đăng ký
             </button>
           </div>
         </div>

@@ -7,6 +7,8 @@ const ApiContext = createContext();
 
 // API base URL
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://zuna-travel.onrender.com/api';
+// const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 
 // Create axios instance
 const api = axios.create({
@@ -104,7 +106,62 @@ const apiMethods = {
     getStats: (id) => api.get(`/categories/${id}/stats`),
   },
 
-  // Products
+  // Tours
+  tours: {
+    getAll: (params = {}) => api.get('/tours', { params }),
+    getBySlug: (slug) => api.get(`/tours/slug/${slug}`),
+    getById: (id) => api.get(`/tours/${id}`),
+    getFeatured: (params = {}) => api.get('/tours/featured/list', { params }),
+    search: (query, params = {}) => api.get('/tours/search/text', { params: { q: query, ...params } }),
+    create: (data) => api.post('/tours', data),
+    update: (id, data) => api.put(`/tours/${id}`, data),
+    delete: (id) => api.delete(`/tours/${id}`),
+  },
+
+  // Transfers
+  transfers: {
+    getAll: (params = {}) => api.get('/transfers', { params }),
+    getBySlug: (slug) => api.get(`/transfers/slug/${slug}`),
+    getById: (id) => api.get(`/transfers/${id}`),
+    getFeatured: (params = {}) => api.get('/transfers/featured/list', { params }),
+    search: (query, params = {}) => api.get('/transfers/search/text', { params: { q: query, ...params } }),
+    getTypes: () => api.get('/transfers/types'),
+    getSeats: () => api.get('/transfers/seats'),
+    getPopularRoutes: (params = {}) => api.get('/transfers/routes/popular', { params }),
+    create: (data) => api.post('/transfers', data),
+    update: (id, data) => api.put(`/transfers/${id}`, data),
+    delete: (id) => api.delete(`/transfers/${id}`),
+  },
+
+  // Tour Categories
+  tourCategories: {
+    getAll: (params = {}) => api.get('/tour-categories', { params }),
+    getBySlug: (slug) => api.get(`/tour-categories/slug/${slug}`),
+    getById: (id) => api.get(`/tour-categories/${id}`),
+    getFeatured: (params = {}) => api.get('/tour-categories/featured/list', { params }),
+    getByRegion: (region) => api.get(`/tour-categories/region/${region}`),
+    getRegions: () => api.get('/tour-categories/regions'),
+    create: (data) => api.post('/tour-categories', data),
+    update: (id, data) => api.put(`/tour-categories/${id}`, data),
+    delete: (id) => api.delete(`/tour-categories/${id}`),
+  },
+
+  // Transfer Categories
+  transferCategories: {
+    getAll: (params = {}) => api.get('/transfer-categories', { params }),
+    getBySlug: (slug) => api.get(`/transfer-categories/slug/${slug}`),
+    getById: (id) => api.get(`/transfer-categories/${id}`),
+    getFeatured: (params = {}) => api.get('/transfer-categories/featured/list', { params }),
+    getByVehicleType: (vehicleType) => api.get(`/transfer-categories/vehicle/${vehicleType}`),
+    getByRegion: (region) => api.get(`/transfer-categories/region/${region}`),
+    getVehicleTypes: () => api.get('/transfer-categories/vehicle-types'),
+    getRegions: () => api.get('/transfer-categories/regions'),
+    create: (data) => api.post('/transfer-categories', data),
+    update: (id, data) => api.put(`/transfer-categories/${id}`, data),
+    delete: (id) => api.delete(`/transfer-categories/${id}`),
+  },
+
+  // Products (Legacy - for backward compatibility)
   products: {
     getAll: (params = {}) => api.get('/products', { params }),
     getBySlug: (slug) => api.get(`/products/slug/${slug}`),
@@ -116,18 +173,6 @@ const apiMethods = {
     delete: (id) => api.delete(`/products/${id}`),
   },
 
-  // Transfer Services
-  transfers: {
-    getAll: (params = {}) => api.get('/transfers', { params }),
-    getBySlug: (slug) => api.get(`/transfers/slug/${slug}`),
-    search: (params = {}) => api.get('/transfers/search', { params }),
-    getTypes: () => api.get('/transfers/types'),
-    getSeats: () => api.get('/transfers/seats'),
-    getPopularRoutes: (params = {}) => api.get('/transfers/routes/popular', { params }),
-    create: (data) => api.post('/transfers', data),
-    update: (id, data) => api.put(`/transfers/${id}`, data),
-    delete: (id) => api.delete(`/transfers/${id}`),
-  },
 
   // Blogs
   blogs: {

@@ -124,7 +124,7 @@ const AboutPage = () => {
       </div>
 
       {/* Our Values */}
-      <div className="mb-16">
+      {/* <div className="mb-16">
         <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Our Values</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {values.map((value, index) => (
@@ -135,10 +135,10 @@ const AboutPage = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Team */}
-      <div className="mb-16">
+      {/* <div className="mb-16">
         <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Meet Our Team</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {teamMembers.map((member, index) => (
@@ -163,7 +163,7 @@ const AboutPage = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Why Choose Us */}
       <div className="mb-16 bg-gray-50 rounded-lg p-8">

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useTransferStore } from '../stores';
+import { useTransferStore, useTransferCategoryStore } from '../stores';
 import { 
   ClockIcon, 
   CurrencyDollarIcon,
@@ -13,11 +13,15 @@ import {
 const TransfersPage = () => {
   const { t, i18n } = useTranslation();
   const { transfers, fetchTransfers, loading, error } = useTransferStore();
+  const { categories, fetchCategories } = useTransferCategoryStore();
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedServiceType, setSelectedServiceType] = useState('');
   const [selectedVehicleType, setSelectedVehicleType] = useState('');
-  const [selectedSeats, setSelectedSeats] = useState('');
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [selectedRegion, setSelectedRegion] = useState('');
+  const [priceRange, setPriceRange] = useState([0, 200]);
   const [sortBy, setSortBy] = useState('name');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [transfersPerPage] = useState(9);
 
   // Handle search form submit
   const handleSearch = (e) => {
@@ -27,15 +31,19 @@ const TransfersPage = () => {
 
   const clearFilters = () => {
     setSearchTerm('');
+    setSelectedServiceType('');
     setSelectedVehicleType('');
-    setSelectedSeats('');
-    setPriceRange([0, 1000]);
+    setSelectedRegion('');
+    setPriceRange([0, 200]);
     setSortBy('name');
   };
 
   useEffect(() => {
     fetchTransfers();
-  }, [fetchTransfers]);
+    fetchCategories();
+  }, [fetchTransfers, fetchCategories]);
+
+
 
   // Filter and search transfers
   const filteredTransfers = transfers?.filter(transfer => {
@@ -45,16 +53,19 @@ const TransfersPage = () => {
                          transfer.shortDescription?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          transfer.description?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Filter by vehicle type (category slug)
-    const matchesVehicleType = !selectedVehicleType || transfer.category?.slug === selectedVehicleType;
+    // Filter by service type
+    const matchesServiceType = !selectedServiceType || transfer.category?.serviceType === selectedServiceType;
     
-    // Filter by seats
-    const matchesSeats = !selectedSeats || transfer.category?.seats === parseInt(selectedSeats);
+    // Filter by vehicle type
+    const matchesVehicleType = !selectedVehicleType || transfer.category?.vehicleType === selectedVehicleType;
+    
+    // Filter by region
+    const matchesRegion = !selectedRegion || transfer.category?.region === selectedRegion;
     
     // Filter by price
     const matchesPrice = (transfer.pricing?.adult || 0) >= priceRange[0] && (transfer.pricing?.adult || 0) <= priceRange[1];
     
-    return matchesSearch && matchesVehicleType && matchesSeats && matchesPrice;
+    return matchesSearch && matchesServiceType && matchesVehicleType && matchesRegion && matchesPrice;
   }) || [];
 
   // Sort transfers
@@ -73,6 +84,18 @@ const TransfersPage = () => {
     }
   });
 
+  // Pagination logic
+  const totalTransfers = sortedTransfers.length;
+  const totalPages = Math.ceil(totalTransfers / transfersPerPage);
+  const startIndex = (currentPage - 1) * transfersPerPage;
+  const endIndex = startIndex + transfersPerPage;
+  const currentTransfers = sortedTransfers.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedServiceType, selectedVehicleType, selectedRegion, priceRange, sortBy]);
+
   // Don't show full page loading, just show content with loading states
 
   return (
@@ -86,7 +109,7 @@ const TransfersPage = () => {
           </p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                  {/* Filters Sidebar */}
+          {/* Filters Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-lg p-6 sticky top-24">
               <div className="flex items-center justify-between mb-6">
@@ -116,24 +139,23 @@ const TransfersPage = () => {
                 </form>
               </div>
 
-              {/* Transfer Types */}
+              {/* Service Types */}
               <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-900 mb-3">Transfer Types</h3>
+                <h3 className="text-sm font-medium text-gray-900 mb-3">Service Type</h3>
                 <div className="space-y-2">
                   <label className="flex items-center">
                     <input
                       type="radio"
-                      name="vehicleType"
+                      name="serviceType"
                       value=""
-                      checked={selectedVehicleType === ''}
-                      onChange={(e) => setSelectedVehicleType(e.target.value)}
+                      checked={selectedServiceType === ''}
+                      onChange={(e) => setSelectedServiceType(e.target.value)}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                     />
-                    <span className="ml-2 text-sm text-gray-700">All Types</span>
+                    <span className="ml-2 text-sm text-gray-700">All Services</span>
                   </label>
                   
                   {loading ? (
-                    // Loading skeleton for transfer types
                     Array.from({ length: 4 }).map((_, index) => (
                       <div key={index} className="flex items-center">
                         <div className="h-4 w-4 bg-gray-200 rounded animate-pulse mr-2"></div>
@@ -141,52 +163,108 @@ const TransfersPage = () => {
                       </div>
                     ))
                   ) : (
-                    // Get unique categories from transfers
-                    Array.from(new Map(transfers
-                      ?.filter(transfer => transfer.category?.slug)
-                      .map(transfer => [transfer.category.slug, {
-                        slug: transfer.category.slug,
-                        name: transfer.category.name?.[i18n.language] || transfer.category.name?.en || transfer.category.slug
-                      }]) || []).values())
-                      .map(vehicleType => (
-                      <label key={vehicleType.slug} className="flex items-center">
+                    <>
+                      <label className="flex items-center">
                         <input
                           type="radio"
-                          name="vehicleType"
-                          value={vehicleType.slug}
-                          checked={selectedVehicleType === vehicleType.slug}
-                          onChange={(e) => setSelectedVehicleType(e.target.value)}
+                          name="serviceType"
+                          value="private"
+                          checked={selectedServiceType === 'private'}
+                          onChange={(e) => setSelectedServiceType(e.target.value)}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                         />
-                        <span className="ml-2 text-sm text-gray-700">{vehicleType.name}</span>
+                        <span className="ml-2 text-sm text-gray-700">🚗 Private Transfers</span>
                       </label>
-                    ))
-                    )}
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="serviceType"
+                          value="shared"
+                          checked={selectedServiceType === 'shared'}
+                          onChange={(e) => setSelectedServiceType(e.target.value)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">🚌 Shared Transfers</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="serviceType"
+                          value="train"
+                          checked={selectedServiceType === 'train'}
+                          onChange={(e) => setSelectedServiceType(e.target.value)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">🚂 Train Services</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="radio"
+                          name="serviceType"
+                          value="special"
+                          checked={selectedServiceType === 'special'}
+                          onChange={(e) => setSelectedServiceType(e.target.value)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">⭐ Special Services</span>
+                      </label>
+                    </>
+                  )}
                 </div>
               </div>
 
-              {/* Seats */}
+              {/* Vehicle Type */}
               <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-900 mb-3">Seats</h3>
+                <h3 className="text-sm font-medium text-gray-900 mb-3">Vehicle Type</h3>
                 <select
-                  value={selectedSeats}
-                  onChange={(e) => setSelectedSeats(e.target.value)}
+                  value={selectedVehicleType}
+                  onChange={(e) => setSelectedVehicleType(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Any Seats</option>
+                  <option value="">Any Vehicle Type</option>
                   {loading ? (
                     <option disabled>Loading...</option>
                   ) : (
                     Array.from(new Set(transfers
-                      ?.filter(transfer => transfer.category?.seats)
-                      .map(transfer => transfer.category.seats) || []))
-                      .sort((a, b) => a - b)
-                      .map(seats => (
-                        <option key={seats} value={seats.toString()}>
-                          {seats === 40 ? '40-seats (Sleeping Bus)' : 
-                           seats === 16 ? '16-seats (Shuttle Bus)' :
-                           seats === 4 ? '4-seats (Private Car/LIMO)' :
-                           `${seats}-seats`}
+                      ?.filter(transfer => transfer.category?.vehicleType)
+                      .map(transfer => transfer.category.vehicleType) || []))
+                      .map(vehicleType => (
+                        <option key={vehicleType} value={vehicleType}>
+                          {vehicleType === 'car' ? '🚗 Car' :
+                           vehicleType === 'van' ? '🚐 Van' :
+                           vehicleType === 'bus' ? '🚌 Bus' :
+                           vehicleType === 'limousine' ? '🚙 Limousine' :
+                           vehicleType === 'motorbike' ? '🏍️ Motorbike' :
+                           vehicleType === 'train' ? '🚂 Train' :
+                           vehicleType}
+                        </option>
+                      ))
+                  )}
+                </select>
+              </div>
+
+              {/* Region */}
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-gray-900 mb-3">Region</h3>
+                <select
+                  value={selectedRegion}
+                  onChange={(e) => setSelectedRegion(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">All Regions</option>
+                  {loading ? (
+                    <option disabled>Loading...</option>
+                  ) : (
+                    Array.from(new Set(transfers
+                      ?.filter(transfer => transfer.category?.region)
+                      .map(transfer => transfer.category.region) || []))
+                      .map(region => (
+                        <option key={region} value={region}>
+                          {region === 'north' ? '🏔️ North Vietnam' :
+                           region === 'central' ? '🏖️ Central Vietnam' :
+                           region === 'south' ? '🌴 South Vietnam' :
+                           region === 'all' ? '🇻🇳 All Vietnam' :
+                           region}
                         </option>
                       ))
                   )}
@@ -200,7 +278,7 @@ const TransfersPage = () => {
                   <input
                     type="range"
                     min="0"
-                    max="1000"
+                    max="200"
                     value={priceRange[1]}
                     onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
                     className="w-full"
@@ -240,7 +318,7 @@ const TransfersPage = () => {
               )}
               <div className="mb-4 sm:mb-0">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {loading ? 'Loading...' : `Showing ${sortedTransfers.length} of ${filteredTransfers.length} transfers`}
+                  {loading ? 'Loading...' : `Showing ${currentTransfers.length} of ${totalTransfers} transfers`}
                 </h2>
               </div>
             </div>
@@ -259,7 +337,7 @@ const TransfersPage = () => {
                   </div>
                 ))}
               </div>
-            ) : sortedTransfers.length === 0 ? (
+            ) : currentTransfers.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-gray-400 mb-4">
                   <MagnifyingGlassIcon className="h-16 w-16 mx-auto" />
@@ -269,7 +347,7 @@ const TransfersPage = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sortedTransfers.map((transfer) => (
+                {currentTransfers.map((transfer) => (
                   <Link
                     key={transfer._id}
                     to={`/transfer/${transfer.slug}`}
@@ -306,11 +384,22 @@ const TransfersPage = () => {
                       
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center text-gray-500 text-sm">
-                          <span className="mr-1">👤</span>
-                          {transfer.category?.seats === 40 ? '40-seats (Sleeping Bus)' : 
-                           transfer.category?.seats === 16 ? '16-seats (Shuttle Bus)' :
-                           transfer.category?.seats === 4 ? '4-seats (Private Car/LIMO)' :
-                           transfer.category?.seats ? `${transfer.category.seats}-seats` : 'Flexible'}
+                          <span className="mr-1">
+                            {transfer.category?.serviceType === 'private' ? '🚗' :
+                             transfer.category?.serviceType === 'shared' ? '🚌' :
+                             transfer.category?.serviceType === 'train' ? '🚂' :
+                             transfer.category?.serviceType === 'special' ? '⭐' : '🚗'}
+                          </span>
+                          {transfer.category?.serviceType === 'private' ? 'Private' :
+                           transfer.category?.serviceType === 'shared' ? 'Shared' :
+                           transfer.category?.serviceType === 'train' ? 'Train' :
+                           transfer.category?.serviceType === 'special' ? 'Special' :
+                           'Transfer'}
+                          {transfer.category?.route?.from?.en && transfer.category?.route?.to?.en && (
+                            <span className="ml-1 text-xs">
+                              ({transfer.category.route.from.en} → {transfer.category.route.to.en})
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center text-yellow-400">
                           <StarIcon className="h-3 w-3 fill-current" />
@@ -329,6 +418,66 @@ const TransfersPage = () => {
                     </div>
                   </Link>
                 ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <nav className="flex items-center space-x-2">
+                  {/* Previous Button */}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+
+                  {/* Page Numbers */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    // Show first page, last page, current page, and pages around current page
+                    const shouldShow = 
+                      page === 1 || 
+                      page === totalPages || 
+                      (page >= currentPage - 1 && page <= currentPage + 1);
+                    
+                    if (!shouldShow) {
+                      // Show ellipsis for gaps
+                      if (page === currentPage - 2 || page === currentPage + 2) {
+                        return (
+                          <span key={page} className="px-3 py-2 text-sm text-gray-500">
+                            ...
+                          </span>
+                        );
+                      }
+                      return null;
+                    }
+
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-2 text-sm font-medium rounded-md ${
+                          currentPage === page
+                            ? 'bg-blue-600 text-white'
+                            : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+
+                  {/* Next Button */}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </nav>
               </div>
             )}
           </div>

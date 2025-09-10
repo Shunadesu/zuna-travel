@@ -76,10 +76,10 @@ const BlogPage = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Travel Blog</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">Blog Du Lịch</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Discover amazing destinations, travel tips, and insider knowledge from our travel experts. 
-          Get inspired for your next adventure!
+          Khám phá những điểm đến tuyệt vời, mẹo du lịch và kiến thức từ các chuyên gia du lịch của chúng tôi. 
+          Tìm cảm hứng cho chuyến phiêu lưu tiếp theo của bạn!
         </p>
       </div>
 
@@ -91,7 +91,7 @@ const BlogPage = () => {
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search blogs..."
+              placeholder="Tìm kiếm blog..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -105,19 +105,19 @@ const BlogPage = () => {
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="all">All Categories</option>
-              <option value="travel-tips">Travel Tips</option>
-              <option value="destinations">Destinations</option>
-              <option value="culture">Culture</option>
-              <option value="food">Food & Dining</option>
-              <option value="adventure">Adventure</option>
+              <option value="all">Tất cả danh mục</option>
+              <option value="travel-tips">Mẹo du lịch</option>
+              <option value="destinations">Điểm đến</option>
+              <option value="culture">Văn hóa</option>
+              <option value="food">Ẩm thực</option>
+              <option value="adventure">Phiêu lưu</option>
             </select>
           </div>
 
           {/* Results Count */}
           <div className="flex items-center justify-end">
             <p className="text-sm text-gray-600">
-              {filteredBlogs.length} blog{filteredBlogs.length !== 1 ? 's' : ''} found
+              Tìm thấy {filteredBlogs.length} blog
             </p>
           </div>
         </div>
@@ -126,7 +126,7 @@ const BlogPage = () => {
       {/* Featured Blog */}
       {(loading || filteredBlogs.length > 0) && (
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Featured Post</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Bài viết nổi bật</h2>
           {loading ? (
             // Loading skeleton for featured blog
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
@@ -187,14 +187,14 @@ const BlogPage = () => {
                       </div>
                       <div className="flex items-center">
                         <EyeIcon className="w-4 h-4 mr-1" />
-                        {filteredBlogs[0].views || 0} views
+                        {filteredBlogs[0].views || 0} lượt xem
                       </div>
                     </div>
                     <Link
                       to={`/blog/${filteredBlogs[0].slug}`}
                       className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                      Read More
+                      Đọc thêm
                     </Link>
                   </div>
                 </div>
@@ -232,8 +232,8 @@ const BlogPage = () => {
       ) : filteredBlogs.length === 0 ? (
         <div className="text-center py-12">
           <FunnelIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No blogs found</h3>
-          <p className="text-gray-600">Try adjusting your search criteria or filters.</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Không tìm thấy blog nào</h3>
+          <p className="text-gray-600">Hãy thử điều chỉnh tiêu chí tìm kiếm hoặc bộ lọc.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -277,13 +277,13 @@ const BlogPage = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center text-sm text-gray-500">
                     <EyeIcon className="w-4 h-4 mr-1" />
-                    {blog.views || 0} views
+                    {blog.views || 0} lượt xem
                   </div>
                   <Link
                     to={`/blog/${blog.slug}`}
                     className="text-blue-600 hover:text-blue-700 font-medium"
                   >
-                    Read More →
+                    Đọc thêm →
                   </Link>
                 </div>
               </div>
@@ -295,46 +295,24 @@ const BlogPage = () => {
       {/* Newsletter Signup */}
       <div className="mt-16 bg-blue-50 rounded-lg p-8">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Stay Updated</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Cập nhật thông tin</h2>
           <p className="text-gray-600 mb-6">
-            Subscribe to our newsletter for the latest travel tips, destination guides, and exclusive offers.
+            Đăng ký nhận bản tin để nhận những mẹo du lịch mới nhất, hướng dẫn điểm đến và ưu đãi độc quyền.
           </p>
           <div className="max-w-md mx-auto flex">
             <input
               type="email"
-              placeholder="Enter your email"
+              placeholder="Nhập email của bạn"
               className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <button className="bg-blue-600 text-white px-6 py-2 rounded-r-lg hover:bg-blue-700 transition-colors">
-              Subscribe
+              Đăng ký
             </button>
           </div>
         </div>
       </div>
 
-      {/* Popular Categories */}
-      <div className="mt-16">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Popular Categories</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { name: 'Travel Tips', count: 15, color: 'bg-blue-100 text-blue-800' },
-            { name: 'Destinations', count: 23, color: 'bg-green-100 text-green-800' },
-            { name: 'Culture', count: 8, color: 'bg-purple-100 text-purple-800' },
-            { name: 'Food & Dining', count: 12, color: 'bg-orange-100 text-orange-800' }
-          ].map((category, index) => (
-            <Link
-              key={index}
-              to={`/blog?category=${category.name.toLowerCase().replace(' & ', '-').replace(' ', '-')}`}
-              className="bg-white border border-gray-200 rounded-lg p-4 text-center hover:shadow-md transition-shadow"
-            >
-              <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium mb-2 ${category.color}`}>
-                {category.name}
-              </div>
-              <p className="text-sm text-gray-600">{category.count} posts</p>
-            </Link>
-          ))}
-        </div>
-      </div>
+    
     </div>
   );
 };

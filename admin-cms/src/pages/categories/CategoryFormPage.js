@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import ImageUpload from '../../components/common/ImageUpload';
-import useCategoryStore from '../../stores/categoryStore';
+import { useTourCategoryStore, useTransferCategoryStore } from '../../stores';
 
 const CategoryFormPage = () => {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isEditing = !!id;
+  const categoryType = searchParams.get('type') || 'vietnam-tours';
 
   const [formData, setFormData] = useState({
     name: {
@@ -21,9 +23,10 @@ const CategoryFormPage = () => {
       en: '',
       vi: ''
     },
-    type: 'vietnam-tours',
+    type: categoryType,
     slug: '',
-    sortOrder: 0,
+    order: 0,
+    featured: false,
     isActive: true,
     images: [],
     location: {
@@ -31,58 +34,100 @@ const CategoryFormPage = () => {
       vi: ''
     },
     vehicleType: '',
-    seats: ''
+    seats: '',
+    region: '',
+    duration: '',
+    difficulty: '',
+    highlights: [],
+    amenities: [],
+    features: []
   });
 
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(isEditing);
   
-  const { 
-    category, 
-    loading: storeLoading, 
-    error, 
-    fetchCategory: fetchCategoryFromStore, 
-    createCategory, 
-    updateCategory, 
-    clearError 
-  } = useCategoryStore();
+  // Tour categories store
+  const {
+    category: tourCategory,
+    loading: tourLoading,
+    error: tourError,
+    fetchCategory: fetchTourCategory,
+    createCategory: createTourCategory,
+    updateCategory: updateTourCategory,
+    clearError: clearTourError
+  } = useTourCategoryStore();
+
+  // Transfer categories store
+  const {
+    category: transferCategory,
+    loading: transferLoading,
+    error: transferError,
+    fetchCategory: fetchTransferCategory,
+    createCategory: createTransferCategory,
+    updateCategory: updateTransferCategory,
+    clearError: clearTransferError
+  } = useTransferCategoryStore();
+
+  // Get current store based on type
+  const currentStore = categoryType === 'vietnam-tours' ? {
+    category: tourCategory,
+    loading: tourLoading,
+    error: tourError,
+    fetchCategory: fetchTourCategory,
+    createCategory: createTourCategory,
+    updateCategory: updateTourCategory,
+    clearError: clearTourError
+  } : {
+    category: transferCategory,
+    loading: transferLoading,
+    error: transferError,
+    fetchCategory: fetchTransferCategory,
+    createCategory: createTransferCategory,
+    updateCategory: updateTransferCategory,
+    clearError: clearTransferError
+  };
 
   useEffect(() => {
     if (isEditing) {
       fetchCategory();
     }
-  }, [id, isEditing]);
+  }, [id, isEditing, categoryType]);
 
   useEffect(() => {
-    if (error) {
-      toast.error(error);
-      clearError();
+    if (currentStore.error) {
+      toast.error(currentStore.error);
+      currentStore.clearError();
     }
-  }, [error, clearError]);
-
-
+  }, [currentStore.error, currentStore.clearError]);
 
   const fetchCategory = async () => {
     try {
       setInitialLoading(true);
-      const categoryData = await fetchCategoryFromStore(id);
+      const categoryData = await currentStore.fetchCategory(id);
       
       setFormData({
         name: categoryData.name || { en: '', vi: '' },
         description: categoryData.description || { en: '', vi: '' },
-        type: categoryData.type || 'vietnam-tours',
+        type: categoryData.type || categoryType,
         slug: categoryData.slug || '',
-        sortOrder: categoryData.sortOrder || 0,
+        order: categoryData.order || 0,
+        featured: categoryData.featured || false,
         isActive: categoryData.isActive !== undefined ? categoryData.isActive : true,
         images: categoryData.images || [],
         location: categoryData.location || { en: '', vi: '' },
         vehicleType: categoryData.vehicleType || '',
-        seats: categoryData.seats || ''
+        seats: categoryData.seats || '',
+        region: categoryData.region || '',
+        duration: categoryData.duration || '',
+        difficulty: categoryData.difficulty || '',
+        highlights: categoryData.highlights || [],
+        amenities: categoryData.amenities || [],
+        features: categoryData.features || []
       });
     } catch (error) {
       console.error('Error fetching category:', error);
       toast.error('Failed to load category');
-      navigate('/admin/categories');
+      navigate(`/admin/categories?tab=${categoryType}`);
     } finally {
       setInitialLoading(false);
     }
@@ -137,14 +182,14 @@ const CategoryFormPage = () => {
       }
 
       if (isEditing) {
-        await updateCategory(id, submitData);
+        await currentStore.updateCategory(id, submitData);
         toast.success(t('categories.updateSuccess'));
       } else {
-        await createCategory(submitData);
+        await currentStore.createCategory(submitData);
         toast.success(t('categories.createSuccess'));
       }
       
-      navigate('/admin/categories');
+      navigate(`/admin/categories?tab=${categoryType}`);
     } catch (error) {
       console.error('Error saving category:', error);
       toast.error(error.response?.data?.message || 'Failed to save category');
@@ -354,8 +399,8 @@ const CategoryFormPage = () => {
               </label>
               <input
                 type="number"
-                value={formData.sortOrder}
-                onChange={(e) => handleInputChange('sortOrder', parseInt(e.target.value) || 0)}
+                value={formData.order}
+                onChange={(e) => handleInputChange('order', parseInt(e.target.value) || 0)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 min="0"
               />

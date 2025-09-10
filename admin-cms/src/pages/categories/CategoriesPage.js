@@ -1,33 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, PhotoIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
-import apiClient from '../../utils/apiConfig';
 import toast from 'react-hot-toast';
+import { useTourCategoryStore, useTransferCategoryStore } from '../../stores';
 
 const CategoriesPage = () => {
   const { t } = useTranslation();
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [deleteLoading, setDeleteLoading] = useState(null);
-  const [activeTab, setActiveTab] = useState('vietnam-tours');
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'vietnam-tours');
+
+  // Tour categories store
+  const {
+    categories: tourCategories,
+    loading: tourLoading,
+    error: tourError,
+    fetchCategories: fetchTourCategories,
+    deleteCategory: deleteTourCategory
+  } = useTourCategoryStore();
+
+  // Transfer categories store
+  const {
+    categories: transferCategories,
+    loading: transferLoading,
+    error: transferError,
+    fetchCategories: fetchTransferCategories,
+    deleteCategory: deleteTransferCategory
+  } = useTransferCategoryStore();
 
   useEffect(() => {
-    fetchCategories();
+    fetchTourCategories();
+    fetchTransferCategories();
   }, []);
 
-  const fetchCategories = async () => {
-    try {
-      setLoading(true);
-      const response = await apiClient.get('/categories');
-      setCategories(response.data.data || []);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      toast.error('Failed to load categories');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Get current categories based on active tab
+  const categories = activeTab === 'vietnam-tours' ? tourCategories : transferCategories;
+  const loading = activeTab === 'vietnam-tours' ? tourLoading : transferLoading;
+  const error = activeTab === 'vietnam-tours' ? tourError : transferError;
 
   const handleDelete = async (id) => {
     if (!window.confirm(t('categories.deleteConfirm'))) {
@@ -36,9 +46,12 @@ const CategoriesPage = () => {
 
     try {
       setDeleteLoading(id);
-      await apiClient.delete(`/categories/${id}`);
+      if (activeTab === 'vietnam-tours') {
+        await deleteTourCategory(id);
+      } else {
+        await deleteTransferCategory(id);
+      }
       toast.success(t('categories.deleteSuccess'));
-      fetchCategories();
     } catch (error) {
       console.error('Error deleting category:', error);
       toast.error(error.response?.data?.message || 'Failed to delete category');
@@ -49,18 +62,21 @@ const CategoriesPage = () => {
 
   const handleToggleStatus = async (id, currentStatus) => {
     try {
-      await apiClient.put(`/categories/${id}`, {
-        isActive: !currentStatus
-      });
+      if (activeTab === 'vietnam-tours') {
+        await useTourCategoryStore.getState().updateCategory(id, {
+          isActive: !currentStatus
+        });
+      } else {
+        await useTransferCategoryStore.getState().updateCategory(id, {
+          isActive: !currentStatus
+        });
+      }
       toast.success(currentStatus ? 'Category deactivated' : 'Category activated');
-      fetchCategories();
     } catch (error) {
       console.error('Error toggling category status:', error);
       toast.error('Failed to update category status');
     }
   };
-
-  const filteredCategories = categories.filter(cat => cat.type === activeTab);
 
   if (loading) {
     return (
@@ -75,11 +91,11 @@ const CategoriesPage = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Categories Management</h1>
         <Link
-          to="/admin/categories/create"
+          to={`/admin/categories/create?type=${activeTab}`}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
         >
           <PlusIcon className="h-4 w-4 mr-2" />
-          Create Category
+          Create {activeTab === 'vietnam-tours' ? 'Tour' : 'Transfer'} Category
         </Link>
       </div>
 
@@ -88,7 +104,10 @@ const CategoriesPage = () => {
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8">
             <button
-              onClick={() => setActiveTab('vietnam-tours')}
+              onClick={() => {
+                setActiveTab('vietnam-tours');
+                setSearchParams({ tab: 'vietnam-tours' });
+              }}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'vietnam-tours'
                   ? 'border-blue-500 text-blue-600'
@@ -98,7 +117,10 @@ const CategoriesPage = () => {
               Vietnam Tours
             </button>
             <button
-              onClick={() => setActiveTab('transfer-services')}
+              onClick={() => {
+                setActiveTab('transfer-services');
+                setSearchParams({ tab: 'transfer-services' });
+              }}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'transfer-services'
                   ? 'border-blue-500 text-blue-600'
@@ -113,21 +135,21 @@ const CategoriesPage = () => {
 
       {/* Categories Grid */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
-        {filteredCategories.length === 0 ? (
+        {(categories || []).length === 0 ? (
           <div className="px-4 py-8 text-center">
             <MapPinIcon className="mx-auto h-12 w-12 text-gray-400" />
             <p className="text-gray-500 mb-4">No categories found for {activeTab === 'vietnam-tours' ? 'Vietnam Tours' : 'Transfer Services'}</p>
             <Link
-              to="/admin/categories/create"
+              to={`/admin/categories/create?type=${activeTab}`}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
             >
               <PlusIcon className="h-4 w-4 mr-2" />
-              Create Category
+              Create {activeTab === 'vietnam-tours' ? 'Tour' : 'Transfer'} Category
             </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-            {filteredCategories.map((category) => (
+            {(categories || []).map((category) => (
               <div key={category._id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                 <div className="p-4">
                   {/* Category Image */}
@@ -196,7 +218,7 @@ const CategoriesPage = () => {
                          <EyeIcon className="h-4 w-4" />
                        </Link>
                        <Link
-                         to={`/admin/categories/${category._id}/edit`}
+                         to={`/admin/categories/${category._id}/edit?type=${activeTab}`}
                          className="text-indigo-600 hover:text-indigo-900 p-1"
                          title="Edit Category"
                        >

@@ -67,7 +67,7 @@ const ServerWarmupLoader = ({ isWarmingUp, isServerReady, warmupError, onRetry }
   }
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 z-[9999] flex items-center justify-center">
       {/* Animated background particles */}
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(20)].map((_, i) => (
@@ -107,19 +107,6 @@ const ServerWarmupLoader = ({ isWarmingUp, isServerReady, warmupError, onRetry }
             </div>
           )}
           
-          {showSuccess && (
-            <div className="relative">
-              <CheckCircleIcon className="h-20 w-20 text-green-500 mx-auto animate-bounce" />
-              <div className="absolute inset-0 w-20 h-20 mx-auto border-4 border-green-200 rounded-full animate-ping"></div>
-            </div>
-          )}
-          
-          {warmupError && (
-            <div className="relative">
-              <ExclamationTriangleIcon className="h-20 w-20 text-red-500 mx-auto animate-pulse" />
-              <div className="absolute inset-0 w-20 h-20 mx-auto border-4 border-red-200 rounded-full animate-ping"></div>
-            </div>
-          )}
         </div>
 
         {/* Progress Bar */}

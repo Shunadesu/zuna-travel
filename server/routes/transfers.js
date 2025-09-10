@@ -1,420 +1,430 @@
 const express = require('express');
-const { body, validationResult, query } = require('express-validator');
-const Product = require('../models/Product');
-const Category = require('../models/Category');
-const { protect: authenticateToken, admin: requireAdmin, optionalAuth } = require('../middleware/auth');
-
 const router = express.Router();
+const Transfer = require('../models/Transfer');
+const TransferCategory = require('../models/TransferCategory');
+const { protect, optionalAuth } = require('../middleware/auth');
 
-// Get all transfer services (public with optional auth)
-router.get('/', optionalAuth, async (req, res) => {
+// @desc    Get all transfers
+// @route   GET /api/transfers
+// @access  Public
+router.get('/', async (req, res) => {
   try {
+    const { page = 1, limit = 20, category, featured, search } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    const {
-      type,
-      seats,
-      departure,
-      destination,
-      minPrice,
-      maxPrice,
-      active,
-      featured,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
-      limit = 20,
-      page = 1
-    } = req.query;
+    // Build query
+    let query = { isActive: true }; // Only return active transfers
 
-    // Build query - get products with transfer-services category type
-    // First, get all transfer services categories
-    const transferCategories = await Category.find({ type: 'transfer-services' });
-    if (!transferCategories || transferCategories.length === 0) {
-      return res.status(404).json({
-        message: 'Transfer services categories not found'
-      });
-    }
-    
-    const query = {
-      category: { $in: transferCategories.map(cat => cat._id) }
-    };
-
-    // For public access, only show active transfers unless user is admin
-    if (!req.user || req.user.role !== 'admin') {
-      query.isActive = true;
-    } else if (active !== undefined) {
-      query.isActive = active === 'true';
-    }
-
-    if (featured !== undefined) query.isFeatured = featured === 'true';
-
-    // Simple filters - only use what exists in current data structure
-    if (type) {
-      const categoryBySlug = await Category.findOne({ slug: type, type: 'transfer-services' });
-      if (categoryBySlug) {
-        query.category = categoryBySlug._id;
-      }
-    } else if (seats) {
-      const categoriesWithSeats = await Category.find({ 
-        type: 'transfer-services', 
-        seats: { $gte: parseInt(seats) } 
-      });
-      if (categoriesWithSeats.length > 0) {
-        query.category = { $in: categoriesWithSeats.map(c => c._id) };
+    if (category) {
+      const categoryObj = await TransferCategory.findOne({ slug: category });
+      if (categoryObj) {
+        query.category = categoryObj._id;
+      } else {
+        // If category not found, return empty result
+        return res.json({
+          success: true,
+          data: [],
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total: 0,
+            pages: 0
+          }
+        });
       }
     }
 
-    // Price filter
-    if (minPrice || maxPrice) {
-      query['pricing.adult'] = {};
-      if (minPrice) query['pricing.adult'].$gte = parseFloat(minPrice);
-      if (maxPrice) query['pricing.adult'].$lte = parseFloat(maxPrice);
+    if (featured === 'true') {
+      query.isFeatured = true;
     }
 
-    const skip = (page - 1) * limit;
-
-    // Build sort object
-    const sort = {};
-    if (sortBy === 'price') {
-      sort['pricing.adult'] = sortOrder === 'asc' ? 1 : -1;
-    } else if (sortBy === 'seats') {
-      // For seats sorting, we need to populate category first
-      // This will be handled in the frontend for now
-      sort['createdAt'] = sortOrder === 'asc' ? 1 : -1;
-    } else if (sortBy === 'rating') {
-      sort['rating.average'] = sortOrder === 'asc' ? 1 : -1;
-    } else if (sortBy === 'title') {
-      sort['title.en'] = sortOrder === 'asc' ? 1 : -1;
-    } else {
-      sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+    if (search) {
+      query.$or = [
+        { 'title.en': { $regex: search, $options: 'i' } },
+        { 'title.vi': { $regex: search, $options: 'i' } },
+        { 'description.en': { $regex: search, $options: 'i' } },
+        { 'description.vi': { $regex: search, $options: 'i' } }
+      ];
     }
 
-    const transfers = await Product.find(query)
-      .populate('category', 'name slug type')
-      .sort(sort)
+    const transfers = await Transfer.find(query)
+      .populate('category', 'name slug serviceType vehicleType region')
+      .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip(skip);
 
-    const total = await Product.countDocuments(query);
-
-    // Set cache headers for better performance
-    res.set({
-      'Cache-Control': 'public, max-age=600', // Cache for 10 minutes
-      'ETag': `"transfers-${total}-${Date.now()}"`,
-      'Vary': 'Accept-Encoding'
-    });
+    const total = await Transfer.countDocuments(query);
 
     res.json({
-      message: 'Transfer services retrieved successfully',
+      success: true,
       data: transfers,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
         total,
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / parseInt(limit))
       }
     });
   } catch (error) {
-    console.error('Get transfer services error:', error);
-    res.status(500).json({
-      message: 'Failed to get transfer services',
-      error: error.message
-    });
+    console.error('Get transfers error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Get transfer service types (public)
-router.get('/types', async (req, res) => {
-  try {
-    const types = [
-      { value: 'luxury-limo', label: { en: 'Luxury LIMO', vi: 'LIMO Cao Cấp' } },
-      { value: 'sharing-bus', label: { en: 'Sharing Bus', vi: 'Xe Buýt Chia Sẻ' } },
-      { value: 'private-car', label: { en: 'Private Car', vi: 'Xe Riêng' } },
-      { value: 'shuttle-bus', label: { en: 'Shuttle Bus', vi: 'Xe Đưa Đón' } },
-      { value: 'private-limo', label: { en: 'Private LIMO', vi: 'LIMO Riêng' } },
-      { value: 'sleeping-bus', label: { en: 'Sleeping Bus', vi: 'Xe Giường Nằm' } },
-      { value: 'airport-transfer', label: { en: 'Airport Transfer', vi: 'Đưa Đón Sân Bay' } },
-      { value: 'city-transfer', label: { en: 'City Transfer', vi: 'Đưa Đón Trong Thành Phố' } },
-      { value: 'intercity-transfer', label: { en: 'Intercity Transfer', vi: 'Đưa Đón Liên Tỉnh' } }
-    ];
-
-    res.json({
-      message: 'Transfer service types retrieved successfully',
-      data: types
-    });
-  } catch (error) {
-    console.error('Get transfer types error:', error);
-    res.status(500).json({
-      message: 'Failed to get transfer types',
-      error: error.message
-    });
-  }
-});
-
-// Get seat options (public)
-router.get('/seats', async (req, res) => {
-  try {
-    const seatOptions = [
-      { value: 4, label: '4-seats' },
-      { value: 7, label: '7-seats' },
-      { value: 9, label: 'LIMO 9 seat' },
-      { value: 16, label: '16-seats' },
-      { value: 45, label: '45 seat' }
-    ];
-
-    res.json({
-      message: 'Seat options retrieved successfully',
-      data: seatOptions
-    });
-  } catch (error) {
-    console.error('Get seat options error:', error);
-    res.status(500).json({
-      message: 'Failed to get seat options',
-      error: error.message
-    });
-  }
-});
-
-// Search transfers by route
-router.get('/search', [
-  query('from').notEmpty().withMessage('Departure location is required'),
-  query('to').notEmpty().withMessage('Destination is required'),
-  query('date').optional().isISO8601().withMessage('Invalid date format'),
-  query('passengers').optional().isInt({ min: 1, max: 45 }).withMessage('Invalid passenger count'),
-  query('type').optional().isIn([
-    'luxury-limo', 'sharing-bus', 'private-car', 'shuttle-bus', 
-    'private-limo', 'sleeping-bus', 'airport-transfer', 'city-transfer', 'intercity-transfer'
-  ])
-], async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        message: 'Validation failed',
-        errors: errors.array()
-      });
-    }
-
-    const { from, to, date, passengers, type } = req.query;
-
-    // Get transfer services categories
-    const transferCategories = await Category.find({ type: 'transfer-services' });
-    if (!transferCategories || transferCategories.length === 0) {
-      return res.status(404).json({
-        message: 'Transfer services categories not found'
-      });
-    }
-
-    // Build search query
-    const query = {
-      category: { $in: transferCategories.map(cat => cat._id) },
-      isActive: true,
-      $and: [
-        {
-          $or: [
-            { 'transferService.route.departure.en': new RegExp(from, 'i') },
-            { 'transferService.route.departure.vi': new RegExp(from, 'i') }
-          ]
-        },
-        {
-          $or: [
-            { 'transferService.route.destination.en': new RegExp(to, 'i') },
-            { 'transferService.route.destination.vi': new RegExp(to, 'i') }
-          ]
-        }
-      ]
-    };
-
-    if (passengers) {
-      query['transferService.seats'] = { $gte: parseInt(passengers) };
-    }
-
-    if (type) {
-      query['transferService.type'] = type;
-    }
-
-    const transfers = await Product.find(query)
-      .populate('category', 'name slug type')
-      .sort({ 'pricing.perTrip': 1 });
-
-    res.json({
-      message: 'Transfer search results retrieved successfully',
-      data: transfers,
-      searchParams: { from, to, date, passengers, type },
-      count: transfers.length
-    });
-  } catch (error) {
-    console.error('Search transfers error:', error);
-    res.status(500).json({
-      message: 'Failed to search transfers',
-      error: error.message
-    });
-  }
-});
-
-// Get transfer service by slug (public)
+// @desc    Get transfer by slug
+// @route   GET /api/transfers/slug/:slug
+// @access  Public
 router.get('/slug/:slug', async (req, res) => {
   try {
-    const { slug } = req.params;
-    
-    const transfer = await Product.findOne({ 
-      slug, 
-      isActive: true 
-    }).populate('category', 'name slug type');
-    
-    if (!transfer || transfer.category.type !== 'transfer-services') {
-      return res.status(404).json({
-        message: 'Transfer service not found',
-        code: 'TRANSFER_NOT_FOUND'
-      });
+    const transfer = await Transfer.findOne({ slug: req.params.slug })
+      .populate('category', 'name slug serviceType vehicleType region');
+
+    if (!transfer) {
+      return res.status(404).json({ message: 'Transfer not found' });
     }
 
     res.json({
-      message: 'Transfer service retrieved successfully',
+      success: true,
       data: transfer
     });
   } catch (error) {
     console.error('Get transfer by slug error:', error);
-    res.status(500).json({
-      message: 'Failed to get transfer service',
-      error: error.message
-    });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Get popular routes (public)
+// @desc    Get transfer by ID
+// @route   GET /api/transfers/:id
+// @access  Private
+router.get('/:id', protect, async (req, res) => {
+  try {
+    const transfer = await Transfer.findById(req.params.id)
+      .populate('category', 'name slug serviceType vehicleType region');
+
+    if (!transfer) {
+      return res.status(404).json({ message: 'Transfer not found' });
+    }
+
+    res.json({
+      success: true,
+      data: transfer
+    });
+  } catch (error) {
+    console.error('Get transfer error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @desc    Create new transfer
+// @route   POST /api/transfers
+// @access  Private
+router.post('/', protect, async (req, res) => {
+  try {
+    const {
+      title,
+      slug,
+      description,
+      shortDescription,
+      category,
+      pricing,
+      duration,
+      from,
+      to,
+      vehicleType,
+      seats,
+      features,
+      amenities,
+      included,
+      excluded,
+      requirements,
+      cancellationPolicy,
+      images,
+      isActive,
+      isFeatured,
+      order,
+      region,
+      route,
+      distance
+    } = req.body;
+
+    // Verify category exists
+    const categoryObj = await TransferCategory.findById(category);
+    if (!categoryObj) {
+      return res.status(400).json({ message: 'Invalid transfer category' });
+    }
+
+    const transfer = new Transfer({
+      title,
+      slug,
+      description,
+      shortDescription,
+      category,
+      pricing,
+      duration,
+      from,
+      to,
+      vehicleType,
+      seats,
+      features,
+      amenities,
+      included,
+      excluded,
+      requirements,
+      cancellationPolicy,
+      images,
+      isActive: isActive !== undefined ? isActive : true,
+      isFeatured: isFeatured || false,
+      order: order || 0,
+      region,
+      route,
+      distance
+    });
+
+    const createdTransfer = await transfer.save();
+    await createdTransfer.populate('category', 'name slug serviceType vehicleType region');
+
+    res.status(201).json({
+      success: true,
+      data: createdTransfer
+    });
+  } catch (error) {
+    console.error('Create transfer error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @desc    Update transfer
+// @route   PUT /api/transfers/:id
+// @access  Private
+router.put('/:id', protect, async (req, res) => {
+  try {
+    const transfer = await Transfer.findById(req.params.id);
+    if (!transfer) {
+      return res.status(404).json({ message: 'Transfer not found' });
+    }
+
+    // Update fields
+    Object.keys(req.body).forEach(key => {
+      if (req.body[key] !== undefined) {
+        transfer[key] = req.body[key];
+      }
+    });
+
+    const updatedTransfer = await transfer.save();
+    await updatedTransfer.populate('category', 'name slug serviceType vehicleType region');
+
+    res.json({
+      success: true,
+      data: updatedTransfer
+    });
+  } catch (error) {
+    console.error('Update transfer error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @desc    Delete transfer
+// @route   DELETE /api/transfers/:id
+// @access  Private
+router.delete('/:id', protect, async (req, res) => {
+  try {
+    const transfer = await Transfer.findById(req.params.id);
+    if (!transfer) {
+      return res.status(404).json({ message: 'Transfer not found' });
+    }
+
+    await Transfer.findByIdAndDelete(req.params.id);
+
+    res.json({
+      success: true,
+      message: 'Transfer deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete transfer error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @desc    Get featured transfers
+// @route   GET /api/transfers/featured/list
+// @access  Public
+router.get('/featured/list', async (req, res) => {
+  try {
+    const { limit = 6 } = req.query;
+
+    const transfers = await Transfer.find({
+      isFeatured: true,
+      isActive: true
+    })
+      .populate('category', 'name slug serviceType vehicleType region')
+      .sort({ order: 1, createdAt: -1 })
+      .limit(parseInt(limit));
+
+    res.json({
+      success: true,
+      data: transfers
+    });
+  } catch (error) {
+    console.error('Get featured transfers error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @desc    Search transfers
+// @route   GET /api/transfers/search
+// @access  Public
+router.get('/search', async (req, res) => {
+  try {
+    const { q, limit = 10, category, region, vehicleType } = req.query;
+
+    // Build query
+    let query = { isActive: true };
+
+    if (q) {
+      query.$or = [
+        { 'title.en': { $regex: q, $options: 'i' } },
+        { 'title.vi': { $regex: q, $options: 'i' } },
+        { 'description.en': { $regex: q, $options: 'i' } },
+        { 'description.vi': { $regex: q, $options: 'i' } },
+        { 'from.en': { $regex: q, $options: 'i' } },
+        { 'from.vi': { $regex: q, $options: 'i' } },
+        { 'to.en': { $regex: q, $options: 'i' } },
+        { 'to.vi': { $regex: q, $options: 'i' } }
+      ];
+    }
+
+    if (category) {
+      const categoryObj = await TransferCategory.findOne({ slug: category });
+      if (categoryObj) {
+        query.category = categoryObj._id;
+      }
+    }
+
+    if (region) {
+      query.region = region;
+    }
+
+    if (vehicleType) {
+      query.vehicleType = vehicleType;
+    }
+
+    const transfers = await Transfer.find(query)
+      .populate('category', 'name slug serviceType vehicleType region')
+      .sort({ order: 1, createdAt: -1 })
+      .limit(parseInt(limit));
+
+    res.json({
+      success: true,
+      data: transfers
+    });
+  } catch (error) {
+    console.error('Search transfers error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @desc    Get transfer types
+// @route   GET /api/transfers/types
+// @access  Public
+router.get('/types', async (req, res) => {
+  try {
+    const transferCategories = await TransferCategory.find({ isActive: true })
+      .select('name slug description vehicleType seats region')
+      .sort({ order: 1, name: 1 });
+
+    res.json({
+      success: true,
+      data: transferCategories
+    });
+  } catch (error) {
+    console.error('Get transfer types error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @desc    Get popular routes
+// @route   GET /api/transfers/routes/popular
+// @access  Public
 router.get('/routes/popular', async (req, res) => {
   try {
     const { limit = 10 } = req.query;
 
-    // Get transfer services categories
-    const transferCategories = await Category.find({ type: 'transfer-services' });
-    if (!transferCategories || transferCategories.length === 0) {
-      return res.status(404).json({
-        message: 'Transfer services categories not found'
-      });
-    }
-
-    // Aggregate popular routes
-    const popularRoutes = await Product.aggregate([
-      {
-        $match: {
-          category: { $in: transferCategories.map(cat => cat._id) },
-          isActive: true,
-          'transferService.route.departure.en': { $exists: true },
-          'transferService.route.destination.en': { $exists: true }
-        }
-      },
-      {
-        $group: {
-          _id: {
-            departure: '$transferService.route.departure',
-            destination: '$transferService.route.destination'
-          },
-          count: { $sum: 1 },
-          minPrice: { $min: '$pricing.perTrip' },
-          avgPrice: { $avg: '$pricing.perTrip' },
-          services: { $push: {
-            _id: '$_id',
-            title: '$title',
-            slug: '$slug',
-            price: '$pricing.perTrip',
-            seats: '$transferService.seats',
-            type: '$transferService.type'
-          }}
-        }
-      },
-      {
-        $sort: { count: -1 }
-      },
-      {
-        $limit: parseInt(limit)
-      }
-    ]);
+    const popularTransfers = await Transfer.find({
+      isActive: true
+    })
+      .populate('category', 'name slug serviceType vehicleType region')
+      .sort({ order: 1, createdAt: -1 })
+      .limit(parseInt(limit));
 
     res.json({
-      message: 'Popular routes retrieved successfully',
-      data: popularRoutes
+      success: true,
+      data: popularTransfers
     });
   } catch (error) {
     console.error('Get popular routes error:', error);
-    res.status(500).json({
-      message: 'Failed to get popular routes',
-      error: error.message
-    });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Create transfer service (admin only)
-router.post('/', authenticateToken, requireAdmin, [
-  body('title.en').trim().notEmpty().withMessage('English title is required'),
-  body('title.vi').trim().notEmpty().withMessage('Vietnamese title is required'),
-  body('transferService.type').isIn([
-    'luxury-limo', 'sharing-bus', 'private-car', 'shuttle-bus', 
-    'private-limo', 'sleeping-bus', 'airport-transfer', 'city-transfer', 'intercity-transfer'
-  ]).withMessage('Invalid transfer service type'),
-  body('transferService.seats').isInt({ min: 1, max: 45 }).withMessage('Seats must be between 1 and 45'),
-  body('pricing.perTrip').optional().isFloat({ min: 0 }).withMessage('Per trip price must be positive'),
-  body('transferService.route.departure.en').trim().notEmpty().withMessage('Departure location (English) is required'),
-  body('transferService.route.departure.vi').trim().notEmpty().withMessage('Departure location (Vietnamese) is required'),
-  body('transferService.route.destination.en').trim().notEmpty().withMessage('Destination (English) is required'),
-  body('transferService.route.destination.vi').trim().notEmpty().withMessage('Destination (Vietnamese) is required')
-], async (req, res) => {
+// @desc    Get seat options
+// @route   GET /api/transfers/seats
+// @access  Public
+router.get('/seats', async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        message: 'Validation failed',
-        errors: errors.array()
-      });
-    }
+    const seatOptions = await Transfer.distinct('seats', { isActive: true });
+    const sortedSeats = seatOptions.sort((a, b) => a - b);
 
-    // Get transfer services categories
-    const transferCategories = await Category.find({ type: 'transfer-services' });
-    if (!transferCategories || transferCategories.length === 0) {
-      return res.status(400).json({
-        message: 'Transfer services categories not found'
-      });
-    }
-
-    // For creation, we'll use the first transfer category or let user specify
-    const transferData = {
-      ...req.body,
-      category: req.body.category || transferCategories[0]._id
-    };
-
-    // Generate slug from English title
-    const slug = transferData.title.en
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-
-    // Check if slug already exists
-    const existingTransfer = await Product.findOne({ slug });
-    if (existingTransfer) {
-      return res.status(400).json({
-        message: 'Transfer service with this title already exists',
-        code: 'SLUG_EXISTS'
-      });
-    }
-
-    const transfer = new Product({
-      ...transferData,
-      slug
-    });
-
-    await transfer.save();
-    await transfer.populate('category', 'name slug type');
-
-    res.status(201).json({
-      message: 'Transfer service created successfully',
-      data: transfer
+    res.json({
+      success: true,
+      data: sortedSeats
     });
   } catch (error) {
-    console.error('Create transfer service error:', error);
-    res.status(500).json({
-      message: 'Failed to create transfer service',
-      error: error.message
+    console.error('Get seat options error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @desc    Get transfers by category
+// @route   GET /api/transfers/category/:categorySlug
+// @access  Public
+router.get('/category/:categorySlug', async (req, res) => {
+  try {
+    const { categorySlug } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const category = await TransferCategory.findOne({ slug: categorySlug });
+    if (!category) {
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
+    const transfers = await Transfer.find({
+      category: category._id,
+      isActive: true
+    })
+      .populate('category', 'name slug serviceType vehicleType region')
+      .sort({ order: 1, createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip(skip);
+
+    const total = await Transfer.countDocuments({
+      category: category._id,
+      isActive: true
     });
+
+    res.json({
+      success: true,
+      data: transfers,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Get transfers by category error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

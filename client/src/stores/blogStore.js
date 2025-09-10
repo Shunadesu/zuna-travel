@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import apiClient from '../utils/apiUtils';
+import api from '../contexts/ApiContext';
 
 const useBlogStore = create((set, get) => ({
   blogs: [],
@@ -33,9 +33,7 @@ const useBlogStore = create((set, get) => ({
 
     const fetchBlogsPromise = (async () => {
       try {
-        const queryString = new URLSearchParams(params).toString();
-        const url = queryString ? `/blogs?${queryString}` : '/blogs';
-        const response = await apiClient.get(url);
+        const response = await api.blogs.getAll(params);
         
         set({ 
           blogs: response.data.data || response.data,
@@ -48,7 +46,7 @@ const useBlogStore = create((set, get) => ({
       } catch (error) {
         console.error('Error fetching blogs:', error);
         set({ 
-          error: error.response?.data?.message || 'Failed to fetch blogs',
+          error: error.response?.data?.message || 'Không thể tải blog',
           loading: false,
           fetchPromise: null
         });
@@ -76,8 +74,7 @@ const useBlogStore = create((set, get) => ({
         set({ loading: true, error: null });
       }
       
-      const queryString = new URLSearchParams({ ...params, featured: 'true' }).toString();
-      const response = await apiClient.get(`/blogs?${queryString}`);
+      const response = await api.blogs.getAll({ ...params, featured: 'true' });
       
       set({ 
         featuredBlogs: response.data.data || response.data,
@@ -88,10 +85,10 @@ const useBlogStore = create((set, get) => ({
       return response.data;
     } catch (error) {
       console.error('Error fetching featured blogs:', error);
-      set({ 
-        error: error.response?.data?.message || 'Failed to fetch featured blogs',
-        loading: false 
-      });
+        set({ 
+          error: error.response?.data?.message || 'Không thể tải blog nổi bật',
+          loading: false 
+        });
       throw error;
     }
   },
@@ -101,7 +98,7 @@ const useBlogStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       
-      const response = await apiClient.get(`/blogs/slug/${slug}`);
+      const response = await api.blogs.getBySlug(slug);
       const blogData = response.data.data || response.data;
       
       set({ 
@@ -112,10 +109,10 @@ const useBlogStore = create((set, get) => ({
       return blogData;
     } catch (error) {
       console.error('Error fetching blog by slug:', error);
-      set({ 
-        error: error.response?.data?.message || 'Failed to fetch blog',
-        loading: false 
-      });
+        set({ 
+          error: error.response?.data?.message || 'Không thể tải blog',
+          loading: false 
+        });
       throw error;
     }
   },
@@ -125,8 +122,7 @@ const useBlogStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       
-      const queryString = new URLSearchParams({ ...params, category }).toString();
-      const response = await apiClient.get(`/blogs?${queryString}`);
+      const response = await api.blogs.getAll({ ...params, category });
       const blogsData = response.data.data || response.data;
       
       set({ 
@@ -137,10 +133,10 @@ const useBlogStore = create((set, get) => ({
       return blogsData;
     } catch (error) {
       console.error('Error fetching blogs by category:', error);
-      set({ 
-        error: error.response?.data?.message || 'Failed to fetch blogs by category',
-        loading: false 
-      });
+        set({ 
+          error: error.response?.data?.message || 'Không thể tải blog theo danh mục',
+          loading: false 
+        });
       throw error;
     }
   },
@@ -150,8 +146,7 @@ const useBlogStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       
-      const queryString = new URLSearchParams({ ...params, search: query }).toString();
-      const response = await apiClient.get(`/blogs?${queryString}`);
+      const response = await api.blogs.getAll({ ...params, search: query });
       
       set({ 
         blogs: response.data.data || response.data,
@@ -161,10 +156,10 @@ const useBlogStore = create((set, get) => ({
       return response.data;
     } catch (error) {
       console.error('Error searching blogs:', error);
-      set({ 
-        error: error.response?.data?.message || 'Failed to search blogs',
-        loading: false 
-      });
+        set({ 
+          error: error.response?.data?.message || 'Không thể tìm kiếm blog',
+          loading: false 
+        });
       throw error;
     }
   },

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import apiClient from '../utils/apiUtils';
 
-const useCategoryStore = create((set, get) => ({
+const useTransferCategoryStore = create((set, get) => ({
   // State
   categories: [],
   loading: false,
@@ -15,7 +15,7 @@ const useCategoryStore = create((set, get) => ({
   setError: (error) => set({ error }),
   clearError: () => set({ error: null }),
 
-  // Fetch categories
+  // Fetch transfer categories
   fetchCategories: async (forceRefresh = false, options = {}) => {
     const { categories, lastFetched, cacheExpiry, fetchPromise } = get();
     const now = Date.now();
@@ -38,13 +38,10 @@ const useCategoryStore = create((set, get) => ({
     const fetchCategoriesPromise = (async () => {
       try {
         const params = new URLSearchParams();
-        if (options.type) params.append('type', options.type);
         if (options.active !== undefined) params.append('active', options.active);
-        if (options.includeSubcategories) params.append('includeSubcategories', 'true');
-        if (options.level !== undefined) params.append('level', options.level);
-        if (options.parent) params.append('parent', options.parent);
+        if (options.featured !== undefined) params.append('featured', options.featured);
 
-        const response = await apiClient.get(`/categories?${params.toString()}`);
+        const response = await apiClient.get(`/transfer-categories?${params.toString()}`);
         const fetchedCategories = response.data.data || response.data || [];
         
         set({ 
@@ -57,7 +54,7 @@ const useCategoryStore = create((set, get) => ({
         return fetchedCategories;
       } catch (error) {
         set({ 
-          error: error.response?.data?.message || 'Failed to fetch categories',
+          error: error.response?.data?.message || 'Failed to fetch transfer categories',
           loading: false,
           fetchPromise: null
         });
@@ -67,17 +64,6 @@ const useCategoryStore = create((set, get) => ({
 
     set({ fetchPromise: fetchCategoriesPromise });
     return fetchCategoriesPromise;
-  },
-
-  // Fetch categories hierarchy
-  fetchCategoriesHierarchy: async (type = 'vietnam-tours') => {
-    try {
-      const response = await apiClient.get(`/categories/hierarchy/${type}`);
-      return response.data.data;
-    } catch (error) {
-      console.error('Failed to fetch categories hierarchy:', error);
-      throw error;
-    }
   },
 
   // Get category by slug
@@ -92,37 +78,10 @@ const useCategoryStore = create((set, get) => ({
     return categories?.filter(category => category.isActive) || [];
   },
 
-  // Get main categories (level 0)
-  getMainCategories: () => {
+  // Get featured categories
+  getFeaturedCategories: () => {
     const { categories } = get();
-    return categories?.filter(category => category.isActive && category.level === 0) || [];
-  },
-
-  // Get subcategories of a parent
-  getSubcategories: (parentId) => {
-    const { categories } = get();
-    return categories?.filter(category => 
-      category.isActive && 
-      category.parent === parentId
-    ) || [];
-  },
-
-  // Get categories by level
-  getCategoriesByLevel: (level) => {
-    const { categories } = get();
-    return categories?.filter(category => 
-      category.isActive && 
-      category.level === level
-    ) || [];
-  },
-
-  // Get categories by region
-  getCategoriesByRegion: (region) => {
-    const { categories } = get();
-    return categories?.filter(category => 
-      category.isActive && 
-      (category.region === region || category.region === 'all')
-    ) || [];
+    return categories?.filter(category => category.isActive && category.isFeatured) || [];
   },
 
   // Clear cache
@@ -138,5 +97,4 @@ const useCategoryStore = create((set, get) => ({
   }),
 }));
 
-export default useCategoryStore;
-
+export default useTransferCategoryStore;

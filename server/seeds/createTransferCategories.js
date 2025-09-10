@@ -1,314 +1,284 @@
 const mongoose = require('mongoose');
-const Category = require('../models/Category');
+const TransferCategory = require('../models/TransferCategory');
 
-// Transfer service categories based on the Quick Guide from the image
+// Transfer categories based on the image analysis
 const transferCategories = [
   {
     name: {
-      en: 'Halong Bay Transfer',
-      vi: 'Đưa Đón Vịnh Hạ Long'
+      en: "Halong Bay Transfer",
+      vi: "Chuyển đổi Vịnh Hạ Long"
     },
-    slug: 'halong-bay-transfer',
+    slug: "halong-bay-transfer",
     description: {
-      en: 'Professional transfer service to Halong Bay from Hanoi. Comfortable vehicles with experienced drivers.',
-      vi: 'Dịch vụ đưa đón chuyên nghiệp từ Hà Nội đến Vịnh Hạ Long. Xe thoải mái với tài xế giàu kinh nghiệm.'
+      en: "Comfortable and reliable transfer services to Halong Bay, one of Vietnam's most famous natural wonders. Experience scenic routes and professional service.",
+      vi: "Dịch vụ chuyển đổi thoải mái và đáng tin cậy đến Vịnh Hạ Long, một trong những kỳ quan thiên nhiên nổi tiếng nhất của Việt Nam. Trải nghiệm tuyến đường đẹp và dịch vụ chuyên nghiệp."
     },
-    type: 'transfer-services',
-    vehicleType: 'Private car',
-    region: 'north',
-    location: {
-      en: 'Halong Bay, Quang Ninh',
-      vi: 'Vịnh Hạ Long, Quảng Ninh'
+    shortDescription: {
+      en: "Professional transfer service to Halong Bay with scenic routes",
+      vi: "Dịch vụ chuyển đổi chuyên nghiệp đến Vịnh Hạ Long với tuyến đường đẹp"
     },
-    seats: 4,
-    sortOrder: 1,
-    isActive: true,
-    seo: {
-      title: {
-        en: 'Halong Bay Transfer Service | VnBestTravel',
-        vi: 'Dịch Vụ Đưa Đón Vịnh Hạ Long | VnBestTravel'
-      },
-      description: {
-        en: 'Book your Halong Bay transfer with VnBestTravel. Professional service, comfortable vehicles, experienced drivers.',
-        vi: 'Đặt dịch vụ đưa đón Vịnh Hạ Long với VnBestTravel. Dịch vụ chuyên nghiệp, xe thoải mái, tài xế giàu kinh nghiệm.'
-      },
-      keywords: ['halong bay transfer', 'hanoi to halong bay', 'halong bay transportation', 'đưa đón vịnh hạ long']
-    }
+    region: "north",
+    vehicleType: "van",
+    features: [
+      { en: "Scenic route views", vi: "Tuyến đường đẹp" },
+      { en: "Professional driver", vi: "Tài xế chuyên nghiệp" },
+      { en: "Air-conditioned vehicle", vi: "Xe có điều hòa" },
+      { en: "Hotel pickup", vi: "Đón tại khách sạn" }
+    ],
+    amenities: [
+      { en: "Free WiFi", vi: "WiFi miễn phí" },
+      { en: "Bottled water", vi: "Nước uống" },
+      { en: "English speaking guide", vi: "Hướng dẫn viên nói tiếng Anh" }
+    ],
+    isFeatured: true,
+    order: 1
   },
   {
     name: {
-      en: 'Hanoi Sapa Train',
-      vi: 'Tàu Hà Nội Sapa'
+      en: "Hanoi Sapa Train",
+      vi: "Tàu hỏa Hà Nội Sapa"
     },
-    slug: 'hanoi-sapa-train',
+    slug: "hanoi-sapa-train",
     description: {
-      en: 'Comfortable train journey from Hanoi to Sapa. Overnight sleeper train with modern amenities.',
-      vi: 'Hành trình tàu thoải mái từ Hà Nội đến Sapa. Tàu ngủ đêm với tiện nghi hiện đại.'
+      en: "Experience the iconic overnight train journey from Hanoi to Sapa. Comfortable sleeper cabins with beautiful mountain scenery along the way.",
+      vi: "Trải nghiệm hành trình tàu hỏa qua đêm nổi tiếng từ Hà Nội đến Sapa. Khoang ngủ thoải mái với cảnh quan núi non đẹp mắt dọc đường."
     },
-    type: 'transfer-services',
-    vehicleType: 'Sleeping Bus',
-    region: 'north',
-    location: {
-      en: 'Sapa, Lao Cai',
-      vi: 'Sapa, Lào Cai'
+    shortDescription: {
+      en: "Overnight train journey to Sapa with mountain views",
+      vi: "Hành trình tàu hỏa qua đêm đến Sapa với cảnh núi non"
     },
-    seats: 40,
-    sortOrder: 2,
-    isActive: true,
-    seo: {
-      title: {
-        en: 'Hanoi to Sapa Train Service | VnBestTravel',
-        vi: 'Dịch Vụ Tàu Hà Nội Sapa | VnBestTravel'
-      },
-      description: {
-        en: 'Travel from Hanoi to Sapa by train. Comfortable sleeper train with modern amenities and scenic views.',
-        vi: 'Du lịch từ Hà Nội đến Sapa bằng tàu. Tàu ngủ thoải mái với tiện nghi hiện đại và cảnh đẹp.'
-      },
-      keywords: ['hanoi sapa train', 'sapa train service', 'hanoi to sapa', 'tàu hà nội sapa']
-    }
+    region: "north",
+    vehicleType: "bus",
+    features: [
+      { en: "Sleeper cabins", vi: "Khoang ngủ" },
+      { en: "Mountain scenery", vi: "Cảnh núi non" },
+      { en: "Overnight journey", vi: "Hành trình qua đêm" },
+      { en: "Traditional experience", vi: "Trải nghiệm truyền thống" }
+    ],
+    amenities: [
+      { en: "Bedding provided", vi: "Có chăn gối" },
+      { en: "Shared facilities", vi: "Tiện ích chung" },
+      { en: "Dining car", vi: "Toa ăn" }
+    ],
+    isFeatured: true,
+    order: 2
   },
   {
     name: {
-      en: 'Ha Giang Transfer',
-      vi: 'Đưa Đón Hà Giang'
+      en: "Ha Giang Transfer",
+      vi: "Chuyển đổi Hà Giang"
     },
-    slug: 'ha-giang-transfer',
+    slug: "hagiang-transfer",
     description: {
-      en: 'Adventure transfer to Ha Giang province. Experience the stunning mountain landscapes.',
-      vi: 'Đưa đón khám phá đến tỉnh Hà Giang. Trải nghiệm cảnh quan núi non tuyệt đẹp.'
+      en: "Adventure transfer service to Ha Giang, the northernmost province of Vietnam. Experience the famous Ha Giang Loop with stunning mountain passes.",
+      vi: "Dịch vụ chuyển đổi phiêu lưu đến Hà Giang, tỉnh cực bắc của Việt Nam. Trải nghiệm vòng lặp Hà Giang nổi tiếng với những đèo núi tuyệt đẹp."
     },
-    type: 'transfer-services',
-    vehicleType: 'Private car',
-    region: 'north',
-    location: {
-      en: 'Ha Giang Province',
-      vi: 'Tỉnh Hà Giang'
+    shortDescription: {
+      en: "Adventure transfer to Ha Giang with mountain loop experience",
+      vi: "Chuyển đổi phiêu lưu đến Hà Giang với trải nghiệm vòng lặp núi"
     },
-    seats: 4,
-    sortOrder: 3,
-    isActive: true,
-    seo: {
-      title: {
-        en: 'Ha Giang Transfer Service | VnBestTravel',
-        vi: 'Dịch Vụ Đưa Đón Hà Giang | VnBestTravel'
-      },
-      description: {
-        en: 'Adventure transfer to Ha Giang. Experience stunning mountain landscapes and ethnic culture.',
-        vi: 'Đưa đón khám phá đến Hà Giang. Trải nghiệm cảnh quan núi non tuyệt đẹp và văn hóa dân tộc.'
-      },
-      keywords: ['ha giang transfer', 'ha giang transportation', 'ha giang loop', 'đưa đón hà giang']
-    }
+    region: "north",
+    vehicleType: "car",
+    features: [
+      { en: "Mountain loop route", vi: "Tuyến vòng lặp núi" },
+      { en: "Adventure experience", vi: "Trải nghiệm phiêu lưu" },
+      { en: "Scenic mountain passes", vi: "Đèo núi đẹp" },
+      { en: "Local culture", vi: "Văn hóa địa phương" }
+    ],
+    amenities: [
+      { en: "Experienced driver", vi: "Tài xế kinh nghiệm" },
+      { en: "Safety equipment", vi: "Thiết bị an toàn" },
+      { en: "Photo stops", vi: "Điểm dừng chụp ảnh" }
+    ],
+    isFeatured: true,
+    order: 3
   },
   {
     name: {
-      en: 'Airport Transfer',
-      vi: 'Đưa Đón Sân Bay'
+      en: "Airport Transfer",
+      vi: "Chuyển đổi sân bay"
     },
-    slug: 'airport-transfer',
+    slug: "airport-transfer",
     description: {
-      en: 'Reliable airport transfer service. Meet and greet service with professional drivers.',
-      vi: 'Dịch vụ đưa đón sân bay đáng tin cậy. Dịch vụ đón tiếp với tài xế chuyên nghiệp.'
+      en: "Reliable and comfortable airport transfer services to and from major airports in Vietnam. Professional drivers and modern vehicles for your convenience.",
+      vi: "Dịch vụ chuyển đổi sân bay đáng tin cậy và thoải mái đến và đi từ các sân bay lớn ở Việt Nam. Tài xế chuyên nghiệp và xe hiện đại cho sự tiện lợi của bạn."
     },
-    type: 'transfer-services',
-    vehicleType: 'Airport Transfer',
-    region: 'all',
-    location: {
-      en: 'All Airports in Vietnam',
-      vi: 'Tất Cả Sân Bay Việt Nam'
+    shortDescription: {
+      en: "Professional airport transfer service with modern vehicles",
+      vi: "Dịch vụ chuyển đổi sân bay chuyên nghiệp với xe hiện đại"
     },
-    seats: 4,
-    sortOrder: 4,
-    isActive: true,
-    seo: {
-      title: {
-        en: 'Airport Transfer Service Vietnam | VnBestTravel',
-        vi: 'Dịch Vụ Đưa Đón Sân Bay Việt Nam | VnBestTravel'
-      },
-      description: {
-        en: 'Professional airport transfer service in Vietnam. Meet and greet, reliable transportation.',
-        vi: 'Dịch vụ đưa đón sân bay chuyên nghiệp tại Việt Nam. Đón tiếp, vận chuyển đáng tin cậy.'
-      },
-      keywords: ['airport transfer vietnam', 'vietnam airport pickup', 'đưa đón sân bay', 'airport transportation']
-    }
+    region: "all",
+    vehicleType: "car",
+    features: [
+      { en: "Flight tracking", vi: "Theo dõi chuyến bay" },
+      { en: "Meet and greet", vi: "Đón và chào hỏi" },
+      { en: "Luggage assistance", vi: "Hỗ trợ hành lý" },
+      { en: "24/7 service", vi: "Dịch vụ 24/7" }
+    ],
+    amenities: [
+      { en: "Free WiFi", vi: "WiFi miễn phí" },
+      { en: "Bottled water", vi: "Nước uống" },
+      { en: "Child seats available", vi: "Có ghế trẻ em" },
+      { en: "English speaking driver", vi: "Tài xế nói tiếng Anh" }
+    ],
+    isFeatured: true,
+    order: 4
   },
   {
     name: {
-      en: 'Sapa Transfer',
-      vi: 'Đưa Đón Sapa'
+      en: "Sapa Transfer",
+      vi: "Chuyển đổi Sapa"
     },
-    slug: 'sapa-transfer',
+    slug: "sapa-transfer",
     description: {
-      en: 'Direct transfer to Sapa from Hanoi. Comfortable journey to the mountain town.',
-      vi: 'Đưa đón trực tiếp từ Hà Nội đến Sapa. Hành trình thoải mái đến thị trấn miền núi.'
+      en: "Comfortable transfer service to Sapa, the famous hill station in northern Vietnam. Enjoy the journey through beautiful mountain landscapes.",
+      vi: "Dịch vụ chuyển đổi thoải mái đến Sapa, trạm nghỉ dưỡng nổi tiếng ở miền bắc Việt Nam. Thưởng thức hành trình qua cảnh quan núi non đẹp mắt."
     },
-    type: 'transfer-services',
-    vehicleType: 'Shuttle Bus',
-    region: 'north',
-    location: {
-      en: 'Sapa, Lao Cai',
-      vi: 'Sapa, Lào Cai'
+    shortDescription: {
+      en: "Comfortable transfer to Sapa hill station",
+      vi: "Chuyển đổi thoải mái đến trạm nghỉ dưỡng Sapa"
     },
-    seats: 16,
-    sortOrder: 5,
-    isActive: true,
-    seo: {
-      title: {
-        en: 'Sapa Transfer Service | VnBestTravel',
-        vi: 'Dịch Vụ Đưa Đón Sapa | VnBestTravel'
-      },
-      description: {
-        en: 'Direct transfer to Sapa from Hanoi. Comfortable shuttle bus service to the mountain town.',
-        vi: 'Đưa đón trực tiếp từ Hà Nội đến Sapa. Dịch vụ xe buýt thoải mái đến thị trấn miền núi.'
-      },
-      keywords: ['sapa transfer', 'hanoi to sapa bus', 'sapa transportation', 'đưa đón sapa']
-    }
+    region: "north",
+    vehicleType: "van",
+    features: [
+      { en: "Mountain route", vi: "Tuyến đường núi" },
+      { en: "Hill station destination", vi: "Điểm đến trạm nghỉ dưỡng" },
+      { en: "Terraced rice fields", vi: "Ruộng bậc thang" },
+      { en: "Ethnic culture", vi: "Văn hóa dân tộc" }
+    ],
+    amenities: [
+      { en: "Comfortable seating", vi: "Ghế ngồi thoải mái" },
+      { en: "Mountain views", vi: "Cảnh núi non" },
+      { en: "Cultural insights", vi: "Hiểu biết văn hóa" }
+    ],
+    isFeatured: true,
+    order: 5
   },
   {
     name: {
-      en: 'Ninh Binh Transfer',
-      vi: 'Đưa Đón Ninh Bình'
+      en: "Ninh Binh Transfer",
+      vi: "Chuyển đổi Ninh Bình"
     },
-    slug: 'ninh-binh-transfer',
+    slug: "ninh-binh-transfer",
     description: {
-      en: 'Explore Ninh Binh with our transfer service. Visit ancient temples and limestone mountains.',
-      vi: 'Khám phá Ninh Bình với dịch vụ đưa đón của chúng tôi. Thăm chùa cổ và núi đá vôi.'
+      en: "Scenic transfer service to Ninh Binh, known as 'Halong Bay on land'. Experience the beautiful karst landscape and ancient temples.",
+      vi: "Dịch vụ chuyển đổi đẹp mắt đến Ninh Bình, được mệnh danh là 'Vịnh Hạ Long trên cạn'. Trải nghiệm cảnh quan karst đẹp và các ngôi chùa cổ."
     },
-    type: 'transfer-services',
-    vehicleType: 'Private car',
-    region: 'north',
-    location: {
-      en: 'Ninh Binh Province',
-      vi: 'Tỉnh Ninh Bình'
+    shortDescription: {
+      en: "Scenic transfer to Ninh Binh with karst landscape",
+      vi: "Chuyển đổi đẹp mắt đến Ninh Bình với cảnh quan karst"
     },
-    seats: 4,
-    sortOrder: 6,
-    isActive: true,
-    seo: {
-      title: {
-        en: 'Ninh Binh Transfer Service | VnBestTravel',
-        vi: 'Dịch Vụ Đưa Đón Ninh Bình | VnBestTravel'
-      },
-      description: {
-        en: 'Transfer service to Ninh Binh. Visit ancient temples, limestone mountains, and scenic landscapes.',
-        vi: 'Dịch vụ đưa đón đến Ninh Bình. Thăm chùa cổ, núi đá vôi và cảnh quan đẹp.'
-      },
-      keywords: ['ninh binh transfer', 'ninh binh transportation', 'trang an transfer', 'đưa đón ninh bình']
-    }
+    region: "north",
+    vehicleType: "car",
+    features: [
+      { en: "Karst landscape", vi: "Cảnh quan karst" },
+      { en: "Ancient temples", vi: "Chùa cổ" },
+      { en: "Boat tours", vi: "Tour thuyền" },
+      { en: "Cultural heritage", vi: "Di sản văn hóa" }
+    ],
+    amenities: [
+      { en: "Cultural guide", vi: "Hướng dẫn văn hóa" },
+      { en: "Photo opportunities", vi: "Cơ hội chụp ảnh" },
+      { en: "Historical insights", vi: "Hiểu biết lịch sử" }
+    ],
+    isFeatured: true,
+    order: 6
   },
   {
     name: {
-      en: 'Cat Ba Transfer',
-      vi: 'Đưa Đón Cát Bà'
+      en: "Cat Ba Transfer",
+      vi: "Chuyển đổi Cát Bà"
     },
-    slug: 'cat-ba-transfer',
+    slug: "cat-ba-transfer",
     description: {
-      en: 'Island transfer to Cat Ba. Combine ferry and road transport for island adventure.',
-      vi: 'Đưa đón đảo Cát Bà. Kết hợp phà và vận chuyển đường bộ cho cuộc phiêu lưu đảo.'
+      en: "Transfer service to Cat Ba Island, the largest island in Halong Bay. Enjoy the journey through beautiful coastal roads and ferry crossing.",
+      vi: "Dịch vụ chuyển đổi đến đảo Cát Bà, hòn đảo lớn nhất trong Vịnh Hạ Long. Thưởng thức hành trình qua những con đường ven biển đẹp và chuyến phà."
     },
-    type: 'transfer-services',
-    vehicleType: 'Shuttle Bus',
-    region: 'north',
-    location: {
-      en: 'Cat Ba Island, Hai Phong',
-      vi: 'Đảo Cát Bà, Hải Phòng'
+    shortDescription: {
+      en: "Transfer to Cat Ba Island with coastal views",
+      vi: "Chuyển đổi đến đảo Cát Bà với cảnh biển"
     },
-    seats: 16,
-    sortOrder: 7,
-    isActive: true,
-    seo: {
-      title: {
-        en: 'Cat Ba Island Transfer Service | VnBestTravel',
-        vi: 'Dịch Vụ Đưa Đón Đảo Cát Bà | VnBestTravel'
-      },
-      description: {
-        en: 'Transfer service to Cat Ba Island. Combine ferry and road transport for island adventure.',
-        vi: 'Dịch vụ đưa đón đến Đảo Cát Bà. Kết hợp phà và vận chuyển đường bộ cho cuộc phiêu lưu đảo.'
-      },
-      keywords: ['cat ba transfer', 'cat ba island transportation', 'cat ba ferry', 'đưa đón cát bà']
-    }
+    region: "north",
+    vehicleType: "van",
+    features: [
+      { en: "Island destination", vi: "Điểm đến đảo" },
+      { en: "Ferry crossing", vi: "Chuyến phà" },
+      { en: "Coastal route", vi: "Tuyến đường ven biển" },
+      { en: "National park", vi: "Vườn quốc gia" }
+    ],
+    amenities: [
+      { en: "Ferry tickets included", vi: "Bao gồm vé phà" },
+      { en: "Island guide", vi: "Hướng dẫn đảo" },
+      { en: "Beach access", vi: "Tiếp cận bãi biển" }
+    ],
+    isFeatured: true,
+    order: 7
   },
   {
     name: {
-      en: 'All in One Transfers Package',
-      vi: 'Gói Đưa Đón Tất Trong Một'
+      en: "All in One Transfers Package",
+      vi: "Gói chuyển đổi tất cả trong một"
     },
-    slug: 'all-in-one-transfers-package',
+    slug: "all-in-one-transfers-package",
     description: {
-      en: 'Complete transfer package for your Vietnam adventure. Multiple destinations in one convenient package.',
-      vi: 'Gói đưa đón hoàn chỉnh cho cuộc phiêu lưu Việt Nam của bạn. Nhiều điểm đến trong một gói tiện lợi.'
+      en: "Comprehensive transfer package covering all major destinations in Vietnam. Save money and enjoy seamless travel between cities and attractions.",
+      vi: "Gói chuyển đổi toàn diện bao gồm tất cả các điểm đến chính ở Việt Nam. Tiết kiệm tiền và tận hưởng du lịch liền mạch giữa các thành phố và điểm tham quan."
     },
-    type: 'transfer-services',
-    vehicleType: 'Luxury LIMO',
-    region: 'all',
-    location: {
-      en: 'All Vietnam Destinations',
-      vi: 'Tất Cả Điểm Đến Việt Nam'
+    shortDescription: {
+      en: "Comprehensive transfer package for all destinations",
+      vi: "Gói chuyển đổi toàn diện cho tất cả điểm đến"
     },
-    seats: 4,
-    sortOrder: 8,
-    isActive: true,
-    seo: {
-      title: {
-        en: 'All in One Vietnam Transfer Package | VnBestTravel',
-        vi: 'Gói Đưa Đón Tất Trong Một Việt Nam | VnBestTravel'
-      },
-      description: {
-        en: 'Complete transfer package for Vietnam. Visit multiple destinations with luxury transportation.',
-        vi: 'Gói đưa đón hoàn chỉnh cho Việt Nam. Thăm nhiều điểm đến với vận chuyển sang trọng.'
-      },
-      keywords: ['vietnam transfer package', 'all in one transfer', 'vietnam transportation package', 'gói đưa đón việt nam']
-    }
+    region: "all",
+    vehicleType: "van",
+    features: [
+      { en: "Multiple destinations", vi: "Nhiều điểm đến" },
+      { en: "Cost savings", vi: "Tiết kiệm chi phí" },
+      { en: "Flexible schedule", vi: "Lịch trình linh hoạt" },
+      { en: "Priority booking", vi: "Ưu tiên đặt chỗ" }
+    ],
+    amenities: [
+      { en: "Dedicated coordinator", vi: "Điều phối viên chuyên dụng" },
+      { en: "24/7 support", vi: "Hỗ trợ 24/7" },
+      { en: "Customizable routes", vi: "Tuyến đường tùy chỉnh" },
+      { en: "Group discounts", vi: "Giảm giá nhóm" }
+    ],
+    isFeatured: true,
+    order: 8
   }
 ];
 
-const seedTransferCategories = async () => {
+const createTransferCategories = async () => {
   try {
-    console.log('🚗 Starting transfer categories seeding...');
+    // Connect to MongoDB
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/zuna-travel');
+    console.log('Connected to MongoDB');
 
-    // Clear existing transfer service categories
-    await Category.deleteMany({ type: 'transfer-services' });
-    console.log('🗑️  Cleared existing transfer service categories');
+    // Clear existing transfer categories
+    await TransferCategory.deleteMany({});
+    console.log('Cleared existing transfer categories');
 
-    // Create transfer categories
-    const createdCategories = [];
-    for (const categoryData of transferCategories) {
-      const category = new Category(categoryData);
-      await category.save();
-      createdCategories.push(category);
-      console.log(`✅ Created: ${categoryData.name.en} (${categoryData.slug})`);
-    }
-
-    console.log(`🎉 Successfully created ${createdCategories.length} transfer categories`);
-    console.log('📋 Transfer Categories Summary:');
+    // Create new transfer categories
+    console.log(`Attempting to create ${transferCategories.length} transfer categories...`);
+    
+    const createdCategories = await TransferCategory.insertMany(transferCategories);
+    console.log(`Created ${createdCategories.length} transfer categories:`);
+    
     createdCategories.forEach(category => {
-      console.log(`   - ${category.name.en} (${category.slug}) - ${category.vehicleType} - ${category.seats} seats`);
+      console.log(`- ${category.name.en} (${category.slug})`);
     });
 
-    return createdCategories;
-
+    console.log('Transfer categories created successfully!');
   } catch (error) {
-    console.error('❌ Error seeding transfer categories:', error);
-    throw error;
+    console.error('Error creating transfer categories:', error);
+  } finally {
+    await mongoose.disconnect();
+    console.log('Disconnected from MongoDB');
   }
 };
 
-// Run the seeding if this file is executed directly
+// Run the script
 if (require.main === module) {
-  require('dotenv').config();
-  
-  mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://namp280918:zunatravel@cluster0.od0rj5u.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
-    .then(() => {
-      console.log('🔗 Connected to MongoDB');
-      return seedTransferCategories();
-    })
-    .then(() => {
-      console.log('✅ Transfer categories seeding completed');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('❌ Seeding failed:', error);
-      process.exit(1);
-    });
+  createTransferCategories();
 }
 
-module.exports = { seedTransferCategories, transferCategories };
+module.exports = createTransferCategories;

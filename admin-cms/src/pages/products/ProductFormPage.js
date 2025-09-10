@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { useTourStore, useTransferStore, useCategoryStore } from '../../stores';
+import { useTourStore, useTransferStore, useTourCategoryStore, useTransferCategoryStore } from '../../stores';
 import toast from 'react-hot-toast';
 import ImageUpload from '../../components/common/ImageUpload';
 
@@ -15,7 +15,8 @@ const ProductFormPage = () => {
 
   const { tours, fetchTours, createTour, updateTour, getTourById } = useTourStore();
   const { transfers, fetchTransfers, createTransfer, updateTransfer, getTransferById } = useTransferStore();
-  const { categories, fetchCategories } = useCategoryStore();
+  const { categories: tourCategories, fetchCategories: fetchTourCategories } = useTourCategoryStore();
+  const { categories: transferCategories, fetchCategories: fetchTransferCategories } = useTransferCategoryStore();
 
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(isEditing);
@@ -41,12 +42,26 @@ const ProductFormPage = () => {
     },
     duration: {
       days: '',
-      nights: ''
+      nights: '',
+      minutes: '' // For transfers
     },
     location: {
       en: '',
       vi: ''
     },
+    // Transfer specific fields
+    from: {
+      en: '',
+      vi: ''
+    },
+    to: {
+      en: '',
+      vi: ''
+    },
+    route: '',
+    distance: '',
+    vehicleType: '',
+    seats: '',
     highlights: [],
     included: [],
     excluded: [],
@@ -71,14 +86,16 @@ const ProductFormPage = () => {
   const [validationErrors, setValidationErrors] = useState({});
 
   useEffect(() => {
-    fetchCategories();
+    fetchTourCategories();
+    fetchTransferCategories();
     if (isEditing) {
       fetchProduct();
     }
-  }, [id, fetchCategories]);
+  }, [id, fetchTourCategories, fetchTransferCategories]);
 
-  // Filter categories by type
-  const filteredCategories = categories.filter(cat => cat.type === type);
+  // Get current categories based on type
+  const categories = type === 'vietnam-tours' ? tourCategories : transferCategories;
+  const filteredCategories = categories || [];
   
   // Auto-select first category of the specified type
   useEffect(() => {
@@ -129,12 +146,26 @@ const ProductFormPage = () => {
         },
         duration: {
           days: product.duration?.days || '',
-          nights: product.duration?.nights || ''
+          nights: product.duration?.nights || '',
+          minutes: product.duration || '' // For transfers
         },
         location: {
           en: product.location?.en || '',
           vi: product.location?.vi || ''
         },
+        // Transfer specific fields
+        from: {
+          en: product.from?.en || '',
+          vi: product.from?.vi || ''
+        },
+        to: {
+          en: product.to?.en || '',
+          vi: product.to?.vi || ''
+        },
+        route: product.route || '',
+        distance: product.distance || '',
+        vehicleType: product.vehicleType || '',
+        seats: product.seats || '',
         highlights: product.highlights || [],
         included: product.included || [],
         excluded: product.excluded || [],
@@ -303,9 +334,17 @@ const ProductFormPage = () => {
     }
 
     // Duration validation
-    if (!formData.duration.days || parseInt(formData.duration.days) <= 0) {
-      errors.push('Duration days must be greater than 0');
-      setValidationErrors(prev => ({ ...prev, duration: 'Duration days must be greater than 0' }));
+    if (type === 'vietnam-tours') {
+      if (!formData.duration.days || parseInt(formData.duration.days) <= 0) {
+        errors.push('Duration days must be greater than 0');
+        setValidationErrors(prev => ({ ...prev, duration: 'Duration days must be greater than 0' }));
+      }
+    } else {
+      // For transfers, validate minutes
+      if (!formData.duration.minutes || parseInt(formData.duration.minutes) <= 0) {
+        errors.push('Duration minutes must be greater than 0');
+        setValidationErrors(prev => ({ ...prev, duration: 'Duration minutes must be greater than 0' }));
+      }
     }
 
     // Location validation
@@ -344,22 +383,25 @@ const ProductFormPage = () => {
       setValidationErrors(prev => ({ ...prev, cancellationPolicy_vi: 'Vietnamese cancellation policy is required' }));
     }
 
-    // Highlights validation
-    if (!formData.highlights || formData.highlights.length === 0) {
-      errors.push('At least one highlight is required');
-      setValidationErrors(prev => ({ ...prev, highlights: 'At least one highlight is required' }));
-    }
+    // Tour specific validations
+    if (type === 'vietnam-tours') {
+      // Highlights validation
+      if (!formData.highlights || formData.highlights.length === 0) {
+        errors.push('At least one highlight is required');
+        setValidationErrors(prev => ({ ...prev, highlights: 'At least one highlight is required' }));
+      }
 
-    // Included validation
-    if (!formData.included || formData.included.length === 0) {
-      errors.push('At least one included item is required');
-      setValidationErrors(prev => ({ ...prev, included: 'At least one included item is required' }));
-    }
+      // Included validation
+      if (!formData.included || formData.included.length === 0) {
+        errors.push('At least one included item is required');
+        setValidationErrors(prev => ({ ...prev, included: 'At least one included item is required' }));
+      }
 
-    // Excluded validation
-    if (!formData.excluded || formData.excluded.length === 0) {
-      errors.push('At least one excluded item is required');
-      setValidationErrors(prev => ({ ...prev, excluded: 'At least one excluded item is required' }));
+      // Excluded validation
+      if (!formData.excluded || formData.excluded.length === 0) {
+        errors.push('At least one excluded item is required');
+        setValidationErrors(prev => ({ ...prev, excluded: 'At least one excluded item is required' }));
+      }
     }
 
     // Show all validation errors
@@ -379,13 +421,41 @@ const ProductFormPage = () => {
           ...formData.pricing,
           adult: formData.pricing.adult ? parseFloat(formData.pricing.adult) : undefined,
           child: formData.pricing.child ? parseFloat(formData.pricing.child) : undefined
-        },
-        duration: {
-          ...formData.duration,
-          days: formData.duration.days ? parseInt(formData.duration.days) : undefined,
-          nights: formData.duration.nights ? parseInt(formData.duration.nights) : undefined
         }
       };
+
+      // Handle duration based on type
+      if (type === 'vietnam-tours') {
+        submitData.duration = {
+          days: formData.duration.days ? parseInt(formData.duration.days) : undefined,
+          nights: formData.duration.nights ? parseInt(formData.duration.nights) : undefined
+        };
+      } else {
+        // For transfers, use minutes as duration
+        submitData.duration = formData.duration.minutes ? parseInt(formData.duration.minutes) : undefined;
+      }
+
+      // Add transfer specific fields
+      if (type === 'transfer-services') {
+        submitData.from = formData.from;
+        submitData.to = formData.to;
+        submitData.route = formData.route;
+        submitData.distance = formData.distance ? parseInt(formData.distance) : undefined;
+        submitData.vehicleType = formData.vehicleType;
+        submitData.seats = formData.seats ? parseInt(formData.seats) : undefined;
+      }
+
+      // Only include tour-specific fields for tours
+      if (type === 'vietnam-tours') {
+        submitData.highlights = formData.highlights;
+        submitData.included = formData.included;
+        submitData.excluded = formData.excluded;
+      } else {
+        // Remove tour-specific fields for transfers
+        delete submitData.highlights;
+        delete submitData.included;
+        delete submitData.excluded;
+      }
 
       if (isEditing) {
         if (type === 'vietnam-tours') {
@@ -647,34 +717,51 @@ const ProductFormPage = () => {
           </div>
 
           {/* Duration */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {type === 'vietnam-tours' ? (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('products.days')}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.duration.days}
+                  onChange={(e) => handleNestedInputChange('duration', 'days', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Number of days"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('products.nights')}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.duration.nights}
+                  onChange={(e) => handleNestedInputChange('duration', 'nights', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Number of nights"
+                />
+              </div>
+            </div>
+          ) : (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('products.days')}
+                Duration (minutes) *
               </label>
               <input
                 type="number"
                 min="1"
-                value={formData.duration.days}
-                onChange={(e) => handleNestedInputChange('duration', 'days', e.target.value)}
+                value={formData.duration.minutes}
+                onChange={(e) => handleNestedInputChange('duration', 'minutes', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Number of days"
+                placeholder="Duration in minutes"
+                required
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('products.nights')}
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={formData.duration.nights}
-                onChange={(e) => handleNestedInputChange('duration', 'nights', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Number of nights"
-              />
-            </div>
-          </div>
+          )}
 
           {/* Location */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -704,11 +791,139 @@ const ProductFormPage = () => {
             </div>
           </div>
 
-          {/* Highlights */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('products.highlights')}
-            </label>
+          {/* Transfer Specific Fields */}
+          {type === 'transfer-services' && (
+            <>
+              {/* From/To */}
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    From (English) *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.from.en}
+                    onChange={(e) => handleInputChange('from', e.target.value, 'en')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="e.g., Hanoi Airport"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    From (Vietnamese) *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.from.vi}
+                    onChange={(e) => handleInputChange('from', e.target.value, 'vi')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="e.g., Sân bay Hà Nội"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    To (English) *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.to.en}
+                    onChange={(e) => handleInputChange('to', e.target.value, 'en')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="e.g., Old Quarter"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    To (Vietnamese) *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.to.vi}
+                    onChange={(e) => handleInputChange('to', e.target.value, 'vi')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="e.g., Phố Cổ"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Route, Distance, Vehicle Type, Seats */}
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Route
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.route}
+                    onChange={(e) => handleInputChange('route', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="e.g., Hanoi-Sapa"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Distance (km)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.distance}
+                    onChange={(e) => handleInputChange('distance', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Distance in kilometers"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Vehicle Type
+                  </label>
+                  <select
+                    value={formData.vehicleType}
+                    onChange={(e) => handleInputChange('vehicleType', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Select Vehicle Type</option>
+                    <option value="car">Car</option>
+                    <option value="van">Van</option>
+                    <option value="bus">Bus</option>
+                    <option value="limousine">Limousine</option>
+                    <option value="motorbike">Motorbike</option>
+                    <option value="train">Train</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Seats
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={formData.seats}
+                    onChange={(e) => handleInputChange('seats', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Number of seats"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Highlights - Only for tours */}
+          {type === 'vietnam-tours' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('products.highlights')}
+              </label>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <input
                 type="text"
@@ -750,13 +965,15 @@ const ProductFormPage = () => {
                 ))}
               </div>
             )}
-          </div>
+            </div>
+          )}
 
-          {/* Included */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('products.included')}
-            </label>
+          {/* Included - Only for tours */}
+          {type === 'vietnam-tours' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('products.included')}
+              </label>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <input
                 type="text"
@@ -798,13 +1015,15 @@ const ProductFormPage = () => {
                 ))}
               </div>
             )}
-          </div>
+            </div>
+          )}
 
-          {/* Excluded */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('products.excluded')}
-            </label>
+          {/* Excluded - Only for tours */}
+          {type === 'vietnam-tours' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('products.excluded')}
+              </label>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <input
                 type="text"
@@ -846,7 +1065,8 @@ const ProductFormPage = () => {
                 ))}
               </div>
             )}
-          </div>
+            </div>
+          )}
 
           {/* Requirements */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

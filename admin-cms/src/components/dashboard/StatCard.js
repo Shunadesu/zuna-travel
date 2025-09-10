@@ -1,7 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-const StatCard = ({ name, value, icon: Icon, color }) => {
-  return (
+const StatCard = ({ name, value, icon: Icon, color, link }) => {
+  const content = (
     <div className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-200">
       <div className="p-5">
         <div className="flex items-center">
@@ -22,9 +23,20 @@ const StatCard = ({ name, value, icon: Icon, color }) => {
       </div>
     </div>
   );
+
+  if (link) {
+    return (
+      <Link to={link} className="block">
+        {content}
+      </Link>
+    );
+  }
+
+  return content;
 };
 
 export default StatCard;
+
 
 
 

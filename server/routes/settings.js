@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const Settings = require('../models/Settings');
-const { protect: authenticateToken, admin: requireAdmin } = require('../middleware/auth');
+const { protect: authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -31,83 +31,43 @@ router.get('/', async (req, res) => {
 });
 
 // Get settings by admin (with all fields)
-router.get('/admin', authenticateToken, requireAdmin, async (req, res) => {
+router.get('/admin', authenticateToken, async (req, res) => {
   try {
     const settings = await Settings.getSettings();
     
     res.json({
-      message: 'Settings retrieved successfully',
+      message: 'Admin settings retrieved successfully',
       data: settings
     });
   } catch (error) {
-    console.error('Get settings error:', error);
+    console.error('Get admin settings error:', error);
     res.status(500).json({
-      message: 'Failed to get settings',
+      message: 'Failed to get admin settings',
       error: error.message
     });
   }
 });
 
-// Update settings (admin only)
-router.put('/', authenticateToken, requireAdmin, [
-  // Branding validation
-  body('primaryColor').optional().matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)
-    .withMessage('Primary color must be a valid hex color'),
-  body('secondaryColor').optional().matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)
-    .withMessage('Secondary color must be a valid hex color'),
-  
-  // Company information validation
-  body('companyName.en').optional().trim().notEmpty()
-    .withMessage('English company name cannot be empty'),
-  body('companyName.vi').optional().trim().notEmpty()
-    .withMessage('Vietnamese company name cannot be empty'),
-  body('companyDescription.en').optional().trim(),
-  body('companyDescription.vi').optional().trim(),
-  
-  // Contact validation
-  body('email').optional().isEmail()
-    .withMessage('Email must be a valid email address'),
-  body('phone').optional().trim(),
-  body('whatsapp').optional().trim(),
-  
-  // Social media validation
-  body('facebook').optional().isURL()
-    .withMessage('Facebook URL must be a valid URL'),
-  body('instagram').optional().isURL()
-    .withMessage('Instagram URL must be a valid URL'),
-  body('youtube').optional().isURL()
-    .withMessage('YouTube URL must be a valid URL'),
-  body('tiktok').optional().isURL()
-    .withMessage('TikTok URL must be a valid URL'),
-  
-  // Address validation
-  body('address.en').optional().trim(),
-  body('address.vi').optional().trim(),
-  body('businessHours.en').optional().trim(),
-  body('businessHours.vi').optional().trim(),
-  
-  // SEO validation
-  body('metaTitle.en').optional().trim(),
-  body('metaTitle.vi').optional().trim(),
-  body('metaDescription.en').optional().trim(),
-  body('metaDescription.vi').optional().trim(),
-  body('metaKeywords').optional().isArray()
-    .withMessage('Meta keywords must be an array'),
-  
-  // Footer validation
-  body('footerText.en').optional().trim(),
-  body('footerText.vi').optional().trim(),
-  
-  // Features validation
-  body('features.enableBooking').optional().isBoolean(),
-  body('features.enableReviews').optional().isBoolean(),
-  body('features.enableNewsletter').optional().isBoolean(),
-  body('features.enableSocialLogin').optional().isBoolean(),
-  body('features.maintenanceMode').optional().isBoolean(),
-  
-  // Analytics validation
-  body('googleAnalyticsId').optional().trim(),
-  body('facebookPixelId').optional().trim()
+// Update settings
+router.put('/', authenticateToken, [
+  body('companyName').optional().isString().trim().isLength({ min: 1, max: 100 }),
+  body('companyDescription').optional().isString().trim().isLength({ max: 500 }),
+  body('email').optional().isEmail().normalizeEmail(),
+  body('phone').optional().isString().trim(),
+  body('whatsapp').optional().isString().trim(),
+  body('address').optional().isString().trim(),
+  body('businessHours').optional().isString().trim(),
+  body('primaryColor').optional().isString().trim(),
+  body('secondaryColor').optional().isString().trim(),
+  body('facebook').optional().isURL(),
+  body('instagram').optional().isURL(),
+  body('youtube').optional().isURL(),
+  body('tiktok').optional().isURL(),
+  body('metaTitle').optional().isString().trim().isLength({ max: 60 }),
+  body('metaDescription').optional().isString().trim().isLength({ max: 160 }),
+  body('metaKeywords').optional().isString().trim(),
+  body('footerText').optional().isString().trim(),
+  body('features').optional().isArray()
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -118,9 +78,26 @@ router.put('/', authenticateToken, requireAdmin, [
       });
     }
 
-    const updateData = req.body;
-    const settings = await Settings.updateSettings(updateData);
-
+    const settings = await Settings.getSettings();
+    
+    // Update only provided fields
+    const updateData = {};
+    const allowedFields = [
+      'companyName', 'companyDescription', 'email', 'phone', 'whatsapp',
+      'address', 'businessHours', 'primaryColor', 'secondaryColor',
+      'facebook', 'instagram', 'youtube', 'tiktok', 'metaTitle',
+      'metaDescription', 'metaKeywords', 'footerText', 'features'
+    ];
+    
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field];
+      }
+    });
+    
+    Object.assign(settings, updateData);
+    await settings.save();
+    
     res.json({
       message: 'Settings updated successfully',
       data: settings
@@ -134,16 +111,12 @@ router.put('/', authenticateToken, requireAdmin, [
   }
 });
 
-// Reset settings to defaults (admin only)
-router.post('/reset', authenticateToken, requireAdmin, async (req, res) => {
+// Reset settings to defaults
+router.post('/reset', authenticateToken, async (req, res) => {
   try {
-    // Delete existing settings
-    await Settings.deleteMany({});
+    const settings = await Settings.getSettings();
+    await settings.resetToDefaults();
     
-    // Create new settings with defaults
-    const settings = new Settings();
-    await settings.save();
-
     res.json({
       message: 'Settings reset to defaults successfully',
       data: settings

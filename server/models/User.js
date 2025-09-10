@@ -20,14 +20,6 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Password is required'],
     minlength: [6, 'Password must be at least 6 characters long']
   },
-  phone: {
-    type: String,
-    trim: true
-  },
-  avatar: {
-    url: String,
-    publicId: String
-  },
   role: {
     type: String,
     enum: ['user', 'admin'],
@@ -36,48 +28,7 @@ const userSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
-  },
-  emailVerified: {
-    type: Boolean,
-    default: false
-  },
-  preferences: {
-    language: {
-      type: String,
-      enum: ['en', 'vi'],
-      default: 'en'
-    },
-    currency: {
-      type: String,
-      enum: ['USD', 'VND'],
-      default: 'USD'
-    },
-    notifications: {
-      email: {
-        type: Boolean,
-        default: true
-      },
-      sms: {
-        type: Boolean,
-        default: false
-      }
-    }
-  },
-  addresses: [{
-    type: {
-      type: String,
-      enum: ['home', 'work', 'other'],
-      default: 'home'
-    },
-    address: String,
-    city: String,
-    country: String,
-    postalCode: String,
-    isDefault: {
-      type: Boolean,
-      default: false
-    }
-  }]
+  }
 }, {
   timestamps: true
 });

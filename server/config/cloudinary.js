@@ -1,10 +1,14 @@
 const cloudinary = require('cloudinary').v2;
 
+const CLOUDINARY_CLOUD_NAME = 'devxmfk83'
+const CLOUDINARY_API_KEY = '555955788839339'
+const CLOUDINARY_API_SECRET = 'jBHZB3mCi16nB43sXIeYH06mpgA'
+
 // Configure Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: CLOUDINARY_CLOUD_NAME,
+  api_key: CLOUDINARY_API_KEY,
+  api_secret: CLOUDINARY_API_SECRET,
 });
 
 // Upload image to cloudinary

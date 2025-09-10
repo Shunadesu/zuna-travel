@@ -9,7 +9,7 @@ import {
   StarIcon,
   AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline';
-import { useTourStore, useCategoryStore, useSettingsStore } from '../stores';
+import { useTourStore, useTourCategoryStore, useSettingsStore } from '../stores';
 import CategoryTabs from '../components/tours/CategoryTabs';
 
 const ToursPage = () => {
@@ -18,7 +18,7 @@ const ToursPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   
   const { tours, fetchTours, loading } = useTourStore();
-  const { categories, fetchCategories } = useCategoryStore();
+  const { categories, fetchCategories } = useTourCategoryStore();
   const { settings, fetchSettings } = useSettingsStore();
   
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
@@ -27,6 +27,8 @@ const ToursPage = () => {
   const [duration, setDuration] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [toursPerPage] = useState(9);
 
   useEffect(() => {
     fetchTours();
@@ -82,6 +84,18 @@ const ToursPage = () => {
     }
   });
 
+  // Pagination logic
+  const totalTours = sortedTours.length;
+  const totalPages = Math.ceil(totalTours / toursPerPage);
+  const startIndex = (currentPage - 1) * toursPerPage;
+  const endIndex = startIndex + toursPerPage;
+  const currentTours = sortedTours.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory, priceRange, duration, sortBy]);
+
   const handleSearch = (e) => {
     e.preventDefault();
     const newSearchParams = new URLSearchParams(searchParams);
@@ -102,7 +116,7 @@ const ToursPage = () => {
     setSearchParams({});
   };
 
-  const activeCategories = categories?.filter(cat => cat.isActive && cat.type === 'vietnam-tours') || [];
+  const activeCategories = categories?.filter(cat => cat.isActive) || [];
 
   return (
     <div className="py-16">
@@ -244,7 +258,7 @@ const ToursPage = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
               <div className="mb-4 sm:mb-0">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {loading ? 'Loading...' : `Showing ${sortedTours.length} of ${filteredTours.length} tours`}
+                  {loading ? 'Loading...' : `Showing ${currentTours.length} of ${totalTours} tours`}
                 </h2>
               </div>
             </div>
@@ -263,7 +277,7 @@ const ToursPage = () => {
                   </div>
                 ))}
               </div>
-            ) : sortedTours.length === 0 ? (
+            ) : currentTours.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-gray-400 mb-4">
                   <MagnifyingGlassIcon className="h-16 w-16 mx-auto" />
@@ -273,7 +287,7 @@ const ToursPage = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sortedTours.map((tour) => (
+                {currentTours.map((tour) => (
                   <Link
                     key={tour._id}
                     to={`/tour/${tour.slug}`}
@@ -330,6 +344,66 @@ const ToursPage = () => {
                     </div>
                   </Link>
                 ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <nav className="flex items-center space-x-2">
+                  {/* Previous Button */}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+
+                  {/* Page Numbers */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    // Show first page, last page, current page, and pages around current page
+                    const shouldShow = 
+                      page === 1 || 
+                      page === totalPages || 
+                      (page >= currentPage - 1 && page <= currentPage + 1);
+                    
+                    if (!shouldShow) {
+                      // Show ellipsis for gaps
+                      if (page === currentPage - 2 || page === currentPage + 2) {
+                        return (
+                          <span key={page} className="px-3 py-2 text-sm text-gray-500">
+                            ...
+                          </span>
+                        );
+                      }
+                      return null;
+                    }
+
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-2 text-sm font-medium rounded-md ${
+                          currentPage === page
+                            ? 'bg-blue-600 text-white'
+                            : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+
+                  {/* Next Button */}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </nav>
               </div>
             )}
           </div>

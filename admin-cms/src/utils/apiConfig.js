@@ -2,6 +2,7 @@ import axios from 'axios';
 
 // API base URL
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://zuna-travel.onrender.com/api';
+// const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance with base URL
 const apiClient = axios.create({

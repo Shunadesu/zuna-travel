@@ -185,14 +185,14 @@ const useUserStore = create((set, get) => ({
     try {
       set({ loading: true, error: null });
       
-      const response = await api.get('/users/profile/me');
+      const response = await api.get('/auth/profile');
       
       set({
-        currentUser: response.data.data,
+        currentUser: response.data,
         loading: false
       });
       
-      return response.data.data;
+      return response.data;
     } catch (error) {
       set({
         error: error.response?.data?.message || 'Failed to fetch profile',

@@ -18,7 +18,7 @@ const generateToken = (id) => {
 // @access  Public
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password } = req.body;
 
     // Check if user exists
     const userExists = await User.findOne({ email });
@@ -26,35 +26,16 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Create user data object
-    const userData = {
-      name,
-      email,
-      password
-    };
-
-    // Only add phone if it's provided and not empty
-    if (phone && phone.trim()) {
-      userData.phone = phone.trim();
-    }
-
-
-
     // Create user
-    const user = await User.create(userData);
+    const user = await User.create({ name, email, password });
 
-    if (user) {
-      res.status(201).json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        token: generateToken(user._id),
-      });
-    } else {
-      res.status(400).json({ message: 'Invalid user data' });
-    }
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
   } catch (error) {
     console.error('Register error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -76,10 +57,7 @@ router.post('/login', async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone,
         role: user.role,
-        avatar: user.avatar,
-        preferences: user.preferences,
         token: generateToken(user._id),
       });
     } else {
@@ -114,16 +92,6 @@ router.put('/profile', protect, async (req, res) => {
     if (user) {
       user.name = req.body.name || user.name;
       user.email = req.body.email || user.email;
-      user.phone = req.body.phone || user.phone;
-      user.avatar = req.body.avatar || user.avatar;
-      
-      if (req.body.preferences) {
-        user.preferences = { ...user.preferences, ...req.body.preferences };
-      }
-
-      if (req.body.addresses) {
-        user.addresses = req.body.addresses;
-      }
 
       const updatedUser = await user.save();
 
@@ -131,11 +99,7 @@ router.put('/profile', protect, async (req, res) => {
         _id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
-        phone: updatedUser.phone,
         role: updatedUser.role,
-        avatar: updatedUser.avatar,
-        preferences: updatedUser.preferences,
-        addresses: updatedUser.addresses,
         token: generateToken(updatedUser._id),
       });
     } else {

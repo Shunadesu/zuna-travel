@@ -7,6 +7,8 @@ const ApiContext = createContext();
 
 // API base URL
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://zuna-travel.onrender.com/api';
+// const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+
 
 // Create axios instance
 const api = axios.create({
@@ -94,7 +96,7 @@ api.interceptors.response.use(
 
 // API methods
 const apiMethods = {
-  // Categories
+  // Categories (legacy)
   categories: {
     getAll: (params = {}) => api.get('/categories', { params }),
     getBySlug: (slug) => api.get(`/categories/slug/${slug}`),
@@ -103,6 +105,36 @@ const apiMethods = {
     update: (id, data) => api.put(`/categories/${id}`, data),
     delete: (id) => api.delete(`/categories/${id}`),
     getStats: (id) => api.get(`/categories/${id}/stats`),
+  },
+
+  // Tour Categories
+  tourCategories: {
+    getAll: (params = {}) => api.get('/tour-categories', { params }),
+    getBySlug: (slug) => api.get(`/tour-categories/slug/${slug}`),
+    getById: (id) => api.get(`/tour-categories/${id}`),
+    getFeatured: (params = {}) => api.get('/tour-categories/featured/list', { params }),
+    getByRegion: (region) => api.get(`/tour-categories/region/${region}`),
+    getRegions: () => api.get('/tour-categories/regions'),
+    create: (data) => api.post('/tour-categories', data),
+    update: (id, data) => api.put(`/tour-categories/${id}`, data),
+    delete: (id) => api.delete(`/tour-categories/${id}`),
+    getStats: (id) => api.get(`/tour-categories/${id}/stats`),
+  },
+
+  // Transfer Categories
+  transferCategories: {
+    getAll: (params = {}) => api.get('/transfer-categories', { params }),
+    getBySlug: (slug) => api.get(`/transfer-categories/slug/${slug}`),
+    getById: (id) => api.get(`/transfer-categories/${id}`),
+    getFeatured: (params = {}) => api.get('/transfer-categories/featured/list', { params }),
+    getByVehicleType: (vehicleType) => api.get(`/transfer-categories/vehicle/${vehicleType}`),
+    getByRegion: (region) => api.get(`/transfer-categories/region/${region}`),
+    getVehicleTypes: () => api.get('/transfer-categories/vehicle-types'),
+    getRegions: () => api.get('/transfer-categories/regions'),
+    create: (data) => api.post('/transfer-categories', data),
+    update: (id, data) => api.put(`/transfer-categories/${id}`, data),
+    delete: (id) => api.delete(`/transfer-categories/${id}`),
+    getStats: (id) => api.get(`/transfer-categories/${id}/stats`),
   },
 
   // Tours

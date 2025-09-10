@@ -10,7 +10,9 @@
     "seed:admin:detailed": "node seeds/createAdminDetailed.js",
     "seed:complete": "node seeds/completeSeed.js",
     "seed:quick": "node seeds/quickSeed.js",
-    "seed:transfers": "node seeds/simpleTransferServices.js"
+    "seed:transfers": "node seeds/simpleTransferServices.js",
+    "seed:tour-categories": "node seeds/createTourCategories.js",
+    "seed:all-tour-categories": "node seeds/createAllTourCategories.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -125,12 +125,25 @@ const TourDetailPage = () => {
     
     // Validate required fields
     if (!bookingData.customerInfo.email || !bookingData.customerInfo.phone) {
-      toast.error('Please fill in your email and phone number');
+      toast.error('Vui lòng điền email và số điện thoại của bạn');
       return;
     }
 
     if (!bookingData.date) {
-      toast.error('Please select a travel date');
+      toast.error('Vui lòng chọn ngày du lịch');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(bookingData.customerInfo.email)) {
+      toast.error('Vui lòng nhập địa chỉ email hợp lệ');
+      return;
+    }
+
+    // Validate phone number
+    if (bookingData.customerInfo.phone.length < 8) {
+      toast.error('Số điện thoại phải có ít nhất 8 chữ số');
       return;
     }
 
@@ -141,16 +154,22 @@ const TourDetailPage = () => {
         travelers: bookingData.travelers,
         travelDate: bookingData.date,
         totalPrice: bookingData.totalPrice,
-        customerInfo: bookingData.customerInfo,
+        customerInfo: {
+          ...bookingData.customerInfo,
+          phone: `${bookingData.customerInfo.countryCode}${bookingData.customerInfo.phone}`
+        },
         tourDetails: {
-          name: tour.name?.en || tour.name,
+          name: tour.title?.en || tour.title,
           duration: tour.duration,
-          location: tour.location?.en || tour.location
-        }
+          location: tour.location?.en || tour.location,
+          price: getTourPrice(),
+          images: tour.images?.map(img => img.url) || []
+        },
+        specialRequests: ''
       };
 
       await createBooking(bookingPayload);
-      toast.success('Booking submitted successfully! We will contact you soon.');
+      toast.success('Đặt tour thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
       setIsBookingModalOpen(false);
       
       // Reset form
@@ -166,7 +185,8 @@ const TourDetailPage = () => {
         }
       });
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to submit booking');
+      console.error('Booking error:', error);
+      toast.error(error.response?.data?.message || 'Không thể gửi đặt tour. Vui lòng thử lại.');
     }
   };
 
@@ -210,7 +230,7 @@ const TourDetailPage = () => {
           <li aria-current="page">
             <div className="flex items-center">
               <span className="mx-2 text-gray-400">/</span>
-              <span className="text-gray-500">{tour.name?.en || tour.name}</span>
+              <span className="text-gray-500">{tour.title?.en || tour.title}</span>
             </div>
           </li>
         </ol>
@@ -224,7 +244,7 @@ const TourDetailPage = () => {
             <div className="relative aspect-video rounded-lg overflow-hidden mb-4">
               <img
                 src={tour.images?.[selectedImage]?.url || '/placeholder-tour.jpg'}
-                alt={tour.name?.en || tour.name}
+                alt={tour.title?.en || tour.title}
                 className="w-full h-full object-cover"
               />
               <div className="absolute top-4 right-4 flex space-x-2">
@@ -255,7 +275,7 @@ const TourDetailPage = () => {
                   >
                     <img
                       src={image.url}
-                      alt={`${tour.name?.en || tour.name} ${index + 1}`}
+                      alt={`${tour.title?.en || tour.title} ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -267,7 +287,7 @@ const TourDetailPage = () => {
           {/* Tour Title and Rating */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {tour.name?.en || tour.name}
+              {tour.title?.en || tour.title}
             </h1>
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
@@ -413,21 +433,22 @@ const TourDetailPage = () => {
             <button 
               onClick={() => setIsBookingModalOpen(true)}
               className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors mb-4"
+              disabled={bookingLoading}
             >
-              Book Now
+              {bookingLoading ? 'Đang xử lý...' : 'Đặt Tour Ngay'}
             </button>
             
             <button className="w-full border border-blue-600 text-blue-600 py-3 px-4 rounded-lg font-medium hover:bg-blue-50 transition-colors">
-              Contact Us
+              Liên Hệ Tư Vấn
             </button>
 
             <div className="mt-6 pt-6 border-t border-gray-200">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">Free cancellation</span>
-                <span className="text-green-600 font-medium">Up to 24h</span>
+                <span className="text-gray-500">Hủy miễn phí</span>
+                <span className="text-green-600 font-medium">Trong 24h</span>
               </div>
               <div className="flex items-center justify-between text-sm mt-2">
-                <span className="text-gray-500">Instant confirmation</span>
+                <span className="text-gray-500">Xác nhận ngay lập tức</span>
                 <span className="text-green-600 font-medium">✓</span>
               </div>
             </div>
@@ -441,7 +462,7 @@ const TourDetailPage = () => {
           <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900">Book Your Tour</h2>
+                <h2 className="text-xl font-bold text-gray-900">Đặt Tour Của Bạn</h2>
                 <button
                   onClick={() => setIsBookingModalOpen(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -451,25 +472,25 @@ const TourDetailPage = () => {
               </div>
 
               <div className="mb-4">
-                <h3 className="font-medium text-gray-900 mb-2">{tour.name?.en || tour.name}</h3>
+                <h3 className="font-medium text-gray-900 mb-2">{tour.title?.en || tour.title}</h3>
                 <p className="text-sm text-gray-600">{formatDuration(tour.duration)} • {tour.location?.en || tour.location || 'Vietnam'}</p>
               </div>
 
                              <form onSubmit={handleBookingSubmit} className="space-y-4">
                  {/* Customer Information */}
                  <div className="border-b border-gray-200 pb-4">
-                   <h4 className="text-lg font-medium text-gray-900 mb-3">Contact Information</h4>
+                   <h4 className="text-lg font-medium text-gray-900 mb-3">Thông Tin Liên Hệ</h4>
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                      <div>
                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                         Full Name
+                         Họ và Tên
                        </label>
                        <input
                          type="text"
                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
                          value={bookingData.customerInfo.name}
                          onChange={(e) => handleCustomerInfoChange('name', e.target.value)}
-                         placeholder="Your full name"
+                         placeholder="Nhập họ và tên của bạn"
                        />
                      </div>
                      <div>
@@ -481,14 +502,14 @@ const TourDetailPage = () => {
                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
                          value={bookingData.customerInfo.email}
                          onChange={(e) => handleCustomerInfoChange('email', e.target.value)}
-                         placeholder="your.email@example.com"
+                         placeholder="email@example.com"
                          required
                        />
                      </div>
                    </div>
                    <div className="mt-4">
                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                       Phone Number *
+                       Số Điện Thoại *
                      </label>
                      <div className="flex gap-2">
                        <select
@@ -507,7 +528,7 @@ const TourDetailPage = () => {
                          className="flex-1 border border-gray-300 rounded-lg px-3 py-2"
                          value={bookingData.customerInfo.phone}
                          onChange={(e) => handleCustomerInfoChange('phone', e.target.value)}
-                         placeholder="123 456 789"
+                         placeholder="0123 456 789"
                          required
                        />
                      </div>
@@ -516,11 +537,11 @@ const TourDetailPage = () => {
 
                  {/* Travel Details */}
                  <div className="border-b border-gray-200 pb-4">
-                   <h4 className="text-lg font-medium text-gray-900 mb-3">Travel Details</h4>
+                   <h4 className="text-lg font-medium text-gray-900 mb-3">Chi Tiết Du Lịch</h4>
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                      <div>
                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                         Number of Travelers
+                         Số Lượng Khách
                        </label>
                        <select 
                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
@@ -533,14 +554,14 @@ const TourDetailPage = () => {
                          required
                        >
                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                           <option key={num} value={num}>{num} {num === 1 ? 'person' : 'people'}</option>
+                           <option key={num} value={num}>{num} {num === 1 ? 'người' : 'người'}</option>
                          ))}
                        </select>
                      </div>
 
                      <div>
                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                         Travel Date *
+                         Ngày Du Lịch *
                        </label>
                        <input
                          type="date"
@@ -556,15 +577,15 @@ const TourDetailPage = () => {
 
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-600">Price per person:</span>
+                    <span className="text-gray-600">Giá mỗi người:</span>
                     <span className="font-medium">{formatPrice(getTourPrice())}</span>
                   </div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-600">Number of travelers:</span>
+                    <span className="text-gray-600">Số lượng khách:</span>
                     <span className="font-medium">{bookingData.travelers}</span>
                   </div>
                   <div className="flex justify-between items-center text-lg font-bold">
-                    <span>Total:</span>
+                    <span>Tổng cộng:</span>
                     <span className="text-blue-600">{formatPrice(bookingData.totalPrice)}</span>
                   </div>
                 </div>
@@ -576,25 +597,25 @@ const TourDetailPage = () => {
                      className="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors"
                      disabled={bookingLoading}
                    >
-                     Cancel
+                     Hủy
                    </button>
                    <button
                      type="submit"
                      className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                      disabled={bookingLoading}
                    >
-                     {bookingLoading ? 'Submitting...' : 'Confirm Booking'}
+                     {bookingLoading ? 'Đang gửi...' : 'Xác Nhận Đặt Tour'}
                    </button>
                  </div>
               </form>
 
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Free cancellation</span>
-                  <span className="text-green-600 font-medium">Up to 24h</span>
+                  <span className="text-gray-500">Hủy miễn phí</span>
+                  <span className="text-green-600 font-medium">Trong 24h</span>
                 </div>
                 <div className="flex items-center justify-between text-sm mt-1">
-                  <span className="text-gray-500">Instant confirmation</span>
+                  <span className="text-gray-500">Xác nhận ngay lập tức</span>
                   <span className="text-green-600 font-medium">✓</span>
                 </div>
               </div>

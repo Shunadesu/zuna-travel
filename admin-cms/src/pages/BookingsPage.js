@@ -19,6 +19,21 @@ import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/sol
 import toast from 'react-hot-toast';
 import { useApi } from '../contexts/ApiContext';
 
+// Helper function to get phone code from country code
+const getPhoneCode = (countryCode) => {
+  const phoneCodes = {
+    'VN': '+84', 'US': '+1', 'GB': '+44', 'AU': '+61', 'CA': '+1',
+    'DE': '+49', 'FR': '+33', 'IT': '+39', 'ES': '+34', 'JP': '+81',
+    'KR': '+82', 'CN': '+86', 'TH': '+66', 'SG': '+65', 'MY': '+60',
+    'ID': '+62', 'PH': '+63', 'IN': '+91', 'NL': '+31', 'CH': '+41',
+    'AT': '+43', 'BE': '+32', 'SE': '+46', 'NO': '+47', 'DK': '+45',
+    'FI': '+358', 'NZ': '+64', 'BR': '+55', 'AR': '+54', 'MX': '+52',
+    'RU': '+7', 'ZA': '+27', 'EG': '+20', 'AE': '+971', 'SA': '+966',
+    'TR': '+90', 'IL': '+972', 'HK': '+852', 'TW': '+886', 'MO': '+853'
+  };
+  return phoneCodes[countryCode] || countryCode;
+};
+
 const BookingsPage = () => {
   const { t } = useTranslation();
   const { api } = useApi();
@@ -325,8 +340,20 @@ const BookingsPage = () => {
                        {booking.transferDetails?.from && booking.transferDetails?.to && (
                          <p><strong>Route:</strong> {booking.transferDetails.from} → {booking.transferDetails.to}</p>
                        )}
-                       {booking.transferDetails?.vehicle && (
-                         <p><strong>Vehicle:</strong> {booking.transferDetails.vehicle}</p>
+                       {booking.transferDetails?.vehicleType && (
+                         <p><strong>Vehicle Type:</strong> {booking.transferDetails.vehicleType}</p>
+                       )}
+                       {booking.transferDetails?.serviceType && (
+                         <p><strong>Service Type:</strong> {booking.transferDetails.serviceType}</p>
+                       )}
+                       {booking.transferDetails?.duration && (
+                         <p><strong>Duration:</strong> {booking.transferDetails.duration} minutes</p>
+                       )}
+                       {booking.transferDetails?.distance && (
+                         <p><strong>Distance:</strong> {booking.transferDetails.distance} km</p>
+                       )}
+                       {booking.transferDetails?.pricing && (
+                         <p><strong>Price:</strong> {booking.transferDetails.pricing.currency} {booking.transferDetails.pricing.adult} per trip</p>
                        )}
                       {booking.specialRequests && (
                         <p><strong>Special Requests:</strong> {booking.specialRequests}</p>
@@ -349,7 +376,14 @@ const BookingsPage = () => {
                       {booking.customerInfo?.phone && (
                         <div className="flex items-center space-x-2">
                           <PhoneIcon className="w-4 h-4" />
-                          <span>{booking.customerInfo.phone}</span>
+                          <span>
+                            {booking.customerInfo.countryCode && (
+                              <span className="text-blue-600 font-medium">
+                                {getPhoneCode(booking.customerInfo.countryCode)} 
+                              </span>
+                            )}
+                            {booking.customerInfo.phone}
+                          </span>
                         </div>
                       )}
                     </div>

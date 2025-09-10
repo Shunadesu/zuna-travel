@@ -2,13 +2,27 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeftIcon, PencilIcon, PhotoIcon, MapPinIcon, TagIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
-import { useTourStore, useTransferStore, useCategoryStore } from '../../stores';
+import { useTourStore, useTransferStore, useTourCategoryStore, useTransferCategoryStore } from '../../stores';
 import toast from 'react-hot-toast';
 
 const CategoryDetailPage = () => {
   const { t } = useTranslation();
   const { id } = useParams();
-  const { categories, fetchCategories, getCategoryById } = useCategoryStore();
+  
+  // Tour categories store
+  const {
+    categories: tourCategories,
+    fetchCategories: fetchTourCategories,
+    getCategoryById: getTourCategoryById
+  } = useTourCategoryStore();
+  
+  // Transfer categories store
+  const {
+    categories: transferCategories,
+    fetchCategories: fetchTransferCategories,
+    getCategoryById: getTransferCategoryById
+  } = useTransferCategoryStore();
+  
   const { tours, fetchTours } = useTourStore();
   const { transfers, fetchTransfers } = useTransferStore();
   const [category, setCategory] = useState(null);
@@ -19,16 +33,28 @@ const CategoryDetailPage = () => {
   useEffect(() => {
     fetchCategory();
     fetchProducts();
-  }, [id, fetchCategories, fetchTours, fetchTransfers]);
+  }, [id, fetchTourCategories, fetchTransferCategories, fetchTours, fetchTransfers]);
 
   const fetchCategory = async () => {
     try {
       setLoading(true);
-      let foundCategory = getCategoryById(id);
+      
+      // Try to find in tour categories first
+      let foundCategory = getTourCategoryById(id);
       if (!foundCategory) {
-        await fetchCategories();
-        foundCategory = getCategoryById(id);
+        await fetchTourCategories();
+        foundCategory = getTourCategoryById(id);
       }
+      
+      // If not found in tour categories, try transfer categories
+      if (!foundCategory) {
+        foundCategory = getTransferCategoryById(id);
+        if (!foundCategory) {
+          await fetchTransferCategories();
+          foundCategory = getTransferCategoryById(id);
+        }
+      }
+      
       setCategory(foundCategory);
     } catch (error) {
       console.error('Error fetching category:', error);
@@ -121,7 +147,7 @@ const CategoryDetailPage = () => {
             </p>
           </div>
           <Link
-            to={`/admin/categories/${id}/edit`}
+            to={`/admin/categories/${id}/edit?type=${category.type || 'vietnam-tours'}`}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
           >
             <PencilIcon className="h-4 w-4 mr-2" />

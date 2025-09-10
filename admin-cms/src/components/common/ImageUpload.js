@@ -81,9 +81,17 @@ const ImageUpload = ({
   const removeImage = async (index) => {
     const imageToRemove = images[index];
     
+    if (!imageToRemove || !imageToRemove.publicId) {
+      // If no publicId, just remove from local state
+      const newImages = images.filter((_, i) => i !== index);
+      onImagesChange(newImages);
+      toast.success('Image removed successfully');
+      return;
+    }
+    
     try {
       // Delete from Cloudinary
-              await apiClient.delete(`/upload/image/${encodeURIComponent(imageToRemove.publicId)}`);
+      await apiClient.delete(`/upload/${encodeURIComponent(imageToRemove.publicId)}`);
       
       // Remove from local state
       const newImages = images.filter((_, i) => i !== index);
