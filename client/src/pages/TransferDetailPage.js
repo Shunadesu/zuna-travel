@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useTransferStore, useBookingStore } from '../stores';
+import { useTransferStore, useBookingStore, useSettingsStore } from '../stores';
 import { countries } from '../utils/countries';
 import { 
   MapPinIcon, 
@@ -21,6 +21,7 @@ const TransferDetailPage = () => {
   const { slug } = useParams();
   const { getTransferBySlug, loading, error } = useTransferStore();
   const { createBooking } = useBookingStore();
+  const { settings } = useSettingsStore();
   const [transfer, setTransfer] = useState(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [selectedImage] = useState(0);
@@ -347,14 +348,18 @@ const TransferDetailPage = () => {
                 {t('contact.info.title') || 'Contact Info'}
               </h4>
               <div className="space-y-2">
-                <div className="flex items-center">
-                  <PhoneIcon className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-600">+84 123 456 789</span>
-                </div>
-                <div className="flex items-center">
-                  <EnvelopeIcon className="h-4 w-4 text-gray-400 mr-2" />
-                  <span className="text-sm text-gray-600">info@zunatravel.com</span>
-                </div>
+                {settings?.phone && (
+                  <div className="flex items-center">
+                    <PhoneIcon className="h-4 w-4 text-gray-400 mr-2" />
+                    <span className="text-sm text-gray-600">{settings.phone}</span>
+                  </div>
+                )}
+                {settings?.email && (
+                  <div className="flex items-center">
+                    <EnvelopeIcon className="h-4 w-4 text-gray-400 mr-2" />
+                    <span className="text-sm text-gray-600">{settings.email}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

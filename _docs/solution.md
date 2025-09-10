@@ -5096,3 +5096,125 @@ if (!product) {
 - ✅ **Tour edit** hoạt động với mọi tour ID
 
 **Tour Edit giờ đã hoạt động với mọi tour ID!** 🎯
+
+## 🔧 Cập nhật Get in Touch - API Data
+
+### ❌ **Vấn đề:**
+
+- **Hardcode data:** Email và phone được hardcode trong nhiều component
+- **Không đồng bộ:** Dữ liệu không cập nhật khi settings thay đổi
+- **Không nhất quán:** Các component hiển thị thông tin khác nhau
+
+### ✅ **Giải pháp:**
+
+**1. Cập nhật AboutPage - Get in Touch section:**
+
+```javascript
+// ✅ Sử dụng settings từ API thay vì hardcode
+<div className="text-center p-6 bg-white border border-gray-200 rounded-lg">
+  <PhoneIcon className="w-8 h-8 text-blue-600 mx-auto mb-3" />
+  <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
+  <p className="text-gray-600">
+    {settings?.phone || '+84 123 456 789'}
+  </p>
+</div>
+<div className="text-center p-6 bg-white border border-gray-200 rounded-lg">
+  <EnvelopeIcon className="w-8 h-8 text-blue-600 mx-auto mb-3" />
+  <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
+  <p className="text-gray-600">
+    {settings?.email || 'info@zunatravel.com'}
+  </p>
+</div>
+```
+
+**2. Cập nhật Header component:**
+
+```javascript
+// ✅ Sử dụng settings từ API
+{
+  settings?.phone && (
+    <a
+      href={`tel:${settings.phone}`}
+      className="flex items-center transition-colors"
+    >
+      <PhoneIcon className="h-4 w-4 mr-1" />
+      <span className="text-white">{settings.phone}</span>
+    </a>
+  );
+}
+{
+  settings?.email && (
+    <a
+      href={`mailto:${settings.email}`}
+      className="flex items-center transition-colors"
+    >
+      <EnvelopeIcon className="h-4 w-4 mr-1" />
+      <span className="text-white">{settings.email}</span>
+    </a>
+  );
+}
+```
+
+**3. Cập nhật TransferDetailPage:**
+
+```javascript
+// ✅ Sử dụng settings từ API
+{
+  settings?.phone && (
+    <div className="flex items-center">
+      <PhoneIcon className="h-4 w-4 text-gray-400 mr-2" />
+      <span className="text-sm text-gray-600">{settings.phone}</span>
+    </div>
+  );
+}
+{
+  settings?.email && (
+    <div className="flex items-center">
+      <EnvelopeIcon className="h-4 w-4 text-gray-400 mr-2" />
+      <span className="text-sm text-gray-600">{settings.email}</span>
+    </div>
+  );
+}
+```
+
+**4. Cập nhật Footer component:**
+
+```javascript
+// ✅ Sử dụng settings từ API
+{
+  settings?.phone && (
+    <div className="flex items-center space-x-3">
+      <PhoneIcon className="w-5 h-5 text-primary-400 flex-shrink-0" />
+      <a
+        href={`tel:${settings.phone}`}
+        className="text-sm text-gray-300 hover:text-white transition-colors duration-200"
+      >
+        {settings.phone}
+      </a>
+    </div>
+  );
+}
+{
+  settings?.email && (
+    <div className="flex items-center space-x-3">
+      <EnvelopeIcon className="w-5 h-5 text-primary-400 flex-shrink-0" />
+      <a
+        href={`mailto:${settings.email}`}
+        className="text-sm text-gray-300 hover:text-white transition-colors duration-200"
+      >
+        {settings.email}
+      </a>
+    </div>
+  );
+}
+```
+
+**5. Kết quả:**
+
+- ✅ **API-driven data** thay vì hardcode
+- ✅ **Real-time updates** khi settings thay đổi
+- ✅ **Consistent data** across all components
+- ✅ **Conditional rendering** chỉ hiển thị khi có data
+- ✅ **Fallback values** khi settings chưa load
+
+**Get in Touch giờ đã sử dụng API data!** 🎯

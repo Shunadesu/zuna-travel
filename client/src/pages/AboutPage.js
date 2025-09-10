@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '../stores';
 import { 
   MapPinIcon,
@@ -10,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const AboutPage = () => {
+  const { t, i18n } = useTranslation();
   const { settings } = useSettingsStore();
 
   const teamMembers = [
@@ -216,28 +218,28 @@ const AboutPage = () => {
             <MapPinIcon className="w-8 h-8 text-blue-600 mx-auto mb-3" />
             <h3 className="font-semibold text-gray-900 mb-2">Address</h3>
             <p className="text-gray-600">
-              {settings?.company?.address || '123 Travel Street, Ho Chi Minh City, Vietnam'}
+              {settings?.address?.[i18n.language] || '123 Travel Street, Ho Chi Minh City, Vietnam'}
             </p>
           </div>
           <div className="text-center p-6 bg-white border border-gray-200 rounded-lg">
             <PhoneIcon className="w-8 h-8 text-blue-600 mx-auto mb-3" />
             <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
             <p className="text-gray-600">
-              {settings?.contact?.phone || '+84 123 456 789'}
+              {settings?.phone || '+84 123 456 789'}
             </p>
           </div>
           <div className="text-center p-6 bg-white border border-gray-200 rounded-lg">
             <EnvelopeIcon className="w-8 h-8 text-blue-600 mx-auto mb-3" />
             <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
             <p className="text-gray-600">
-              {settings?.contact?.email || 'info@zunatravel.com'}
+              {settings?.email || 'info@zunatravel.com'}
             </p>
           </div>
           <div className="text-center p-6 bg-white border border-gray-200 rounded-lg">
             <ClockIcon className="w-8 h-8 text-blue-600 mx-auto mb-3" />
             <h3 className="font-semibold text-gray-900 mb-2">Business Hours</h3>
             <p className="text-gray-600">
-              {settings?.company?.businessHours || 'Mon - Fri: 8:00 AM - 6:00 PM'}
+              {settings?.businessHours?.[i18n.language] || 'Mon - Fri: 8:00 AM - 6:00 PM'}
             </p>
           </div>
         </div>

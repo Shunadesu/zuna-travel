@@ -22,9 +22,6 @@ const Header = () => {
   const { settings, fetchSettings } = useSettingsStore();
   const { categories, fetchCategories } = useCategoryStore();
   const { user, isAuthenticated, logout } = useAuthStore();
-  
-  // Use settings refresh hook
-  useSettingsRefresh();
 
   useEffect(() => {
     fetchSettings();
@@ -150,25 +147,29 @@ const Header = () => {
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center space-x-4">
                   
-                    <a 
-                      href={`tel:${'0909090909'}`}  
-                      className="flex items-center transition-colors"
-                      style={{
-                        color: '#FFFFFF',
-                        '--tw-text-opacity': '1'
-                      }}
-                    >
-                      <PhoneIcon className="h-4 w-4 mr-1" />
-                      <span className='text-white'>0909090909</span>
-                    </a>
+                    {settings?.phone && (
+                      <a 
+                        href={`tel:${settings.phone}`}  
+                        className="flex items-center transition-colors"
+                        style={{
+                          color: '#FFFFFF',
+                          '--tw-text-opacity': '1'
+                        }}
+                      >
+                        <PhoneIcon className="h-4 w-4 mr-1" />
+                        <span className='text-white'>{settings.phone}</span>
+                      </a>
+                    )}
               
-                    <a 
-                      href={`mailto:${'info@vnbesttravel.com'}`}
-                      className="flex items-center transition-colors"
-                    >
-                      <EnvelopeIcon className="h-4 w-4 mr-1" />
-                      <span className='text-white'>info@vnbesttravel.com</span>
-                    </a>
+                    {settings?.email && (
+                      <a 
+                        href={`mailto:${settings.email}`}
+                        className="flex items-center transition-colors"
+                      >
+                        <EnvelopeIcon className="h-4 w-4 mr-1" />
+                        <span className='text-white'>{settings.email}</span>
+                      </a>
+                    )}
                 </div>
                 <div className="flex items-center space-x-4">
                   <button

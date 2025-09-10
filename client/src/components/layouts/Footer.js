@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useSettingsStore } from '../../stores';
 import {
   MapPinIcon,
   PhoneIcon,
@@ -16,6 +17,7 @@ import {
 
 const Footer = () => {
   const { t } = useTranslation();
+  const { settings } = useSettingsStore();
 
   const quickLinks = [
     { name: t('nav.home'), href: '/' },
@@ -123,25 +125,29 @@ const Footer = () => {
                 </div>
               </div>
               
-              <div className="flex items-center space-x-3">
-                <PhoneIcon className="w-5 h-5 text-primary-400 flex-shrink-0" />
-                <a
-                  href="tel:+84123456789"
-                  className="text-sm text-gray-300 hover:text-white transition-colors duration-200"
-                >
-                  +84 123 456 789
-                </a>
-              </div>
+              {settings?.phone && (
+                <div className="flex items-center space-x-3">
+                  <PhoneIcon className="w-5 h-5 text-primary-400 flex-shrink-0" />
+                  <a
+                    href={`tel:${settings.phone}`}
+                    className="text-sm text-gray-300 hover:text-white transition-colors duration-200"
+                  >
+                    {settings.phone}
+                  </a>
+                </div>
+              )}
               
-              <div className="flex items-center space-x-3">
-                <EnvelopeIcon className="w-5 h-5 text-primary-400 flex-shrink-0" />
-                <a
-                  href="mailto:info@zunatravel.com"
-                  className="text-sm text-gray-300 hover:text-white transition-colors duration-200"
-                >
-                  info@zunatravel.com
-                </a>
-              </div>
+              {settings?.email && (
+                <div className="flex items-center space-x-3">
+                  <EnvelopeIcon className="w-5 h-5 text-primary-400 flex-shrink-0" />
+                  <a
+                    href={`mailto:${settings.email}`}
+                    className="text-sm text-gray-300 hover:text-white transition-colors duration-200"
+                  >
+                    {settings.email}
+                  </a>
+                </div>
+              )}
               
               <div className="flex items-start space-x-3">
                 <ClockIcon className="w-5 h-5 text-primary-400 mt-0.5 flex-shrink-0" />
