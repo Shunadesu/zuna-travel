@@ -7,7 +7,6 @@ const tourSchema = new mongoose.Schema({
   },
   slug: {
     type: String,
-    required: true,
     unique: true,
     lowercase: true
   },
@@ -16,8 +15,8 @@ const tourSchema = new mongoose.Schema({
     vi: { type: String, required: true }
   },
   shortDescription: {
-    en: { type: String, required: true },
-    vi: { type: String, required: true }
+    en: { type: String },
+    vi: { type: String }
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
@@ -34,8 +33,8 @@ const tourSchema = new mongoose.Schema({
     nights: { type: Number, default: 0 }
   },
   location: {
-    en: { type: String, required: true },
-    vi: { type: String, required: true }
+    en: { type: String },
+    vi: { type: String }
   },
   highlights: [{
     en: String,
@@ -75,8 +74,7 @@ const tourSchema = new mongoose.Schema({
     default: 0
   },
   region: {
-    type: String,
-    required: true
+    type: String
   },
   difficulty: {
     type: String,

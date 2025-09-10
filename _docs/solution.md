@@ -4379,3 +4379,56 @@ body("address.vi").optional().isString().trim();
 - ✅ **Tương thích** với admin CMS form
 
 **Contact settings giờ đã hoạt động hoàn hảo!** 🎯
+
+## 🔧 Đơn giản hóa Tour Model
+
+### ❌ **Vấn đề:**
+
+- **Tour model** có quá nhiều trường `required: true`
+- **Gây khó khăn** khi tạo tour mới
+- **Location, highlights, included, excluded, requirements, cancellationPolicy** đã không required nhưng các trường khác vẫn bắt buộc
+
+### ✅ **Giải pháp:**
+
+**1. Bỏ required cho các trường không cần thiết:**
+
+```javascript
+// ❌ Trước
+slug: { type: String, required: true, unique: true, lowercase: true }
+shortDescription: { en: { type: String, required: true }, vi: { type: String, required: true } }
+location: { en: { type: String, required: true }, vi: { type: String, required: true } }
+region: { type: String, required: true }
+
+// ✅ Sau
+slug: { type: String, unique: true, lowercase: true }
+shortDescription: { en: { type: String }, vi: { type: String } }
+location: { en: { type: String }, vi: { type: String } }
+region: { type: String }
+```
+
+**2. Auto-generation trong route POST:**
+
+```javascript
+slug: slug || title?.en?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+shortDescription: shortDescription || {
+  en: description?.en?.substring(0, 200) || '',
+  vi: description?.vi?.substring(0, 200) || ''
+}
+```
+
+**3. Các trường đã không required (từ trước):**
+
+- ✅ `highlights` - array of objects
+- ✅ `included` - array of objects
+- ✅ `excluded` - array of objects
+- ✅ `requirements` - object với en/vi
+- ✅ `cancellationPolicy` - object với en/vi
+
+**4. Kết quả:**
+
+- ✅ **Location, highlights, included, excluded, requirements, cancellationPolicy** không bắt buộc
+- ✅ **Slug, shortDescription, region** không bắt buộc
+- ✅ **Auto-generation** cho slug và shortDescription
+- ✅ **Dễ dàng tạo tour** mới hơn
+
+**Tour model giờ đã đơn giản và linh hoạt hơn!** 🎯
