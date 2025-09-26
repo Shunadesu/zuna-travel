@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { XMarkIcon, UserIcon, EnvelopeIcon, PhoneIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import apiClient from '../utils/apiUtils';
+import apiClient from '../../utils/apiUtils';
 
 const ConsultationModal = ({ isOpen, onClose, tourData = null }) => {
   const [formData, setFormData] = useState({

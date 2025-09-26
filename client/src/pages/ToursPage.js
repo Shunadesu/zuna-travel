@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
   MagnifyingGlassIcon,
@@ -15,14 +15,13 @@ import CategoryTabs from '../components/tours/CategoryTabs';
 const ToursPage = () => {
   const { t, i18n } = useTranslation();
   const { slug } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
   
   const { tours, fetchTours, loading } = useTourStore();
   const { categories, fetchCategories } = useTourCategoryStore();
   const { settings, fetchSettings } = useSettingsStore();
   
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-  const [selectedCategory, setSelectedCategory] = useState(slug || '');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [priceRange, setPriceRange] = useState([0, 50000]);
   const [duration, setDuration] = useState('');
   const [sortBy, setSortBy] = useState('name');
@@ -30,29 +29,19 @@ const ToursPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [toursPerPage] = useState(9);
 
-  useEffect(() => {
-    fetchTours();
-    fetchCategories();
-    fetchSettings();
-  }, [fetchTours, fetchCategories]); // Remove fetchSettings from dependencies
-
-  // Debug logging
-  useEffect(() => {
-    console.log('ToursPage Debug:', {
-      tours: tours?.length || 0,
-      toursData: tours,
-      loading,
-      categories: categories?.length || 0,
-      filteredTours: filteredTours?.length || 0,
-      currentTours: currentTours?.length || 0
-    });
-  }, [tours, loading, categories, filteredTours, currentTours]);
-
+  // Initialize category from URL slug
   useEffect(() => {
     if (slug) {
       setSelectedCategory(slug);
     }
   }, [slug]);
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchTours();
+    fetchCategories();
+    fetchSettings();
+  }, [fetchTours, fetchCategories]); // Remove fetchSettings from dependencies
 
   // Re-filter when categories are loaded
   useEffect(() => {
@@ -111,13 +100,7 @@ const ToursPage = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const newSearchParams = new URLSearchParams(searchParams);
-    if (searchTerm) {
-      newSearchParams.set('search', searchTerm);
-    } else {
-      newSearchParams.delete('search');
-    }
-    setSearchParams(newSearchParams);
+    // Search is handled by local state, no need to update URL params
   };
 
   const clearFilters = () => {
@@ -126,7 +109,6 @@ const ToursPage = () => {
     setPriceRange([0, 50000]);
     setDuration('');
     setSortBy('name');
-    setSearchParams({});
   };
 
   const activeCategories = categories?.filter(cat => cat.isActive) || [];

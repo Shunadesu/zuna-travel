@@ -40,7 +40,6 @@ const useTourStore = create((set, get) => ({
     const fetchToursPromise = (async () => {
       try {
         const response = await apiClient.get('/tours');
-        console.log('Tours API Response:', response.data);
         const fetchedTours = response.data.data || response.data;
         
         set({ 
