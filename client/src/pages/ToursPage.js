@@ -23,7 +23,7 @@ const ToursPage = () => {
   
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(slug || '');
-  const [priceRange, setPriceRange] = useState([0, 10000]);
+  const [priceRange, setPriceRange] = useState([0, 50000]);
   const [duration, setDuration] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
@@ -35,6 +35,18 @@ const ToursPage = () => {
     fetchCategories();
     fetchSettings();
   }, [fetchTours, fetchCategories]); // Remove fetchSettings from dependencies
+
+  // Debug logging
+  useEffect(() => {
+    console.log('ToursPage Debug:', {
+      tours: tours?.length || 0,
+      toursData: tours,
+      loading,
+      categories: categories?.length || 0,
+      filteredTours: filteredTours?.length || 0,
+      currentTours: currentTours?.length || 0
+    });
+  }, [tours, loading, categories, filteredTours, currentTours]);
 
   useEffect(() => {
     if (slug) {
@@ -53,7 +65,8 @@ const ToursPage = () => {
 
   // Filter and search tours
   const filteredTours = tours?.filter(tour => {
-    const matchesSearch = tour.title?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = !searchTerm || 
+                         tour.title?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          tour.shortDescription?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          tour.description?.[i18n.language]?.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -61,7 +74,7 @@ const ToursPage = () => {
                            tour.category?.slug === selectedCategory || 
                            (typeof tour.category === 'string' && tour.category === selectedCategory);
     
-    const matchesPrice = tour.pricing?.adult >= priceRange[0] && tour.pricing?.adult <= priceRange[1];
+    const matchesPrice = !tour.pricing?.adult || (tour.pricing.adult >= priceRange[0] && tour.pricing.adult <= priceRange[1]);
     
     const matchesDuration = !duration || tour.duration?.days === parseInt(duration);
     
@@ -110,7 +123,7 @@ const ToursPage = () => {
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedCategory('');
-    setPriceRange([0, 10000]);
+    setPriceRange([0, 50000]);
     setDuration('');
     setSortBy('name');
     setSearchParams({});
@@ -204,7 +217,7 @@ const ToursPage = () => {
                   <input
                     type="range"
                     min="0"
-                    max="1000"
+                    max="5000"
                     value={priceRange[1]}
                     onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
                     className="w-full"

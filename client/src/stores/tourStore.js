@@ -40,7 +40,8 @@ const useTourStore = create((set, get) => ({
     const fetchToursPromise = (async () => {
       try {
         const response = await apiClient.get('/tours');
-        const fetchedTours = response.data.data;
+        console.log('Tours API Response:', response.data);
+        const fetchedTours = response.data.data || response.data;
         
         set({ 
           tours: fetchedTours, 
@@ -51,6 +52,7 @@ const useTourStore = create((set, get) => ({
 
         return fetchedTours;
       } catch (error) {
+        console.error('Tours API Error:', error);
         set({ 
           error: error.response?.data?.message || 'Failed to fetch tours',
           loading: false,
