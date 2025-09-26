@@ -339,7 +339,7 @@ router.get('/', protect, async (req, res) => {
   try {
 
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const limit = parseInt(req.query.limit) || 100;
     const status = req.query.status;
     const productType = req.query.productType;
 

@@ -9,7 +9,7 @@ const { protect, optionalAuth } = require('../middleware/auth');
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const { page = 1, limit = 20, category, featured, search } = req.query;
+    const { page = 1, limit = 100, category, featured, search } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Build query
@@ -393,7 +393,7 @@ router.get('/seats', async (req, res) => {
 router.get('/category/:categorySlug', async (req, res) => {
   try {
     const { categorySlug } = req.params;
-    const { page = 1, limit = 20 } = req.query;
+    const { page = 1, limit = 100 } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const category = await TransferCategory.findOne({ slug: categorySlug });

@@ -8,7 +8,7 @@ const { protect, optionalAuth } = require('../middleware/auth');
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const { page = 1, limit = 20, featured, search } = req.query;
+    const { page = 1, limit = 100, featured, search } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Build query
@@ -195,7 +195,7 @@ router.delete('/:id', protect, async (req, res) => {
       return res.status(404).json({ message: 'Tour category not found' });
     }
 
-    await Category.findByIdAndDelete(req.params.id);
+    await TourCategory.findByIdAndDelete(req.params.id);
 
     res.json({
       success: true,

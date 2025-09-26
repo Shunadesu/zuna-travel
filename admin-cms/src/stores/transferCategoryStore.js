@@ -154,7 +154,7 @@ const useTransferCategoryStore = create((set, get) => ({
     set({ loading: true, error: null });
 
     try {
-      await apiClient.delete(`/transfer-categories/${id}`);
+      const response = await apiClient.delete(`/transfer-categories/${id}`);
       
       // Remove from local state
       set(state => ({
@@ -162,6 +162,8 @@ const useTransferCategoryStore = create((set, get) => ({
         category: state.category?._id === id ? null : state.category,
         loading: false
       }));
+      
+      return response.data;
     } catch (error) {
       set({ 
         error: error.response?.data?.message || 'Failed to delete transfer category',

@@ -8,7 +8,7 @@ const { protect } = require('../middleware/auth');
 // @access  Private/Admin
 router.get('/', protect, async (req, res) => {
   try {
-    const { page = 1, limit = 20, search, role } = req.query;
+    const { page = 1, limit = 100, search, role } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
     // Build query

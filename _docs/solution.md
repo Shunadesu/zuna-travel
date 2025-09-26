@@ -10,7 +10,62 @@ Dự án VnBestTravel Tour bao gồm 3 phần chính:
 
 ## Cập Nhật Gần Đây
 
-### 1. Cập Nhật Chức Năng Booking (Client)
+### 1. Phân Tích Hệ Thống Warmup API và Loading
+
+**Tổng Quan:**
+Hệ thống warmup API được thiết kế để "đánh thức" server từ trạng thái sleep (đặc biệt quan trọng với Render.com free tier) và cung cấp trải nghiệm loading mượt mà cho người dùng.
+
+**Luồng Hoạt Động:**
+
+1. **Khởi tạo**: `useServerWarmup` hook tự động chạy khi App mount
+2. **Kiểm tra session**: Sử dụng `sessionStorage` để tránh warmup không cần thiết
+3. **Gọi API**: Nếu chưa warmup → gọi `/api/warmup` endpoint
+4. **Hiển thị loading**: `ServerWarmupLoader` với animation đẹp
+5. **Hoàn tất**: Ẩn loading, đánh dấu session đã warmup
+
+**Các Component Chính:**
+
+- `useServerWarmup.js`: Hook quản lý state và logic warmup
+- `ServerWarmupLoader.js`: Component UI với animation phức tạp
+- `/api/warmup` endpoint: Trả về thông tin server status
+
+**Tính Năng Nổi Bật:**
+
+- ✅ **Session Caching**: Tránh warmup lặp lại trong cùng session
+- ✅ **Beautiful UI**: Animation gradient, particles, progress bar
+- ✅ **Error Handling**: Retry mechanism và fallback
+- ✅ **Performance**: Timeout 30s, retry với exponential backoff
+- ✅ **User Experience**: Thông báo tiếng Việt, loading states rõ ràng
+- ✅ **Smart Loading Timeout**: UI loading chỉ hiện tối đa 10s, warmup tiếp tục background
+
+**API Response:**
+
+```json
+{
+  "status": "OK",
+  "message": "Server is awake and ready",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "uptime": 123.456,
+  "memory": {...},
+  "environment": "production"
+}
+```
+
+**Cập Nhật Loading Timeout (Mới):**
+
+- ✅ **10s UI Timeout**: Loading UI tự động ẩn sau 10 giây
+- ✅ **Background Warmup**: API warmup tiếp tục chạy ở background
+- ✅ **Better UX**: Người dùng không phải chờ quá lâu
+- ✅ **Smart Fallback**: Nếu warmup lâu, app vẫn hoạt động bình thường
+
+**Logic Hoạt Động:**
+
+1. **0-10s**: Hiển thị loading UI + warmup API
+2. **Sau 10s**: Ẩn loading UI, vào app chính
+3. **Background**: Warmup tiếp tục chạy cho đến khi hoàn thành
+4. **Session**: Lưu kết quả warmup để lần sau không cần chờ
+
+### 2. Cập Nhật Chức Năng Booking (Client)
 
 - ✅ Cập nhật `TourDetailPage.js` với validation client-side
 - ✅ Cải thiện `bookingStore.js` với error handling tốt hơn

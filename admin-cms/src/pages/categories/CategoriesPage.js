@@ -54,7 +54,7 @@ const CategoriesPage = () => {
       toast.success(t('categories.deleteSuccess'));
     } catch (error) {
       console.error('Error deleting category:', error);
-      toast.error(error.response?.data?.message || 'Failed to delete category');
+      toast.error(error.response?.data?.message || error.message || 'Failed to delete category');
     } finally {
       setDeleteLoading(null);
     }

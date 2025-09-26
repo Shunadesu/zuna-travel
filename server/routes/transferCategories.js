@@ -8,7 +8,7 @@ const { protect, optionalAuth } = require('../middleware/auth');
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const { page = 1, limit = 20, featured, search, vehicleType, region } = req.query;
+    const { page = 1, limit = 100, featured, search, vehicleType, region } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     // Build query
@@ -224,10 +224,7 @@ router.put('/:id', protect, async (req, res) => {
 // @access  Private
 router.delete('/:id', protect, async (req, res) => {
   try {
-    const category = await TransferCategory.findOne({ 
-      _id: req.params.id, 
-      type: 'transfer-services' 
-    });
+    const category = await TransferCategory.findById(req.params.id);
     
     if (!category) {
       return res.status(404).json({ message: 'Transfer category not found' });
