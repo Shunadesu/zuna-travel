@@ -4,7 +4,8 @@ import {
   PhoneIcon,
   EnvelopeIcon,
   MapPinIcon,
-  ClockIcon
+  ClockIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { 
   FaFacebook, 
@@ -14,6 +15,7 @@ import {
 } from 'react-icons/fa';
 import { useSettingsStore } from '../stores';
 import toast from 'react-hot-toast';
+import ConsultationModal from '../components/common/ConsultationModal';
 
 const ContactPage = () => {
   const { t, i18n } = useTranslation();
@@ -26,6 +28,7 @@ const ContactPage = () => {
     message: ''
   });
   const [loading, setLoading] = useState(false);
+  const [showConsultationModal, setShowConsultationModal] = useState(false);
 
   useEffect(() => {
     fetchSettings();
@@ -98,9 +101,26 @@ const ContactPage = () => {
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             {t('contact.title')}
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
             {t('contact.subtitle')}
           </p>
+          
+          {/* Consultation CTA */}
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white max-w-2xl mx-auto">
+            <div className="flex items-center justify-center mb-4">
+              <ChatBubbleLeftRightIcon className="h-8 w-8 mr-3" />
+              <h2 className="text-2xl font-bold">Free Travel Consultation</h2>
+            </div>
+            <p className="text-blue-100 mb-4">
+              Get personalized travel advice from our experts. Tell us about your dream trip and we'll help you plan it perfectly!
+            </p>
+            <button
+              onClick={() => setShowConsultationModal(true)}
+              className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            >
+              Get Free Consultation
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -325,6 +345,12 @@ const ContactPage = () => {
           </div>
         </div>
       </div>
+      
+      {/* Consultation Modal */}
+      <ConsultationModal 
+        isOpen={showConsultationModal} 
+        onClose={() => setShowConsultationModal(false)} 
+      />
     </div>
   );
 };

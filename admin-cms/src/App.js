@@ -29,6 +29,7 @@ import BlogDetailPage from './pages/blogs/BlogDetailPage';
 import SettingsPage from './pages/SettingsPage';
 import ProfilePage from './pages/ProfilePage';
 import BookingsPage from './pages/BookingsPage';
+import ConsultationsPage from './pages/ConsultationsPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 // Context Providers
@@ -97,6 +98,9 @@ function App() {
                 
                 {/* Bookings */}
                 <Route path="bookings" element={<BookingsPage />} />
+                
+                {/* Consultations */}
+                <Route path="consultations" element={<ConsultationsPage />} />
               </Route>
 
               {/* Root redirect */}

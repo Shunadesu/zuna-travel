@@ -12,10 +12,12 @@ import {
   ArrowLeftIcon,
   ShareIcon,
   HeartIcon,
-  XMarkIcon
+  XMarkIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import toast from 'react-hot-toast';
+import ConsultationModal from '../components/common/ConsultationModal';
 
 const TourDetailPage = () => {
   const { t, i18n } = useTranslation();
@@ -27,6 +29,7 @@ const TourDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
   const [bookingData, setBookingData] = useState({
     travelers: 1,
     date: '',
@@ -467,7 +470,11 @@ const TourDetailPage = () => {
               {bookingLoading ? 'Đang xử lý...' : 'Đặt Tour Ngay'}
             </button>
             
-            <button className="w-full border border-blue-600 text-blue-600 py-3 px-4 rounded-lg font-medium hover:bg-blue-50 transition-colors">
+            <button 
+              onClick={() => setIsConsultationModalOpen(true)}
+              className="w-full border border-blue-600 text-blue-600 py-3 px-4 rounded-lg font-medium hover:bg-blue-50 transition-colors flex items-center justify-center"
+            >
+              <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2" />
               Liên Hệ Tư Vấn
             </button>
 
@@ -652,6 +659,13 @@ const TourDetailPage = () => {
           </div>
         </div>
       )}
+      
+      {/* Consultation Modal */}
+      <ConsultationModal 
+        isOpen={isConsultationModalOpen} 
+        onClose={() => setIsConsultationModalOpen(false)}
+        tourData={tour}
+      />
     </div>
   );
 };

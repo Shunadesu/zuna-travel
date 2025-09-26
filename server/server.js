@@ -20,6 +20,7 @@ const tourRoutes = require('./routes/tours');
 const transferRoutes = require('./routes/transfers');
 const tourCategoryRoutes = require('./routes/tourCategories');
 const transferCategoryRoutes = require('./routes/transferCategories');
+const consultationRoutes = require('./routes/consultations');
 
 const app = express();
 
@@ -76,6 +77,7 @@ app.use('/api/tours', tourRoutes);
 app.use('/api/transfers', transferRoutes);
 app.use('/api/tour-categories', tourCategoryRoutes);
 app.use('/api/transfer-categories', transferCategoryRoutes);
+app.use('/api/consultations', consultationRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

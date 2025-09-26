@@ -12,7 +12,8 @@ import {
   Bars3Icon,
   XMarkIcon,
   ArrowRightOnRectangleIcon,
-  CalendarIcon
+  CalendarIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
 const AdminLayout = () => {
@@ -28,6 +29,7 @@ const AdminLayout = () => {
     { name: t('nav.products'), href: '/admin/products', icon: CubeIcon },
     { name: t('nav.blogs'), href: '/admin/blogs', icon: DocumentTextIcon },
     { name: 'Bookings', href: '/admin/bookings', icon: CalendarIcon },
+    { name: 'Consultations', href: '/admin/consultations', icon: ChatBubbleLeftRightIcon },
     { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
     { name: t('nav.profile'), href: '/admin/profile', icon: UserIcon },
   ];
