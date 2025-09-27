@@ -7,3 +7,4 @@ export { default as useBlogStore } from './blogStore';
 export { default as useDashboardStore } from './dashboardStore';
 export { default as useSettingsStore } from './settingsStore';
 export { default as useUserStore } from './userStore';
+export { default as useConsultationStore } from './consultationStore';

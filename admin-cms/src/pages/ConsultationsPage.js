@@ -16,7 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import useConsultationStore from '../../stores/consultationStore';
+import useConsultationStore from '../stores/consultationStore';
 
 const ConsultationsPage = () => {
   const { t } = useTranslation();
